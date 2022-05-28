@@ -1,0 +1,6 @@
+[book]
+authors = ["Julia Naomi <jnboeira@outlook.com>"]
+language = "pt"
+multilingual = false
+src = "src"
+title = "Desenvolvimento de Jogos online com Rust"
