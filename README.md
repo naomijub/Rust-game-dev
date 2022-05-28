@@ -1,4 +1,4 @@
-# Desenvolvimento de Jogos Online com Rust
+# Desenvolvimento de Jogos Online com Rust **[WIP]**
 
 Por Julia Naomi Boeira.
 
