@@ -1,4 +1,4 @@
-# Desenvolvimento de Jogos online com Rust
+# Desenvolvimento de Jogos Online com Rust
 
 Por Julia Naomi Boeira.
 
