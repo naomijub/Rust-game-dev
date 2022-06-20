@@ -7,3 +7,6 @@
     - [Predição e Reconciliação](part-1/02-prd-rec.md)
     - [Interpolação de Entidades](part-1/03-interpolacao.md)
     - [Compensacão de Lag](part-1/04-lag.md)
+- [Multiplayer Snake Game](part-2/00-intro.md)
+    - [Sobre a Bevy](part-2/01-bevy.md)
+    - [Entity Compoent System](part-2/02-ecs.md)

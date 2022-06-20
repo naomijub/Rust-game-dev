@@ -1,0 +1,348 @@
+<!DOCTYPE HTML>
+<html lang="pt" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Sobre a Bevy - Desenvolvimento de Jogos online com Rust</title>
+        
+        
+
+
+        <!-- Custom HTML head -->
+        
+
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        
+        <link rel="icon" href="../favicon.svg">
+        
+        
+        <link rel="shortcut icon" href="../favicon.png">
+        
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        
+        <link rel="stylesheet" href="../css/print.css" media="print">
+        
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        
+        <link rel="stylesheet" href="../fonts/fonts.css">
+        
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../0-capa.html"><strong aria-hidden="true">1.</strong> Capa</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../01-quemsou.html"><strong aria-hidden="true">1.1.</strong> Quem sou eu? (Sobre a autora)</a></li></ol></li><li class="chapter-item expanded "><a href="../part-1/00-capa.html"><strong aria-hidden="true">2.</strong> Conceitos Básicos</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../part-1/01-arq.html"><strong aria-hidden="true">2.1.</strong> Arquitetura de servidores</a></li><li class="chapter-item expanded "><a href="../part-1/02-prd-rec.html"><strong aria-hidden="true">2.2.</strong> Predição e Reconciliação</a></li><li class="chapter-item expanded "><a href="../part-1/03-interpolacao.html"><strong aria-hidden="true">2.3.</strong> Interpolação de Entidades</a></li><li class="chapter-item expanded "><a href="../part-1/04-lag.html"><strong aria-hidden="true">2.4.</strong> Compensacão de Lag</a></li></ol></li><li class="chapter-item expanded "><a href="../part-2/00-intro.html"><strong aria-hidden="true">3.</strong> Multiplayer Snake Game</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../part-2/01-bevy.html" class="active"><strong aria-hidden="true">3.1.</strong> Sobre a Bevy</a></li><li class="chapter-item expanded "><a href="../part-2/02-ecs.html"><strong aria-hidden="true">3.2.</strong> Entity Compoent System</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                        
+                    </div>
+
+                    <h1 class="menu-title">Desenvolvimento de Jogos online com Rust</h1>
+
+                    <div class="right-buttons">
+                        
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        
+                        
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="sobre-a-bevy"><a class="header" href="#sobre-a-bevy">Sobre a Bevy</a></h1>
+<p>Bevy engine é uma das game engines mais promissoras do mercado e um grande esforço coletivo para a comundiade rust_gamedev. Se trata de uma engine orientada a dados, gratuíta e open source, sob as licenças Apache e MIT, ou seja, perfeita para qualquer projeto. Ela possui como objetivos de design:</p>
+<ul>
+<li>Um conjunto completo de features para jogos 2D e 3D, podendo inclusive ser aplicada para outros objetivos.</li>
+<li>Simples e poderosa, mas mantendo o fácil aprendizado.</li>
+<li>Orientada a dados utilizando o paradigma ECS (Entity component system, no próximo capítulo).</li>
+<li>Modular, use o que quiser, adicione o que quiser, e substitua o que quiser.</li>
+<li>Rápida, paralela e em Rust &lt;3.</li>
+<li>Compilação rápida</li>
+</ul>
+<p>A atual versão da Bevy é <a href="https://crates.io/crates/bevy"><img src="https://img.shields.io/crates/v/bevy.svg" alt="Crates.io" /></a> e este livro foi desenvolvido com a versão <code>0.7</code>.</p>
+<h2 id="iniciando-o-projeto"><a class="header" href="#iniciando-o-projeto">Iniciando o projeto</a></h2>
+<blockquote>
+<p>Para iniciar um projeto com a Bevy é necessário possuir Rust e Cargo, caso você não possua basta fazer download em https://rustup.rs/.</p>
+</blockquote>
+<p>Vamos iniciar nosso projeto com um simples <code>cargo new bevy-snake --bin</code>, que gera um projeto executável em Rust chamado <code>bevy-snake</code>. Este projeto vai possuir um <code>Cargo.toml</code> (onde os metadados do projeto estão localizados), um <code>src/main.rs</code> e um <code>.gitignore</code>:</p>
+<pre><pre class="playground"><code class="language-rust">// src/main.rs
+fn main() {
+    println!(&quot;Hello, world!&quot;);
+}
+</code></pre></pre>
+<pre><code class="language-sh"># .gitignore 
+/target
+</code></pre>
+<p>Agora adicionamos versão atual da bevy (<code>bevy = &quot;0.7&quot;</code>) a seção <code>[dependencies]</code> do Cargo.toml. Adicionamos também a crate de aleatorierade <code>rand</code>:</p>
+<pre><code class="language-toml">[dependencies]
+bevy = &quot;0.7&quot;
+rand = &quot;0.7&quot;
+</code></pre>
+<p>Com essas mudanças no <code>Cargo.toml</code> podemos começar a usar o <code>prelude</code> da bevy e criar nosso primeiro app com:</p>
+<pre><pre class="playground"><code class="language-rust">use bevy::prelude::*;
+
+fn main() {
+    App::new().run();
+}
+</code></pre></pre>
+<h3 id="instanciando-uma-janela"><a class="header" href="#instanciando-uma-janela">Instanciando uma Janela</a></h3>
+<p>Instanciar uma janela com a Bevy é bastante trivial e pode ser feito através do uso de plugins, neste caso o <code>DefaultPlugins</code> contém um conjunto básico de plugins que tornam a bevy operacional:</p>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    App::new().add_plugins(DefaultPlugins).run();
+}
+</code></pre></pre>
+<p>Agora se executarmos <code>cargo run</code> veremos uma janela com fundo cinza. Por padrão, os plugins da Bevy não incluem camera, pois o uso de camera é muito variado em jogos, assim, precisamos criar nosso próprio sistema de cameras. Usaremos uma camera ortográfica 2D com o commando <code>OrthographicCameraBundle::new_2d()</code> em uma função que fará a configuração do sistema de cameras inicial alterando a variável do tipo <code>mut Commands</code>. <code>Commands</code> é um tipo muito comum ao escrever sistemas com a Bevy e é usado para enfileirar comandos com o objetivo de modificar o mundo (que chameremos de <code>world</code>) e os recursos (que chamaremos de <code>resources</code>). Assim, na função a seguir, <code>setup_camera</code>, receberemos como argumento <code>mut commands: Commands</code> e utilizaremos ele para instanciar (chamado de <code>spawn</code>) uma nova entidade bundle com os componentes de uma camera 2D ortográfica:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn setup_camera(mut commands: Commands) {
+    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>E agora basta adicionar esse função ao nosso <code>App</code> através de um <code>add_startup_system</code>:</p>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    App::new()
+        .add_startup_system(setup_camera)
+        .add_plugins(DefaultPlugins)
+        .run();
+}
+
+fn setup_camera(mut commands: Commands) {
+    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+}
+</code></pre></pre>
+<h2 id="plugins"><a class="header" href="#plugins">Plugins</a></h2>
+<p>A Bevy é pensada de forma que todas suas partes sejam modularizáveis, assim, todas as core features da engine são implementadas como plugins que podem ser substituídos, evoluídos e customizados, além disso, os prórpios jogos são encarados como plugins. Assim, se você não precisar de uma UI, basta não registrar o sistema de UI, quer um sistema de UI diferente, registre o seu prórpio. Para o caso de servidores, basta não registrar o plugin <code>RenderPlugin</code>.</p>
+<p>Caso você não precise de uma experiência tão avançada com a Bevy, é possível utilizar o <code>DefaultPlugins</code> que utilizamos anteriormente, que ossui sistemas como Rendering, gerenciamento de assets, sistema de UI, janelas e gerenciamento de entrada de dados.</p>
+<h3 id="criando-um-plugin"><a class="header" href="#criando-um-plugin">Criando um Plugin</a></h3>
+<p>Para criar um plugin simplesmente precisamos implementar a trait <code>Plugin</code> em um tipo que comporte as informações necessárias. No caso do plugin que vamos implementar é apenas um <code>hello world</code> para plugins, então não precisamos de dados, criando apenas um </p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct HelloPlugin;
+
+impl Plugin for HelloPlugin {
+    fn build(&amp;self, app: &amp;mut App) {
+        // lógica do plugin
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Agora precisamos de uma função que nosso sistema vai executar, neste caso um simples <code>println</code>:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn hello_plugin() {
+    println!(&quot;hello plugin!&quot;);
+}
+
+<span class="boring">}
+</span></code></pre></pre>
+<p>E adicionamos essa função como um <code>startup_system</code> no nosso plugin:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl Plugin for HelloPlugin {
+    fn build(&amp;self, app: &amp;mut App) {
+        app.add_startup_system(hello_plugin);
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Por último, basta adicionarmos nosso plugin ao <code>App</code> principal e executar <code>cargo run</code>:</p>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    App::new()
+        .add_startup_system(setup_camera)
+        .add_plugin(HelloPlugin)
+        .add_plugins(DefaultPlugins)
+        .run();
+}
+</code></pre></pre>
+<p>Veremos algo no terminal como:</p>
+<pre><code>2022-06-20T05:28:52.725036Z  INFO bevy_render::renderer: AdapterInfo { name: &quot;AMD Radeon Pro 5500M&quot;, vendor: 0, device: 0, device_type: DiscreteGpu, backend: Metal }
+hello plugin!
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="../part-2/00-intro.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+
+                        
+                            <a rel="next" href="../part-2/02-ecs.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a rel="prev" href="../part-2/00-intro.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a rel="next" href="../part-2/02-ecs.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+
+        
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+
+        
+
+        
+        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+
+    </body>
+</html>

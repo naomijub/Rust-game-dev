@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Compensacão de Lag - Desenvolvimento de Jogos online com Rust</title>
+        <title>Entity Compoent System - Desenvolvimento de Jogos online com Rust</title>
         
         
 
@@ -95,7 +95,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../0-capa.html"><strong aria-hidden="true">1.</strong> Capa</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../01-quemsou.html"><strong aria-hidden="true">1.1.</strong> Quem sou eu? (Sobre a autora)</a></li></ol></li><li class="chapter-item expanded "><a href="../part-1/00-capa.html"><strong aria-hidden="true">2.</strong> Conceitos Básicos</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../part-1/01-arq.html"><strong aria-hidden="true">2.1.</strong> Arquitetura de servidores</a></li><li class="chapter-item expanded "><a href="../part-1/02-prd-rec.html"><strong aria-hidden="true">2.2.</strong> Predição e Reconciliação</a></li><li class="chapter-item expanded "><a href="../part-1/03-interpolacao.html"><strong aria-hidden="true">2.3.</strong> Interpolação de Entidades</a></li><li class="chapter-item expanded "><a href="../part-1/04-lag.html" class="active"><strong aria-hidden="true">2.4.</strong> Compensacão de Lag</a></li></ol></li><li class="chapter-item expanded "><a href="../part-2/00-intro.html"><strong aria-hidden="true">3.</strong> Multiplayer Snake Game</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../part-2/01-bevy.html"><strong aria-hidden="true">3.1.</strong> Sobre a Bevy</a></li><li class="chapter-item expanded "><a href="../part-2/02-ecs.html"><strong aria-hidden="true">3.2.</strong> Entity Compoent System</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../0-capa.html"><strong aria-hidden="true">1.</strong> Capa</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../01-quemsou.html"><strong aria-hidden="true">1.1.</strong> Quem sou eu? (Sobre a autora)</a></li></ol></li><li class="chapter-item expanded "><a href="../part-1/00-capa.html"><strong aria-hidden="true">2.</strong> Conceitos Básicos</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../part-1/01-arq.html"><strong aria-hidden="true">2.1.</strong> Arquitetura de servidores</a></li><li class="chapter-item expanded "><a href="../part-1/02-prd-rec.html"><strong aria-hidden="true">2.2.</strong> Predição e Reconciliação</a></li><li class="chapter-item expanded "><a href="../part-1/03-interpolacao.html"><strong aria-hidden="true">2.3.</strong> Interpolação de Entidades</a></li><li class="chapter-item expanded "><a href="../part-1/04-lag.html"><strong aria-hidden="true">2.4.</strong> Compensacão de Lag</a></li></ol></li><li class="chapter-item expanded "><a href="../part-2/00-intro.html"><strong aria-hidden="true">3.</strong> Multiplayer Snake Game</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../part-2/01-bevy.html"><strong aria-hidden="true">3.1.</strong> Sobre a Bevy</a></li><li class="chapter-item expanded "><a href="../part-2/02-ecs.html" class="active"><strong aria-hidden="true">3.2.</strong> Entity Compoent System</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -163,47 +163,18 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="compensacão-de-lag"><a class="header" href="#compensacão-de-lag">Compensacão de Lag</a></h1>
-<p>O cenário que temos até agora parece funcionar muito bem para percebermos movimentações, pois temos:</p>
-<ul>
-<li>Dado um tempo n, nosso servidor recebe informações de todos os clientes.</li>
-<li>Servidor processa todas as informações e transmite as atualizações.</li>
-<li>Estas atualizações são periódicas e de baixa frequência.</li>
-<li>Clientes enviam informações e verificam seus efeitos localmente.</li>
-<li>Clientes recebem as atualizações de estado do jogo:
-<ol>
-<li>Reconciliam com os efeitos que previram.</li>
-<li>Interpolam os efeitos dos outros personagens.</li>
-</ol>
-</li>
-<li>Cliente se vê no presente, mas vê os outros cliente no passado.</li>
-</ul>
-<p>Esta situação é geralmente ótima, a menos quando precisamos garantir situações como um tiro na cabeça, que qualquer pequena variação pode causar um erro, pois as informações de tempo e espaço são muito sensíveis. É ai que entra a compensação de lag.</p>
-<p>Imagine o cenário na qual você é uma sniper mirando perfeitamente na cabeça de um personagem &quot;imóvel&quot;, um tiro dificil de errar. Você atira e, magicamente, nada acontece. Você se irrita, sai da partida e desliga o jogo pensando como pode ter errado aquele tiro perfeito e, pior, a pessoa que você devia ter matado te matou. Este é o efeito de lag temporal, pois seu tiro ocorreu em um personagem que estava 100 ms no passado, para quem gosta de física, é como se a velocidade da luz fosse muito muito muito inferior a que realmente é. Felizmente, existem algumas estratégias para resolver este efeito. Vamos detalhar como isso pode ser reolvido:</p>
-<ol>
-<li>Você deu um tiro, seu cliente enviou as informações para o servidor, mas desta vez enviou mais informações além do botão que você clicou, pois enviou o botão que você apertou, o exato momento temporal que você apertou o botão (e se o botão de mira estava sendo apertado) e o que estava exatamente em sua mira neste instante.</li>
-<li>Como o servidor está recebendo todos momentos temporais, ele pode reconstruir os eventos temporalmente ordenados, ou seja, o servidor pode reconstruir o mundo no exato momento de seu tiro, assim como para todos outros clientes.</li>
-<li>Sabendo o que sua arma estava mirando no momento de seu tiro, a cabeça de seu inimigo, seu presente passa a ser considerado como válido no servidor, já que ele compensa esta diferenca.</li>
-<li>O servidor processa o tiro e transmite para todos os clientes, deixando seu oponente furioso por ter levado um headshot.</li>
-</ol>
-<p>E é no passo dois que a compensacão de lag ocorre.</p>
-<h2 id="conclusão"><a class="header" href="#conclusão">Conclusão</a></h2>
-<p>Primeira coisa que fizemos foi entender qual o grande problema do desenvolvimento de servidores para jogos, pessoas querendo trapacear, e a partir disso entendemos qual a solução básica, um cliente que só envia comandos pro servidor e um servidor autoritário. Vimos que com um servidor autoritário alguns problemas de defasamento temporal pode ocorrer entre a informação que temos e a informação que o servidor nos obriga a ter. Para reduzir estes problemas aprendemos as técncias de predição e de reconciliação, mas descobrimos problemas de sincronização com outros clientes. Para resolver os problemas de sincronização aprendemos as técncias de dead reckoning e interpolação de entidades, que são ótimas técnicas, mas ainda podem falhar na hora que ações muito sensíveis espacialmente são executadas. Para resolver este problema de ações sensíveis, aprendemos compensação de lag, mas ainda nos falta por a mão na massa. Nos próximos capítulos vamos explorar um jogo simples de tiro e um exemplo de servidor para ele.</p>
+                        <h1 id="entity-component-system-ecs"><a class="header" href="#entity-component-system-ecs">Entity Component System (ECS)</a></h1>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
                         
-                            <a rel="prev" href="../part-1/03-interpolacao.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../part-2/01-bevy.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
                         
 
-                        
-                            <a rel="next" href="../part-2/00-intro.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
                         
 
                         <div style="clear: both"></div>
@@ -213,15 +184,11 @@
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
                 
-                    <a rel="prev" href="../part-1/03-interpolacao.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../part-2/01-bevy.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
                 
 
-                
-                    <a rel="next" href="../part-2/00-intro.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
                 
             </nav>
 
