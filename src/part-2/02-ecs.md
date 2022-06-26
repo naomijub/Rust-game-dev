@@ -92,3 +92,86 @@ struct Player {
 ```
 
 Como podemos ver em `transform: Transform`, bundles também podem ser encadeados. Tuplas arbitrárias também são consideradas bundles. Note, que bundles não podem ser consultados com uma *query*.
+
+## Recursos (*Resources*)
+
+Recursos são um tipo de instância que permite armazenar um tipo de dado de forma global, independente de entidades, e qualquer tipo Rust pode ser usado como um recurso independente de implementação de traits. Existem duas formas de inicializar recursos, a primeira é definindo a trait `Default` para eles, quando eles possuem um tipo de dado simples, já a segunda é implementando a trait `FromWorld` que permite atuar sobre o recurso utilizando valores de `World`:
+
+```rust
+#[derive(Default)]
+struct StartingLevel(usize);
+
+struct MyFancyResource { /* stuff */ }
+
+impl FromWorld for MyFancyResource {
+    fn from_world(world: &mut World) -> Self {
+        // You have full access to anything in the ECS from here.
+        // For instance, you can mutate other resources:
+        let mut x = world.get_resource_mut::<MyOtherResource>().unwrap();
+        x.do_mut_stuff();
+
+        MyFancyResource { /* stuff */ }
+    }
+}
+```
+
+E para inicializar seus recursos em um App basta usar a função `insert_resource`:
+
+```rust
+fn main() {
+    App::new()
+        // Caso implemente uma das traits `Default` ou `FromWorld`
+        .init_resource::<MyFancyResource>()
+        // se for necessário definir o valor inicial
+        .insert_resource(StartingLevel(3))
+        // ...
+        .run();
+}
+```
+
+A decisão de quando usar recursos ou entity/component é baseada na forma e no momento em que este dado vai ser acessado, mas considerando algo como um jogo com uma unica entidade, pode ainda ser útil utilizar o padrão ECS, pois ele permite maior flexibildiade e compartilhamento de dados, que podem ser muito úteis para a evolução do jogo.
+
+## Sistemas (*Systems*)
+
+Sistemas são funções que a desenvolvedora escreve com o objetivo de ser uma unidade de lógica do jogo atuando sobre as entidades e os componentes. Os sistemas são executados e gerenciados pelas Bevy, mas somente podem ser usados com parâmetros especiais. Os parâmetros especiais são:
+* `Res/ResMut` para acessar recursos.
+* `Query` para acessar componentes de uma entidade.
+* `Commands` para criar e destruir entidades, componentes e recursos.
+* `EventWriter/EventReader` para enviar e receber eventos.
+
+Um sistema pode conter no máximo 16 parâmetros, caso seja preciso mais parâmetros pode se agrega-los em tuplas de no máximo 16 parâmtros. Caso estes limites não sejam suficiente, é possível fazer tuplas de tuplas.
+
+```rust
+fn complex_system(
+    (a, mut b): (Res<ResourceA>, ResMut<ResourceB>),
+    mut c: Option<ResMut<ResourceC>>,
+) {
+    if let Some(mut c) = c {
+        // lógica
+    }
+}
+```
+
+No sistema a cima `ResourceA` é um recurso imutável e esta compartilhando uma tupla com `ResourceB`que é um recurso mutável. Já `ResourceC` é um recurso que pode não existir e por isso está englobado por um tipo `Optional<T>`.
+
+Existem dois tipos de funções para executar sistemas na Bevy
+
+```rust
+fn main() {
+    App::new()
+        // ...
+        // sistemas executados apenas quando o App é lançado
+        .add_startup_system(init_menu)
+        .add_startup_system(debug_start)
+
+        // sistemas executados todos os frames
+        .add_system(move_player)
+        .add_system(enemies_ai)
+        // ...
+        .run();
+}
+```
+
+Agora vamos começar a implementar nosso snake game e aprofundar nossos conhecimentos em bevy.
+
+**Referência: [unofficial bevy guide](https://bevy-cheatbook.github.io/programming.html)**
