@@ -202,4 +202,62 @@ fn debug_player_hp(
 
 ## Movendo a cabeça da cobra
 
+Nnao existe o Snake game sem movimento, então o próximo passo é controlarmos os movimentos da cabeça da cobra com as teclas `WASD` ou direcionais. Para isso, podemos começar com a movimentação para cima utilizando o teste:
 
+```rust
+#[test]
+fn snake_head_has_moved_up() {
+    // Setup
+    let mut app = App::new();
+    let default_transform = Transform {..default()};
+
+    // Adicionando sistemas
+    app.add_startup_system(spawn_snake)
+    .add_system(snake_movement);
+
+    // Adicionando inputs de `KeyCode`s
+    let mut input = Input::<KeyCode>::default();
+    input.press(KeyCode::W);
+    app.insert_resource(input);
+
+    // Executando sistemas pelo menos uma vez
+    app.update();
+
+    // Query para obter entidades com `SnakeHead` e `Transform`
+    let mut query = app.world.query::<(&SnakeHead, &Transform)>();
+
+    // Verificando se o valor de Y no `Transform` mudou
+    query.iter(&app.world).for_each(|(_head, transform)| {
+        assert!(default_transform.translation.y < transform.translation.y);
+        assert_eq!(default_transform.translation.x, transform.translation.x);
+    })
+}
+```
+
+Neste teste adicionamos um `Transform` com valores padrão de `translation` para comparar quando o transform da query mudar, adicionamos um novo sistema de movimento `add_system(snake_movement)` e criamos um recurso que gerencia inputs de teclado `Input::<KeyCode>::default()`, na qual setamos seu evento `press` como `KeyCode::W`. Para resolver este teste precisamos criar o sistema `snake_movement`, que é bastante trivial neste caso, apenas um sistema que busca por um query contendo `&SnakeHead` e `&Transform`, depois modifica o valor de Y de forma que sempre aumente:
+
+```rust
+// snake.rs
+pub fn snake_movement(mut head_positions: Query<(&SnakeHead, &mut Transform)>) {
+    for (_head, mut transform) in head_positions.iter_mut() {
+        transform.translation.y += 1.;
+    }
+}
+
+// main.rs
+// ...
+mod snake;
+use snake::{spawn_snake, snake_movement};
+
+fn main() {
+    App::new()
+        .add_startup_system(setup_camera)
+        .add_startup_system(spawn_snake)
+        .add_plugins(DefaultPlugins)
+        .add_system(snake_movement)
+        .run();
+}
+// ...
+```
+
+### Controlando a direção de movimento

@@ -362,6 +362,63 @@ fn query_entities(q: Query&lt;(Entity, /* ... */)&gt;) {
 </ul>
 </blockquote>
 <h2 id="movendo-a-cabeça-da-cobra"><a class="header" href="#movendo-a-cabeça-da-cobra">Movendo a cabeça da cobra</a></h2>
+<p>Nnao existe o Snake game sem movimento, então o próximo passo é controlarmos os movimentos da cabeça da cobra com as teclas <code>WASD</code> ou direcionais. Para isso, podemos começar com a movimentação para cima utilizando o teste:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[test]
+fn snake_head_has_moved_up() {
+    // Setup
+    let mut app = App::new();
+    let default_transform = Transform {..default()};
+
+    // Adicionando sistemas
+    app.add_startup_system(spawn_snake)
+    .add_system(snake_movement);
+
+    // Adicionando inputs de `KeyCode`s
+    let mut input = Input::&lt;KeyCode&gt;::default();
+    input.press(KeyCode::W);
+    app.insert_resource(input);
+
+    // Executando sistemas pelo menos uma vez
+    app.update();
+
+    // Query para obter entidades com `SnakeHead` e `Transform`
+    let mut query = app.world.query::&lt;(&amp;SnakeHead, &amp;Transform)&gt;();
+
+    // Verificando se o valor de Y no `Transform` mudou
+    query.iter(&amp;app.world).for_each(|(_head, transform)| {
+        assert!(default_transform.translation.y &lt; transform.translation.y);
+        assert_eq!(default_transform.translation.x, transform.translation.x);
+    })
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Neste teste adicionamos um <code>Transform</code> com valores padrão de <code>translation</code> para comparar quando o transform da query mudar, adicionamos um novo sistema de movimento <code>add_system(snake_movement)</code> e criamos um recurso que gerencia inputs de teclado <code>Input::&lt;KeyCode&gt;::default()</code>, na qual setamos seu evento <code>press</code> como <code>KeyCode::W</code>. Para resolver este teste precisamos criar o sistema <code>snake_movement</code>, que é bastante trivial neste caso, apenas um sistema que busca por um query contendo <code>&amp;SnakeHead</code> e <code>&amp;Transform</code>, depois modifica o valor de Y de forma que sempre aumente:</p>
+<pre><pre class="playground"><code class="language-rust">// snake.rs
+pub fn snake_movement(mut head_positions: Query&lt;(&amp;SnakeHead, &amp;mut Transform)&gt;) {
+    for (_head, mut transform) in head_positions.iter_mut() {
+        transform.translation.y += 1.;
+    }
+}
+
+// main.rs
+// ...
+mod snake;
+use snake::{spawn_snake, snake_movement};
+
+fn main() {
+    App::new()
+        .add_startup_system(setup_camera)
+        .add_startup_system(spawn_snake)
+        .add_plugins(DefaultPlugins)
+        .add_system(snake_movement)
+        .run();
+}
+// ...
+</code></pre></pre>
+<h3 id="controlando-a-direção-de-movimento"><a class="header" href="#controlando-a-direção-de-movimento">Controlando a direção de movimento</a></h3>
 
                     </main>
 
