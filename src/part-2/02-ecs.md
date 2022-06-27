@@ -139,7 +139,7 @@ Sistemas são funções que a desenvolvedora escreve com o objetivo de ser uma u
 * `Commands` para criar e destruir entidades, componentes e recursos.
 * `EventWriter/EventReader` para enviar e receber eventos.
 
-Um sistema pode conter no máximo 16 parâmetros, caso seja preciso mais parâmetros pode se agrega-los em tuplas de no máximo 16 parâmtros. Caso estes limites não sejam suficiente, é possível fazer tuplas de tuplas.
+Um sistema pode conter no máximo 16 parâmetros, caso seja preciso mais parâmetros pode se agrega-los em tuplas de no máximo 16 parâmetros. Caso estes limites não sejam suficiente, é possível fazer tuplas de tuplas.
 
 ```rust
 fn complex_system(

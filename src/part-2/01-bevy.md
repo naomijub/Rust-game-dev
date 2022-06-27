@@ -1,6 +1,6 @@
 # Sobre a Bevy
 
-Bevy engine é uma das game engines mais promissoras do mercado e um grande esforço coletivo para a comundiade rust_gamedev. Se trata de uma engine orientada a dados, gratuíta e open source, sob as licenças Apache e MIT, ou seja, perfeita para qualquer projeto. Ela possui como objetivos de design:
+Bevy engine é uma das game engines mais promissoras do mercado e um grande esforço coletivo para a comunidade rust_gamedev. Se trata de uma engine orientada a dados, gratuíta e open source, sob as licenças Apache e MIT, ou seja, perfeita para qualquer projeto. Ela possui como objetivos de design:
 
 * Um conjunto completo de features para jogos 2D e 3D, podendo inclusive ser aplicada para outros objetivos.
 * Simples e poderosa, mas mantendo o fácil aprendizado.
@@ -29,7 +29,7 @@ fn main() {
 /target
 ```
 
-Agora adicionamos versão atual da bevy (`bevy = "0.7"`) a seção `[dependencies]` do Cargo.toml. Adicionamos também a crate de aleatorierade `rand`:
+Agora adicionamos versão atual da bevy (`bevy = "0.7"`) a seção `[dependencies]` do Cargo.toml. Adicionamos também a crate de aleatoriedade `rand`:
 
 ```toml
 [dependencies]
@@ -57,7 +57,7 @@ fn main() {
 }
 ```
 
-Agora se executarmos `cargo run` veremos uma janela com fundo cinza. Por padrão, os plugins da Bevy não incluem camera, pois o uso de camera é muito variado em jogos, assim, precisamos criar nosso próprio sistema de cameras. Usaremos uma camera ortográfica 2D com o commando `OrthographicCameraBundle::new_2d()` em uma função que fará a configuração do sistema de cameras inicial alterando a variável do tipo `mut Commands`. `Commands` é um tipo muito comum ao escrever sistemas com a Bevy e é usado para enfileirar comandos com o objetivo de modificar o mundo (que chameremos de `world`) e os recursos (que chamaremos de `resources`). Assim, na função a seguir, `setup_camera`, receberemos como argumento `mut commands: Commands` e utilizaremos ele para instanciar (chamado de `spawn`) uma nova entidade bundle com os componentes de uma camera 2D ortográfica:
+Agora se executarmos `cargo run` veremos uma janela com fundo cinza. Por padrão, os plugins da Bevy não incluem camera, pois o uso de camera é muito variado em jogos, assim, precisamos criar nosso próprio sistema de cameras. Usaremos uma camera ortográfica 2D com o commando `OrthographicCameraBundle::new_2d()` em uma função que fará a configuração do sistema de cameras inicial alterando a variável do tipo `mut Commands`. `Commands` é um tipo muito comum ao escrever sistemas com a Bevy e é usado para enfileirar comandos com o objetivo de modificar o mundo (que chamaremos de `world`) e os recursos (que chamaremos de `resources`). Assim, na função a seguir, `setup_camera`, receberemos como argumento `mut commands: Commands` e utilizaremos ele para instanciar (chamado de `spawn`) uma nova entidade bundle com os componentes de uma câmera 2D ortográfica:
 
 ```rust
 fn setup_camera(mut commands: Commands) {
@@ -82,9 +82,9 @@ fn setup_camera(mut commands: Commands) {
 
 ## Plugins
 
-A Bevy é pensada de forma que todas suas partes sejam modularizáveis, assim, todas as core features da engine são implementadas como plugins que podem ser substituídos, evoluídos e customizados, além disso, os prórpios jogos são encarados como plugins. Assim, se você não precisar de uma UI, basta não registrar o sistema de UI, quer um sistema de UI diferente, registre o seu prórpio. Para o caso de servidores, basta não registrar o plugin `RenderPlugin`.
-
-Caso você não precise de uma experiência tão avançada com a Bevy, é possível utilizar o `DefaultPlugins` que utilizamos anteriormente, que ossui sistemas como Rendering, gerenciamento de assets, sistema de UI, janelas e gerenciamento de entrada de dados.
+A Bevy é pensada de forma que todas suas partes sejam modularizáveis, assim, todas as core features da engine são implementadas como plugins que podem ser substituídos, evoluídos e customizados, além disso, os próprios jogos são encarados como plugins. Assim, se você não precisar de uma UI, basta não registrar o sistema de UI, quer um sistema de UI diferente, registre o seu próprio. Para o caso de servidores, basta não registrar o plugin `RenderPlugin`.
+ 
+Caso você não precise de uma experiência tão avançada com a Bevy, é possível utilizar o `DefaultPlugins` que utilizamos anteriormente, que possui sistemas como Rendering, gerenciamento de assets, sistema de UI, janelas e gerenciamento de entrada de dados.
 
 ### Criando um Plugin
 

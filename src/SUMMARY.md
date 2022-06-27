@@ -10,3 +10,4 @@
 - [Multiplayer Snake Game](part-2/00-intro.md)
     - [Sobre a Bevy](part-2/01-bevy.md)
     - [Entity Compoent System](part-2/02-ecs.md)
+    - [A Cabaça da Cobra](part-2/03-cabeca.md)

@@ -97,7 +97,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="0-capa.html"><strong aria-hidden="true">1.</strong> Capa</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="01-quemsou.html"><strong aria-hidden="true">1.1.</strong> Quem sou eu? (Sobre a autora)</a></li></ol></li><li class="chapter-item expanded "><a href="part-1/00-capa.html"><strong aria-hidden="true">2.</strong> Conceitos Básicos</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="part-1/01-arq.html"><strong aria-hidden="true">2.1.</strong> Arquitetura de servidores</a></li><li class="chapter-item expanded "><a href="part-1/02-prd-rec.html"><strong aria-hidden="true">2.2.</strong> Predição e Reconciliação</a></li><li class="chapter-item expanded "><a href="part-1/03-interpolacao.html"><strong aria-hidden="true">2.3.</strong> Interpolação de Entidades</a></li><li class="chapter-item expanded "><a href="part-1/04-lag.html"><strong aria-hidden="true">2.4.</strong> Compensacão de Lag</a></li></ol></li><li class="chapter-item expanded "><a href="part-2/00-intro.html"><strong aria-hidden="true">3.</strong> Multiplayer Snake Game</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="part-2/01-bevy.html"><strong aria-hidden="true">3.1.</strong> Sobre a Bevy</a></li><li class="chapter-item expanded "><a href="part-2/02-ecs.html"><strong aria-hidden="true">3.2.</strong> Entity Compoent System</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="0-capa.html"><strong aria-hidden="true">1.</strong> Capa</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="01-quemsou.html"><strong aria-hidden="true">1.1.</strong> Quem sou eu? (Sobre a autora)</a></li></ol></li><li class="chapter-item expanded "><a href="part-1/00-capa.html"><strong aria-hidden="true">2.</strong> Conceitos Básicos</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="part-1/01-arq.html"><strong aria-hidden="true">2.1.</strong> Arquitetura de servidores</a></li><li class="chapter-item expanded "><a href="part-1/02-prd-rec.html"><strong aria-hidden="true">2.2.</strong> Predição e Reconciliação</a></li><li class="chapter-item expanded "><a href="part-1/03-interpolacao.html"><strong aria-hidden="true">2.3.</strong> Interpolação de Entidades</a></li><li class="chapter-item expanded "><a href="part-1/04-lag.html"><strong aria-hidden="true">2.4.</strong> Compensacão de Lag</a></li></ol></li><li class="chapter-item expanded "><a href="part-2/00-intro.html"><strong aria-hidden="true">3.</strong> Multiplayer Snake Game</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="part-2/01-bevy.html"><strong aria-hidden="true">3.1.</strong> Sobre a Bevy</a></li><li class="chapter-item expanded "><a href="part-2/02-ecs.html"><strong aria-hidden="true">3.2.</strong> Entity Compoent System</a></li><li class="chapter-item expanded "><a href="part-2/03-cabeca.html"><strong aria-hidden="true">3.3.</strong> A Cabaça da Cobra</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -323,7 +323,7 @@
 <p>Primeira coisa que fizemos foi entender qual o grande problema do desenvolvimento de servidores para jogos, pessoas querendo trapacear, e a partir disso entendemos qual a solução básica, um cliente que só envia comandos pro servidor e um servidor autoritário. Vimos que com um servidor autoritário alguns problemas de defasamento temporal pode ocorrer entre a informação que temos e a informação que o servidor nos obriga a ter. Para reduzir estes problemas aprendemos as técncias de predição e de reconciliação, mas descobrimos problemas de sincronização com outros clientes. Para resolver os problemas de sincronização aprendemos as técncias de dead reckoning e interpolação de entidades, que são ótimas técnicas, mas ainda podem falhar na hora que ações muito sensíveis espacialmente são executadas. Para resolver este problema de ações sensíveis, aprendemos compensação de lag, mas ainda nos falta por a mão na massa. Nos próximos capítulos vamos explorar um jogo simples de tiro e um exemplo de servidor para ele.</p>
 <h1 id="multiplayer-snake-game"><a class="header" href="#multiplayer-snake-game">Multiplayer Snake Game</a></h1>
 <h1 id="sobre-a-bevy"><a class="header" href="#sobre-a-bevy">Sobre a Bevy</a></h1>
-<p>Bevy engine é uma das game engines mais promissoras do mercado e um grande esforço coletivo para a comundiade rust_gamedev. Se trata de uma engine orientada a dados, gratuíta e open source, sob as licenças Apache e MIT, ou seja, perfeita para qualquer projeto. Ela possui como objetivos de design:</p>
+<p>Bevy engine é uma das game engines mais promissoras do mercado e um grande esforço coletivo para a comunidade rust_gamedev. Se trata de uma engine orientada a dados, gratuíta e open source, sob as licenças Apache e MIT, ou seja, perfeita para qualquer projeto. Ela possui como objetivos de design:</p>
 <ul>
 <li>Um conjunto completo de features para jogos 2D e 3D, podendo inclusive ser aplicada para outros objetivos.</li>
 <li>Simples e poderosa, mas mantendo o fácil aprendizado.</li>
@@ -346,7 +346,7 @@ fn main() {
 <pre><code class="language-sh"># .gitignore 
 /target
 </code></pre>
-<p>Agora adicionamos versão atual da bevy (<code>bevy = &quot;0.7&quot;</code>) a seção <code>[dependencies]</code> do Cargo.toml. Adicionamos também a crate de aleatorierade <code>rand</code>:</p>
+<p>Agora adicionamos versão atual da bevy (<code>bevy = &quot;0.7&quot;</code>) a seção <code>[dependencies]</code> do Cargo.toml. Adicionamos também a crate de aleatoriedade <code>rand</code>:</p>
 <pre><code class="language-toml">[dependencies]
 bevy = &quot;0.7&quot;
 rand = &quot;0.7&quot;
@@ -364,7 +364,7 @@ fn main() {
     App::new().add_plugins(DefaultPlugins).run();
 }
 </code></pre></pre>
-<p>Agora se executarmos <code>cargo run</code> veremos uma janela com fundo cinza. Por padrão, os plugins da Bevy não incluem camera, pois o uso de camera é muito variado em jogos, assim, precisamos criar nosso próprio sistema de cameras. Usaremos uma camera ortográfica 2D com o commando <code>OrthographicCameraBundle::new_2d()</code> em uma função que fará a configuração do sistema de cameras inicial alterando a variável do tipo <code>mut Commands</code>. <code>Commands</code> é um tipo muito comum ao escrever sistemas com a Bevy e é usado para enfileirar comandos com o objetivo de modificar o mundo (que chameremos de <code>world</code>) e os recursos (que chamaremos de <code>resources</code>). Assim, na função a seguir, <code>setup_camera</code>, receberemos como argumento <code>mut commands: Commands</code> e utilizaremos ele para instanciar (chamado de <code>spawn</code>) uma nova entidade bundle com os componentes de uma camera 2D ortográfica:</p>
+<p>Agora se executarmos <code>cargo run</code> veremos uma janela com fundo cinza. Por padrão, os plugins da Bevy não incluem camera, pois o uso de camera é muito variado em jogos, assim, precisamos criar nosso próprio sistema de cameras. Usaremos uma camera ortográfica 2D com o commando <code>OrthographicCameraBundle::new_2d()</code> em uma função que fará a configuração do sistema de cameras inicial alterando a variável do tipo <code>mut Commands</code>. <code>Commands</code> é um tipo muito comum ao escrever sistemas com a Bevy e é usado para enfileirar comandos com o objetivo de modificar o mundo (que chamaremos de <code>world</code>) e os recursos (que chamaremos de <code>resources</code>). Assim, na função a seguir, <code>setup_camera</code>, receberemos como argumento <code>mut commands: Commands</code> e utilizaremos ele para instanciar (chamado de <code>spawn</code>) uma nova entidade bundle com os componentes de uma câmera 2D ortográfica:</p>
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -386,8 +386,8 @@ fn setup_camera(mut commands: Commands) {
 }
 </code></pre></pre>
 <h2 id="plugins"><a class="header" href="#plugins">Plugins</a></h2>
-<p>A Bevy é pensada de forma que todas suas partes sejam modularizáveis, assim, todas as core features da engine são implementadas como plugins que podem ser substituídos, evoluídos e customizados, além disso, os prórpios jogos são encarados como plugins. Assim, se você não precisar de uma UI, basta não registrar o sistema de UI, quer um sistema de UI diferente, registre o seu prórpio. Para o caso de servidores, basta não registrar o plugin <code>RenderPlugin</code>.</p>
-<p>Caso você não precise de uma experiência tão avançada com a Bevy, é possível utilizar o <code>DefaultPlugins</code> que utilizamos anteriormente, que ossui sistemas como Rendering, gerenciamento de assets, sistema de UI, janelas e gerenciamento de entrada de dados.</p>
+<p>A Bevy é pensada de forma que todas suas partes sejam modularizáveis, assim, todas as core features da engine são implementadas como plugins que podem ser substituídos, evoluídos e customizados, além disso, os próprios jogos são encarados como plugins. Assim, se você não precisar de uma UI, basta não registrar o sistema de UI, quer um sistema de UI diferente, registre o seu próprio. Para o caso de servidores, basta não registrar o plugin <code>RenderPlugin</code>.</p>
+<p>Caso você não precise de uma experiência tão avançada com a Bevy, é possível utilizar o <code>DefaultPlugins</code> que utilizamos anteriormente, que possui sistemas como Rendering, gerenciamento de assets, sistema de UI, janelas e gerenciamento de entrada de dados.</p>
 <h3 id="criando-um-plugin"><a class="header" href="#criando-um-plugin">Criando um Plugin</a></h3>
 <p>Para criar um plugin simplesmente precisamos implementar a trait <code>Plugin</code> em um tipo que comporte as informações necessárias. No caso do plugin que vamos implementar é apenas um <code>hello world</code> para plugins, então não precisamos de dados, criando apenas um </p>
 <pre><pre class="playground"><code class="language-rust">
@@ -573,7 +573,7 @@ impl FromWorld for MyFancyResource {
 <li><code>Commands</code> para criar e destruir entidades, componentes e recursos.</li>
 <li><code>EventWriter/EventReader</code> para enviar e receber eventos.</li>
 </ul>
-<p>Um sistema pode conter no máximo 16 parâmetros, caso seja preciso mais parâmetros pode se agrega-los em tuplas de no máximo 16 parâmtros. Caso estes limites não sejam suficiente, é possível fazer tuplas de tuplas.</p>
+<p>Um sistema pode conter no máximo 16 parâmetros, caso seja preciso mais parâmetros pode se agrega-los em tuplas de no máximo 16 parâmetros. Caso estes limites não sejam suficiente, é possível fazer tuplas de tuplas.</p>
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -605,6 +605,205 @@ impl FromWorld for MyFancyResource {
 </code></pre></pre>
 <p>Agora vamos começar a implementar nosso snake game e aprofundar nossos conhecimentos em bevy.</p>
 <p><strong>Referência: <a href="https://bevy-cheatbook.github.io/programming.html">unofficial bevy guide</a></strong></p>
+<h1 id="a-cabaça-da-cobra"><a class="header" href="#a-cabaça-da-cobra">A Cabaça da Cobra</a></h1>
+<p>Para começar o jogo precisamos do primeiro componente, neste caso a cabeça da cobra, que definirá os próximos possíveis passos, assim como para onde os blocos seguintes se moverão. Este primeiro componente se chamará <code>SnakeHead</code> e será uma struct vazia com a trait <code>Compoent</code> associada a ela:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Component)]
+pub struct SnakeHead;
+<span class="boring">}
+</span></code></pre></pre>
+<p>A função de <code>SnakeHead</code> é basicamente ser um marcador para as entidades do tipo snake, que nos permitirá filtrar as estas entidades quando formos fazer queries com os players. Muitos componentes não precisam de estados e podem funcionar apenas como marcadores, um padrão bastante comum no mundo ECS, já que optamos por uma estratégia de <em>has a</em> (possui um) em vez de <em>is a</em> (é um, da orientação a objetos). Outro detalhe importante é a adição de uma cor ao específica para a cabeça da cobra <code>const SNAKE_HEAD_COLOR: Color = Color::rgb(0.7, 0.7, 0.7);</code>.</p>
+<p>Nosso próximo passo é gerar uma entidade snake, que possui um componente do tipo <code>SnakeHead</code>, e essa entidade pode ser gerada adicionando um sistema incial com <code>add_startup_system(spawn_snake)</code>, dada a função <code>spawn_snake</code>:</p>
+<pre><pre class="playground"><code class="language-rust">use bevy::prelude::*;
+
+const SNAKE_HEAD_COLOR: Color = Color::rgb(0.7, 0.7, 0.7);
+
+fn main() {
+    App::new()
+        .add_startup_system(setup_camera)
+        .add_startup_system(spawn_snake)
+        .add_plugins(DefaultPlugins)
+        .run();
+}
+
+fn setup_camera(mut commands: Commands) {
+    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+}
+
+#[derive(Component)]
+pub struct SnakeHead;
+
+fn spawn_snake(mut commands: Commands) {
+    commands
+        .spawn_bundle(SpriteBundle {
+            sprite: Sprite {
+                color: SNAKE_HEAD_COLOR,
+                ..default()
+            },
+            transform: Transform {
+                scale: Vec3::new(10.0, 10.0, 10.0),
+                ..default()
+            },
+            ..default()
+        })
+        .insert(SnakeHead);
+}
+</code></pre></pre>
+<blockquote>
+<p><strong>SpriteBundle</strong></p>
+<p><code>SpriteBundle</code> é um tipo de componente que agrega características comuns a uma entidade que utiliza sprites como o proprio sprite (especificidades da imagem), transform (relação de posição, escala e rotação), visibilidade, transform global e o manuseio de imagens. </p>
+</blockquote>
+<p>Neste caso, não temos nenhuma imagem específica como sprite, mas definimos um transform com uma escala de <code>10 x 10 x 10</code> pixels e uma cor de filtro acinzentada para a região definida pelo transform, as outras propriedades foram definidas como <code>..default()</code>. Ao executarmos <code>cargo run</code> o resultado é algo como:</p>
+<p><img src="part-2/../imagens/snake_pixel.png" alt="Entidade snake com SpriteBundle" /></p>
+<h2 id="nosso-primeiro-teste"><a class="header" href="#nosso-primeiro-teste">Nosso primeiro teste</a></h2>
+<p>No mundo moderno, jogos sem testes estão fadados ao fracasso. Não estou dizendo que todos os jogos possuem uma bateria maravilhosa de testes automatizados, mas desde que escrevi o livro <strong>Lean Game Development</strong> até hoje, o mercado de games AAA mudou muito. Hoje em dia vejo jogos sendo desenvolvidos com TDD e com QA advogando por testes automatizados de gameplay emt todos os sistemas, garantindo uma jogabilidade equilibrada/desejada em qualquer plataforma. Hoje em dia um jogo, middleware, game server ou ferramenta sem nenhum teste esta fadado ao fracasso por conta do número excessivo de bugs e clientes infelizes. Sendo assim, é importante ter uma noção de como testar minimamente seus sistemas com a Bevy. Sendo assim, vamos aprender a escrever o teste mais simples possível, verificar se nosso sistema <code>spawn_snake</code> de fato adiciona um compoente <code>SnakeHead</code> a entidade desejada.</p>
+<p>Primeiro passo do teste será mover tudo que é relacionado a <code>snake</code> para um módulo chamado <code>snake.rs</code>:</p>
+<p><strong><code>main.rs</code></strong>:</p>
+<pre><pre class="playground"><code class="language-rust">use bevy::prelude::*;
+
+mod snake;
+
+use snake::spawn_snake;
+
+fn main() {
+    App::new()
+        .add_startup_system(setup_camera)
+        .add_startup_system(spawn_snake)
+        .add_plugins(DefaultPlugins)
+        .run();
+}
+
+fn setup_camera(mut commands: Commands) {
+    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+}
+</code></pre></pre>
+<p><strong><code>snake.rs</code></strong>:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use bevy::prelude::*;
+
+const SNAKE_HEAD_COLOR: Color = Color::rgb(0.7, 0.7, 0.7);
+
+#[derive(Component)]
+pub struct SnakeHead;
+
+pub fn spawn_snake(mut commands: Commands) {
+    commands
+        .spawn_bundle(SpriteBundle {
+            sprite: Sprite {
+                color: SNAKE_HEAD_COLOR,
+                ..default()
+            },
+            transform: Transform {
+                scale: Vec3::new(10.0, 10.0, 10.0),
+                ..default()
+            },
+            ..default()
+        })
+        .insert(SnakeHead);
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Agora em Snake vamos criar um teste dentro de um módulo de testes (<code>#[cfg(test)] mod test {...}</code>) que verifique se um componente <code>SnakeHead</code> está presente:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn entity_has_snake_head() {
+        // 1 Inicialização do App
+        let mut app = App::new();
+
+        // 2 Adicionar o `spawn_snake` startup system
+        app.add_startup_system(spawn_snake);
+
+        // 3 Executar todos os sistemas pelo menos uma vez
+        app.update();
+
+        // 4 Fazer uma query por entidades que contenham o componente `SnakeHead`
+        let mut query = app.world.query_filtered::&lt;Entity, With&lt;SnakeHead&gt;&gt;();
+
+        // 5 Verificar se a contagem de componentes da query foi igual a 1
+        assert_eq!(query.iter(&amp;app.world).count(), 1);
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Descrevendo o teste <code>entity_has_snake_head</code> (verifica se entidade possui componente snake head) temos como primeiro passo (<code>1</code>) criar um <code>App</code> mutável para podermos adicionar sistemas como o <code>spawn_snake</code> (<code>2</code>) e executarmos todos os sistemas pelo menos uma vez com <code>app.update()</code> (<code>3</code>). Próximo passo é realizarmos uma <code>query</code> (<code>4</code>) no sistema de ECS para procurarmos por uma entidade que possua o componente <code>SnakeHead</code> (<code>With&lt;SnakeHead&gt;</code>). Com o resultado desta <code>query</code> verificamos se a quantidade de entidades que possuam o componente <code>SnakeHead</code> é igual a <code>1</code> (<code>5</code>).</p>
+<h2 id="queries"><a class="header" href="#queries">Queries</a></h2>
+<p>O principal objetivo de queries é nos permitir acessar componentes de entidades. No código a seguir, temos uma query do tipo <code>Query&lt;(&amp;Health, &amp;mut Transform, Option&lt;&amp;Player&gt;)&gt;</code> que representa todas as entidades que possuam <code>Health</code> e <code>Transform</code>, com a propriedade <code>Health</code> sendo apenas leitura e a propriedade <code>Transform</code> sendo mutável. Além disso, caso o componente <code>Player</code> esteja presente, permite leitura a ele. Depois disso iteramos sobre todos os ítens dessa query, de forma mutável, para podermos alterar a propriedade transform, <code>(health, mut transform, player) in query.iter_mut()</code>. Por último, caso o componente <code>Player</code> esteja presente, sabemos que está entidade é do tipo player e aplicamos uma lógica extra.</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn check_zero_health(
+    mut query: Query&lt;(&amp;Health, &amp;mut Transform, Option&lt;&amp;Player&gt;)&gt;,
+) {
+    // Obtem todas as entidades do tipo
+    for (health, mut transform, player) in query.iter_mut() {
+        eprintln!(&quot;Entity at {} has {} HP.&quot;, transform.translation, health.hp);
+
+        // centraliza se `hp` é menor ou igual a `0.0`
+        if health.hp &lt;= 0.0 {
+            transform.translation = Vec3::ZERO;
+        }
+
+        if let Some(player) = player {
+            // entidade é do tipo `Player`
+            // lógica extra
+        }
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>para obter o ID de uma entidade com queries basta adicionar <code>Entity</code> a query e a variável <code>entity_id</code> correspodnerá ao id:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// adicione `Entity` a `Query` para obter os IDs
+fn query_entities(q: Query&lt;(Entity, /* ... */)&gt;) {
+    for (entity_id, /* ... */) in q.iter() {
+        // `entity_id` é o ID da entidade que estamos acessando.
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Caso exista certeza que uma query vai identificar apenas uma entidade, é possível utilizar <code>single</code> e <code>single_mut</code> para acessar seus componentes:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn query_player(mut q: Query&lt;(&amp;Player, &amp;mut Transform)&gt;) {
+    let (player, mut transform) = q.single_mut();
+    // lógica
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Outro recurso interessante de queries são os <em>Query Filters</em>, um tipo especial de queries que permite reduzir a quantidade de entidade que uma query retorna. <em>Query filters</em> se utilizam dos filtros <code>With</code> e <code>Without</code> para garantir que a entidade tenha (<code>With</code>) ou não tenha (<code>Without</code>) certos componentes. No exemplo a seguir, a query acessa todas as entidades com o componente <code>Health</code> que sejam  <code>Players</code> amigáveis e que opcionalmente possuam <code>PlayerName</code></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn debug_player_hp(
+    query: Query&lt;(&amp;Health, Option&lt;&amp;PlayerName&gt;), (With&lt;Player&gt;, Without&lt;Enemy&gt;)&gt;,
+) {
+    for (health, name) in query.iter() {
+        // ...
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<blockquote>
+<p><strong>Utilizando filtros</strong></p>
+<ul>
+<li>Elementos adicionados em uma Tupla, como <code>(With&lt;Player&gt;, Without&lt;Enemy&gt;)</code>, são considerados <code>AND</code>/<code>E</code> lógicos.</li>
+<li>Para utilizar <code>OR</code>/<code>OU</code> lógicos é preciso envolver as tuplas em um filtro do tipo <code>Or&lt;(…)&gt;</code>.</li>
+</ul>
+</blockquote>
+<h2 id="movendo-a-cabeça-da-cobra"><a class="header" href="#movendo-a-cabeça-da-cobra">Movendo a cabeça da cobra</a></h2>
 
                     </main>
 
