@@ -202,7 +202,7 @@ fn debug_player_hp(
 
 ## Movendo a cabeça da cobra
 
-Nnao existe o Snake game sem movimento, então o próximo passo é controlarmos os movimentos da cabeça da cobra com as teclas `WASD` ou direcionais. Para isso, podemos começar com a movimentação para cima utilizando o teste:
+Não existe o Snake game sem movimento, então o próximo passo é controlarmos os movimentos da cabeça da cobra com as teclas `WASD` ou direcionais. Para isso, podemos começar com a movimentação para cima utilizando o teste:
 
 ```rust
 #[test]
@@ -261,3 +261,206 @@ fn main() {
 ```
 
 ### Controlando a direção de movimento
+
+Nosso movimento atual está longe de ser realista ou funcional, para isso precismos que a cobra se movimente com base nas teclas `wasd` e podemos começar com um teste que move a cobra 1 unidade para cima, verificando que apenas o `y` mudou em relacao ao original, depois uma unidade para direita, verificando que apenas o `x` mudou em relação ao anterior. Por último, um novo teste movendo para baixo e para esquerda, verificando se as posições são inferiores as originais em `x` e `y`. Assim, o primeiro teste fica:
+
+```rust
+#[test]
+fn snake_head_moves_up_and_right() {
+    // Setup
+    let mut app = App::new();
+    let default_transform = Transform {..default()};
+
+    // Adiciona systemas
+    app.add_startup_system(spawn_snake)
+    .add_system(snake_movement);
+
+    // Testa movimento para cima
+    let mut up_transform = Transform {..default()};
+    let mut input = Input::<KeyCode>::default();
+    input.press(KeyCode::W);
+    app.insert_resource(input);
+    app.update();
+    let mut query = app.world.query::<(&SnakeHead, &Transform)>();
+    query.iter(&app.world).for_each(|(_head, transform)| {
+        assert!(default_transform.translation.y < transform.translation.y);
+        assert_eq!(default_transform.translation.x, transform.translation.x);
+        up_transform = transform.to_owned();
+    });
+
+    // Testa movimento para direita
+    let mut input = Input::<KeyCode>::default();
+    input.press(KeyCode::D);
+    app.insert_resource(input);
+    app.update();
+    let mut query = app.world.query::<(&SnakeHead, &Transform)>();
+    query.iter(&app.world).for_each(|(_head, transform)| {
+        assert_eq!(up_transform.translation.y , transform.translation.y);
+        assert!(up_transform.translation.x < transform.translation.x);
+    })
+}
+```
+
+Ao executarmos este teste percebemos que a linha `assert_eq!(up_transform.translation.y , transform.translation.y);` falha pois nosso `transform.translation.y` está maior que o anterior, que faz sentido, já que nosso sistema de movimento está apenas aumentando o `y` a cada update. Para resolvermos isso, podemos adicionar os comandos para se mover com `w` e com `d`:
+
+```rust
+// snake.rs
+pub fn snake_movement(
+    keyboard_input: Res<Input<KeyCode>>, 
+    mut head_positions: Query<(&SnakeHead, &mut Transform)>
+) {
+    for (_head, mut transform) in head_positions.iter_mut() {
+        if keyboard_input.pressed(KeyCode::D) {
+            transform.translation.x += 1.;
+        }
+        if keyboard_input.pressed(KeyCode::W) {
+            transform.translation.y += 1.;
+        }
+    }
+}
+```
+
+Teste passando, então podemos fazer o segundo teste, movimento para baixo e para esquerda. O teste é basicamente igual ao anterior, mas reduzimos algumas linhas:
+
+```rust
+#[test]
+fn snake_head_moves_down_and_left() {
+    // Setup
+    let mut app = App::new();
+    let default_transform = Transform {..default()};
+
+    app.add_startup_system(spawn_snake)
+    .add_system(snake_movement);
+
+    // Movimenta para baixo
+    let mut input = Input::<KeyCode>::default();
+    input.press(KeyCode::S);
+    app.insert_resource(input);
+    app.update();
+
+
+    // Movimenta para esquerda
+    let mut input = Input::<KeyCode>::default();
+    input.press(KeyCode::A);
+    app.insert_resource(input);
+    app.update();
+
+    // Assert
+    let mut query = app.world.query::<(&SnakeHead, &Transform)>();
+    query.iter(&app.world).for_each(|(_head, transform)| {
+        assert!(default_transform.translation.y > transform.translation.y);
+        assert!(default_transform.translation.x > transform.translation.x);
+    })
+}
+```
+
+Como esperado, o teste falha e podemos implementar as condições que faltam de pressionar o teclado, `s` e `a`:
+
+```rust
+pub fn snake_movement(
+    keyboard_input: Res<Input<KeyCode>>, 
+    mut head_positions: Query<(&SnakeHead, &mut Transform)>
+) {
+    for (_head, mut transform) in head_positions.iter_mut() {
+        if keyboard_input.pressed(KeyCode::D) {
+            transform.translation.x += 1.;
+        }
+        if keyboard_input.pressed(KeyCode::W) {
+            transform.translation.y += 1.;
+        }
+        if keyboard_input.pressed(KeyCode::A) {
+            transform.translation.x -= 1.;
+        }
+        if keyboard_input.pressed(KeyCode::S) {
+            transform.translation.y -= 1.;
+        }
+    }
+}
+```
+
+Tudo passa e podemos ir par ao próximo passo, explciar e melhorar este código. O argumento `keyboard_input` é um recurso que contém os eventos relacionados a tecla que foi pressionada no `input`, ou seja, `Res<Input<KeyCode>>,`. Nossa query faz sentido e está funcional, porém, como não estamos utilizando o componente `SnakeHead`, representado por `_head`, podemos mudar nossa query para `Query<&mut Transform, With<SnakeHead>>`, que altera nosso código para utilizar apenas o transform como variável:
+
+```rust
+pub fn snake_movement(
+    keyboard_input: Res<Input<KeyCode>>, 
+    mut head_positions: Query<&mut Transform, With<SnakeHead>>
+) {
+    for mut transform in head_positions.iter_mut() {
+        if keyboard_input.pressed(KeyCode::D) {
+            transform.translation.x += 1.;
+        }
+        if keyboard_input.pressed(KeyCode::W) {
+            transform.translation.y += 1.;
+        }
+        if keyboard_input.pressed(KeyCode::A) {
+            transform.translation.x -= 1.;
+        }
+        if keyboard_input.pressed(KeyCode::S) {
+            transform.translation.y -= 1.;
+        }
+    }
+}
+```
+
+Como mencionamos antes sobre o `With`, ele nos permite buscar todas as entidades que possuam o componente `SnakeHead`, mas explicita para a Bevy que não nos importamos com o conteúdo de `SnakeHead`, apenas com o `Transform`. Isso é importante pois quanto menos componentes o systema precisar acessar, mais a bevy conseguirá paralelizar as coisas. 
+
+## CI
+
+Uma coisa bastante importante enquanto desenvolvemos é termos um sistema de integracão continua executando. No caso do Rust no Github eu recomendo utilizar o *Github Actions* e minha configuração base para projetos Rust é:
+
+```yaml
+name: Rust
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "*" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install alsa and udev
+      run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
+    - name: Build
+      run: cargo build --release --verbose
+      
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install alsa and udev
+      run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
+    - name: tests
+      run: cargo test -- --nocapture
+  
+  fmt:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: FMT
+      run: cargo fmt -- --check
+
+  clippy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install alsa and udev
+      run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
+    - name: install-clippy
+      run: rustup component add clippy
+    - name: clippy
+      run: cargo clippy -- -W clippy::pedantic --deny "warnings"
+
+```
+
+A seguir vamos criar o conceito de Grid.

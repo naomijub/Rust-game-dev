@@ -97,7 +97,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="0-capa.html"><strong aria-hidden="true">1.</strong> Capa</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="01-quemsou.html"><strong aria-hidden="true">1.1.</strong> Quem sou eu? (Sobre a autora)</a></li></ol></li><li class="chapter-item expanded "><a href="part-1/00-capa.html"><strong aria-hidden="true">2.</strong> Conceitos Básicos</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="part-1/01-arq.html"><strong aria-hidden="true">2.1.</strong> Arquitetura de servidores</a></li><li class="chapter-item expanded "><a href="part-1/02-prd-rec.html"><strong aria-hidden="true">2.2.</strong> Predição e Reconciliação</a></li><li class="chapter-item expanded "><a href="part-1/03-interpolacao.html"><strong aria-hidden="true">2.3.</strong> Interpolação de Entidades</a></li><li class="chapter-item expanded "><a href="part-1/04-lag.html"><strong aria-hidden="true">2.4.</strong> Compensacão de Lag</a></li></ol></li><li class="chapter-item expanded "><a href="part-2/00-intro.html"><strong aria-hidden="true">3.</strong> Multiplayer Snake Game</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="part-2/01-bevy.html"><strong aria-hidden="true">3.1.</strong> Sobre a Bevy</a></li><li class="chapter-item expanded "><a href="part-2/02-ecs.html"><strong aria-hidden="true">3.2.</strong> Entity Compoent System</a></li><li class="chapter-item expanded "><a href="part-2/03-cabeca.html"><strong aria-hidden="true">3.3.</strong> A Cabaça da Cobra</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="0-capa.html"><strong aria-hidden="true">1.</strong> Capa</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="01-quemsou.html"><strong aria-hidden="true">1.1.</strong> Quem sou eu? (Sobre a autora)</a></li></ol></li><li class="chapter-item expanded "><a href="part-1/00-capa.html"><strong aria-hidden="true">2.</strong> Conceitos Básicos</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="part-1/01-arq.html"><strong aria-hidden="true">2.1.</strong> Arquitetura de servidores</a></li><li class="chapter-item expanded "><a href="part-1/02-prd-rec.html"><strong aria-hidden="true">2.2.</strong> Predição e Reconciliação</a></li><li class="chapter-item expanded "><a href="part-1/03-interpolacao.html"><strong aria-hidden="true">2.3.</strong> Interpolação de Entidades</a></li><li class="chapter-item expanded "><a href="part-1/04-lag.html"><strong aria-hidden="true">2.4.</strong> Compensacão de Lag</a></li></ol></li><li class="chapter-item expanded "><a href="part-2/00-intro.html"><strong aria-hidden="true">3.</strong> Multiplayer Snake Game</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="part-2/01-bevy.html"><strong aria-hidden="true">3.1.</strong> Sobre a Bevy</a></li><li class="chapter-item expanded "><a href="part-2/02-ecs.html"><strong aria-hidden="true">3.2.</strong> Entity Compoent System</a></li><li class="chapter-item expanded "><a href="part-2/03-cabeca.html"><strong aria-hidden="true">3.3.</strong> A Cabaça da Cobra</a></li><li class="chapter-item expanded "><a href="part-2/04-grid.html"><strong aria-hidden="true">3.4.</strong> Grid de Movimento</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -804,7 +804,7 @@ fn query_entities(q: Query&lt;(Entity, /* ... */)&gt;) {
 </ul>
 </blockquote>
 <h2 id="movendo-a-cabeça-da-cobra"><a class="header" href="#movendo-a-cabeça-da-cobra">Movendo a cabeça da cobra</a></h2>
-<p>Nnao existe o Snake game sem movimento, então o próximo passo é controlarmos os movimentos da cabeça da cobra com as teclas <code>WASD</code> ou direcionais. Para isso, podemos começar com a movimentação para cima utilizando o teste:</p>
+<p>Não existe o Snake game sem movimento, então o próximo passo é controlarmos os movimentos da cabeça da cobra com as teclas <code>WASD</code> ou direcionais. Para isso, podemos começar com a movimentação para cima utilizando o teste:</p>
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -861,6 +861,209 @@ fn main() {
 // ...
 </code></pre></pre>
 <h3 id="controlando-a-direção-de-movimento"><a class="header" href="#controlando-a-direção-de-movimento">Controlando a direção de movimento</a></h3>
+<p>Nosso movimento atual está longe de ser realista ou funcional, para isso precismos que a cobra se movimente com base nas teclas <code>wasd</code> e podemos começar com um teste que move a cobra 1 unidade para cima, verificando que apenas o <code>y</code> mudou em relacao ao original, depois uma unidade para direita, verificando que apenas o <code>x</code> mudou em relação ao anterior. Por último, um novo teste movendo para baixo e para esquerda, verificando se as posições são inferiores as originais em <code>x</code> e <code>y</code>. Assim, o primeiro teste fica:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[test]
+fn snake_head_moves_up_and_right() {
+    // Setup
+    let mut app = App::new();
+    let default_transform = Transform {..default()};
+
+    // Adiciona systemas
+    app.add_startup_system(spawn_snake)
+    .add_system(snake_movement);
+
+    // Testa movimento para cima
+    let mut up_transform = Transform {..default()};
+    let mut input = Input::&lt;KeyCode&gt;::default();
+    input.press(KeyCode::W);
+    app.insert_resource(input);
+    app.update();
+    let mut query = app.world.query::&lt;(&amp;SnakeHead, &amp;Transform)&gt;();
+    query.iter(&amp;app.world).for_each(|(_head, transform)| {
+        assert!(default_transform.translation.y &lt; transform.translation.y);
+        assert_eq!(default_transform.translation.x, transform.translation.x);
+        up_transform = transform.to_owned();
+    });
+
+    // Testa movimento para direita
+    let mut input = Input::&lt;KeyCode&gt;::default();
+    input.press(KeyCode::D);
+    app.insert_resource(input);
+    app.update();
+    let mut query = app.world.query::&lt;(&amp;SnakeHead, &amp;Transform)&gt;();
+    query.iter(&amp;app.world).for_each(|(_head, transform)| {
+        assert_eq!(up_transform.translation.y , transform.translation.y);
+        assert!(up_transform.translation.x &lt; transform.translation.x);
+    })
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Ao executarmos este teste percebemos que a linha <code>assert_eq!(up_transform.translation.y , transform.translation.y);</code> falha pois nosso <code>transform.translation.y</code> está maior que o anterior, que faz sentido, já que nosso sistema de movimento está apenas aumentando o <code>y</code> a cada update. Para resolvermos isso, podemos adicionar os comandos para se mover com <code>w</code> e com <code>d</code>:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// snake.rs
+pub fn snake_movement(
+    keyboard_input: Res&lt;Input&lt;KeyCode&gt;&gt;, 
+    mut head_positions: Query&lt;(&amp;SnakeHead, &amp;mut Transform)&gt;
+) {
+    for (_head, mut transform) in head_positions.iter_mut() {
+        if keyboard_input.pressed(KeyCode::D) {
+            transform.translation.x += 1.;
+        }
+        if keyboard_input.pressed(KeyCode::W) {
+            transform.translation.y += 1.;
+        }
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Teste passando, então podemos fazer o segundo teste, movimento para baixo e para esquerda. O teste é basicamente igual ao anterior, mas reduzimos algumas linhas:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[test]
+fn snake_head_moves_down_and_left() {
+    // Setup
+    let mut app = App::new();
+    let default_transform = Transform {..default()};
+
+    app.add_startup_system(spawn_snake)
+    .add_system(snake_movement);
+
+    // Movimenta para baixo
+    let mut input = Input::&lt;KeyCode&gt;::default();
+    input.press(KeyCode::S);
+    app.insert_resource(input);
+    app.update();
+
+
+    // Movimenta para esquerda
+    let mut input = Input::&lt;KeyCode&gt;::default();
+    input.press(KeyCode::A);
+    app.insert_resource(input);
+    app.update();
+
+    // Assert
+    let mut query = app.world.query::&lt;(&amp;SnakeHead, &amp;Transform)&gt;();
+    query.iter(&amp;app.world).for_each(|(_head, transform)| {
+        assert!(default_transform.translation.y &gt; transform.translation.y);
+        assert!(default_transform.translation.x &gt; transform.translation.x);
+    })
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Como esperado, o teste falha e podemos implementar as condições que faltam de pressionar o teclado, <code>s</code> e <code>a</code>:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn snake_movement(
+    keyboard_input: Res&lt;Input&lt;KeyCode&gt;&gt;, 
+    mut head_positions: Query&lt;(&amp;SnakeHead, &amp;mut Transform)&gt;
+) {
+    for (_head, mut transform) in head_positions.iter_mut() {
+        if keyboard_input.pressed(KeyCode::D) {
+            transform.translation.x += 1.;
+        }
+        if keyboard_input.pressed(KeyCode::W) {
+            transform.translation.y += 1.;
+        }
+        if keyboard_input.pressed(KeyCode::A) {
+            transform.translation.x -= 1.;
+        }
+        if keyboard_input.pressed(KeyCode::S) {
+            transform.translation.y -= 1.;
+        }
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Tudo passa e podemos ir par ao próximo passo, explciar e melhorar este código. O argumento <code>keyboard_input</code> é um recurso que contém os eventos relacionados a tecla que foi pressionada no <code>input</code>, ou seja, <code>Res&lt;Input&lt;KeyCode&gt;&gt;,</code>. Nossa query faz sentido e está funcional, porém, como não estamos utilizando o componente <code>SnakeHead</code>, representado por <code>_head</code>, podemos mudar nossa query para <code>Query&lt;&amp;mut Transform, With&lt;SnakeHead&gt;&gt;</code>, que altera nosso código para utilizar apenas o transform como variável:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn snake_movement(
+    keyboard_input: Res&lt;Input&lt;KeyCode&gt;&gt;, 
+    mut head_positions: Query&lt;&amp;mut Transform, With&lt;SnakeHead&gt;&gt;
+) {
+    for mut transform in head_positions.iter_mut() {
+        if keyboard_input.pressed(KeyCode::D) {
+            transform.translation.x += 1.;
+        }
+        if keyboard_input.pressed(KeyCode::W) {
+            transform.translation.y += 1.;
+        }
+        if keyboard_input.pressed(KeyCode::A) {
+            transform.translation.x -= 1.;
+        }
+        if keyboard_input.pressed(KeyCode::S) {
+            transform.translation.y -= 1.;
+        }
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Como mencionamos antes sobre o <code>With</code>, ele nos permite buscar todas as entidades que possuam o componente <code>SnakeHead</code>, mas explicita para a Bevy que não nos importamos com o conteúdo de <code>SnakeHead</code>, apenas com o <code>Transform</code>. Isso é importante pois quanto menos componentes o systema precisar acessar, mais a bevy conseguirá paralelizar as coisas. </p>
+<h2 id="ci"><a class="header" href="#ci">CI</a></h2>
+<p>Uma coisa bastante importante enquanto desenvolvemos é termos um sistema de integracão continua executando. No caso do Rust no Github eu recomendo utilizar o <em>Github Actions</em> e minha configuração base para projetos Rust é:</p>
+<pre><code class="language-yaml">name: Rust
+
+on:
+  push:
+    branches: [ &quot;main&quot; ]
+  pull_request:
+    branches: [ &quot;*&quot; ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install alsa and udev
+      run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
+    - name: Build
+      run: cargo build --release --verbose
+      
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install alsa and udev
+      run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
+    - name: tests
+      run: cargo test -- --nocapture
+  
+  fmt:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: FMT
+      run: cargo fmt -- --check
+
+  clippy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install alsa and udev
+      run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
+    - name: install-clippy
+      run: rustup component add clippy
+    - name: clippy
+      run: cargo clippy -- -W clippy::pedantic --deny &quot;warnings&quot;
+
+</code></pre>
+<p>A seguir vamos criar o conceito de Grid.</p>
+<h1 id="grid-de-movimento"><a class="header" href="#grid-de-movimento">Grid de Movimento</a></h1>
 
                     </main>
 
