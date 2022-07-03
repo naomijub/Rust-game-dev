@@ -97,7 +97,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="0-capa.html"><strong aria-hidden="true">1.</strong> Capa</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="01-quemsou.html"><strong aria-hidden="true">1.1.</strong> Quem sou eu? (Sobre a autora)</a></li></ol></li><li class="chapter-item expanded "><a href="part-1/00-capa.html"><strong aria-hidden="true">2.</strong> Conceitos Básicos</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="part-1/01-arq.html"><strong aria-hidden="true">2.1.</strong> Arquitetura de servidores</a></li><li class="chapter-item expanded "><a href="part-1/02-prd-rec.html"><strong aria-hidden="true">2.2.</strong> Predição e Reconciliação</a></li><li class="chapter-item expanded "><a href="part-1/03-interpolacao.html"><strong aria-hidden="true">2.3.</strong> Interpolação de Entidades</a></li><li class="chapter-item expanded "><a href="part-1/04-lag.html"><strong aria-hidden="true">2.4.</strong> Compensacão de Lag</a></li></ol></li><li class="chapter-item expanded "><a href="part-2/00-intro.html"><strong aria-hidden="true">3.</strong> Multiplayer Snake Game</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="part-2/01-bevy.html"><strong aria-hidden="true">3.1.</strong> Sobre a Bevy</a></li><li class="chapter-item expanded "><a href="part-2/02-ecs.html"><strong aria-hidden="true">3.2.</strong> Entity Compoent System</a></li><li class="chapter-item expanded "><a href="part-2/03-cabeca.html"><strong aria-hidden="true">3.3.</strong> A Cabaça da Cobra</a></li><li class="chapter-item expanded "><a href="part-2/04-grid.html"><strong aria-hidden="true">3.4.</strong> Grid de Movimento</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="0-capa.html"><strong aria-hidden="true">1.</strong> Capa</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="01-quemsou.html"><strong aria-hidden="true">1.1.</strong> Quem sou eu? (Sobre a autora)</a></li></ol></li><li class="chapter-item expanded "><a href="part-1/00-capa.html"><strong aria-hidden="true">2.</strong> Conceitos Básicos</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="part-1/01-arq.html"><strong aria-hidden="true">2.1.</strong> Arquitetura de servidores</a></li><li class="chapter-item expanded "><a href="part-1/02-prd-rec.html"><strong aria-hidden="true">2.2.</strong> Predição e Reconciliação</a></li><li class="chapter-item expanded "><a href="part-1/03-interpolacao.html"><strong aria-hidden="true">2.3.</strong> Interpolação de Entidades</a></li><li class="chapter-item expanded "><a href="part-1/04-lag.html"><strong aria-hidden="true">2.4.</strong> Compensacão de Lag</a></li></ol></li><li class="chapter-item expanded "><a href="part-2/00-intro.html"><strong aria-hidden="true">3.</strong> Multiplayer Snake Game</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="part-2/01-bevy.html"><strong aria-hidden="true">3.1.</strong> Sobre a Bevy</a></li><li class="chapter-item expanded "><a href="part-2/02-ecs.html"><strong aria-hidden="true">3.2.</strong> Entity Compoent System</a></li><li class="chapter-item expanded "><a href="part-2/03-cabeca.html"><strong aria-hidden="true">3.3.</strong> A Cabeça da Cobra</a></li><li class="chapter-item expanded "><a href="part-2/04-grid.html"><strong aria-hidden="true">3.4.</strong> Grid de Movimento</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -605,7 +605,7 @@ impl FromWorld for MyFancyResource {
 </code></pre></pre>
 <p>Agora vamos começar a implementar nosso snake game e aprofundar nossos conhecimentos em bevy.</p>
 <p><strong>Referência: <a href="https://bevy-cheatbook.github.io/programming.html">unofficial bevy guide</a></strong></p>
-<h1 id="a-cabaça-da-cobra"><a class="header" href="#a-cabaça-da-cobra">A Cabaça da Cobra</a></h1>
+<h1 id="a-cabeça-da-cobra"><a class="header" href="#a-cabeça-da-cobra">A Cabeça da Cobra</a></h1>
 <p>Para começar o jogo precisamos do primeiro componente, neste caso a cabeça da cobra, que definirá os próximos possíveis passos, assim como para onde os blocos seguintes se moverão. Este primeiro componente se chamará <code>SnakeHead</code> e será uma struct vazia com a trait <code>Compoent</code> associada a ela:</p>
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]
@@ -614,69 +614,69 @@ impl FromWorld for MyFancyResource {
 pub struct SnakeHead;
 <span class="boring">}
 </span></code></pre></pre>
-<p>A função de <code>SnakeHead</code> é basicamente ser um marcador para as entidades do tipo snake, que nos permitirá filtrar as estas entidades quando formos fazer queries com os players. Muitos componentes não precisam de estados e podem funcionar apenas como marcadores, um padrão bastante comum no mundo ECS, já que optamos por uma estratégia de <em>has a</em> (possui um) em vez de <em>is a</em> (é um, da orientação a objetos). Outro detalhe importante é a adição de uma cor ao específica para a cabeça da cobra <code>const SNAKE_HEAD_COLOR: Color = Color::rgb(0.7, 0.7, 0.7);</code>.</p>
-<p>Nosso próximo passo é gerar uma entidade snake, que possui um componente do tipo <code>SnakeHead</code>, e essa entidade pode ser gerada adicionando um sistema incial com <code>add_startup_system(spawn_snake)</code>, dada a função <code>spawn_snake</code>:</p>
+<p>A função de <code>SnakeHead</code> é basicamente ser um marcador para as entidades do tipo snake, que nos permitirá filtrar as estas entidades quando formos fazer queries com os players. Muitos componentes não precisam de estados e podem funcionar apenas como marcadores, um padrão bastante comum no mundo ECS, já que optamos por uma estratégia de <em>has a</em> (possui um) em vez de <em>is a</em> (é um, da orientação a objetos). Outro detalhe importante é a adição de uma cor específica para a cabeça da cobra <code>const SNAKE_HEAD_COLOR: Color = Color::rgb(0.7, 0.7, 0.7);</code>.</p>
+<p>Nosso próximo passo é gerar uma entidade snake, que possui um componente do tipo <code>SnakeHead</code>, e essa entidade pode ser gerada adicionando um sistema inicial com <code>add_startup_system(spawn_snake)</code>, dada a função <code>spawn_snake</code>:</p>
 <pre><pre class="playground"><code class="language-rust">use bevy::prelude::*;
-
+ 
 const SNAKE_HEAD_COLOR: Color = Color::rgb(0.7, 0.7, 0.7);
-
+ 
 fn main() {
-    App::new()
-        .add_startup_system(setup_camera)
-        .add_startup_system(spawn_snake)
-        .add_plugins(DefaultPlugins)
-        .run();
+   App::new()
+       .add_startup_system(setup_camera)
+       .add_startup_system(spawn_snake)
+       .add_plugins(DefaultPlugins)
+       .run();
 }
-
+ 
 fn setup_camera(mut commands: Commands) {
-    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+   commands.spawn_bundle(OrthographicCameraBundle::new_2d());
 }
-
+ 
 #[derive(Component)]
 pub struct SnakeHead;
-
+ 
 fn spawn_snake(mut commands: Commands) {
-    commands
-        .spawn_bundle(SpriteBundle {
-            sprite: Sprite {
-                color: SNAKE_HEAD_COLOR,
-                ..default()
-            },
-            transform: Transform {
-                scale: Vec3::new(10.0, 10.0, 10.0),
-                ..default()
-            },
-            ..default()
-        })
-        .insert(SnakeHead);
+   commands
+       .spawn_bundle(SpriteBundle {
+           sprite: Sprite {
+               color: SNAKE_HEAD_COLOR,
+               ..default()
+           },
+           transform: Transform {
+               scale: Vec3::new(10.0, 10.0, 10.0),
+               ..default()
+           },
+           ..default()
+       })
+       .insert(SnakeHead);
 }
 </code></pre></pre>
 <blockquote>
 <p><strong>SpriteBundle</strong></p>
-<p><code>SpriteBundle</code> é um tipo de componente que agrega características comuns a uma entidade que utiliza sprites como o proprio sprite (especificidades da imagem), transform (relação de posição, escala e rotação), visibilidade, transform global e o manuseio de imagens. </p>
+<p><code>SpriteBundle</code> é um tipo de componente que agrega características comuns a uma entidade que utiliza sprites como o próprio sprite (especificidades da imagem), transform (relação de posição, escala e rotação), visibilidade, transform global e o manuseio de imagens.</p>
 </blockquote>
 <p>Neste caso, não temos nenhuma imagem específica como sprite, mas definimos um transform com uma escala de <code>10 x 10 x 10</code> pixels e uma cor de filtro acinzentada para a região definida pelo transform, as outras propriedades foram definidas como <code>..default()</code>. Ao executarmos <code>cargo run</code> o resultado é algo como:</p>
 <p><img src="part-2/../imagens/snake_pixel.png" alt="Entidade snake com SpriteBundle" /></p>
 <h2 id="nosso-primeiro-teste"><a class="header" href="#nosso-primeiro-teste">Nosso primeiro teste</a></h2>
-<p>No mundo moderno, jogos sem testes estão fadados ao fracasso. Não estou dizendo que todos os jogos possuem uma bateria maravilhosa de testes automatizados, mas desde que escrevi o livro <strong>Lean Game Development</strong> até hoje, o mercado de games AAA mudou muito. Hoje em dia vejo jogos sendo desenvolvidos com TDD e com QA advogando por testes automatizados de gameplay emt todos os sistemas, garantindo uma jogabilidade equilibrada/desejada em qualquer plataforma. Hoje em dia um jogo, middleware, game server ou ferramenta sem nenhum teste esta fadado ao fracasso por conta do número excessivo de bugs e clientes infelizes. Sendo assim, é importante ter uma noção de como testar minimamente seus sistemas com a Bevy. Sendo assim, vamos aprender a escrever o teste mais simples possível, verificar se nosso sistema <code>spawn_snake</code> de fato adiciona um compoente <code>SnakeHead</code> a entidade desejada.</p>
+<p>No mundo moderno, jogos sem testes estão fadados ao fracasso. Não estou dizendo que todos os jogos possuem uma bateria maravilhosa de testes automatizados, mas desde que escrevi o livro <strong>Lean Game Development</strong> até hoje, o mercado de games AAA mudou muito. Hoje em dia vejo jogos sendo desenvolvidos com TDD e com QA advogando por testes automatizados de gameplay emt todos os sistemas, garantindo uma jogabilidade equilibrada/desejada em qualquer plataforma. Hoje em dia um jogo, middleware, game server ou ferramenta sem nenhum teste esta fadado ao fracasso por conta do número excessivo de bugs e clientes infelizes. Sendo assim, é importante ter uma noção de como testar minimamente seus sistemas com a Bevy. Sendo assim, vamos aprender a escrever o teste mais simples possível, verificar se nosso sistema <code>spawn_snake</code> de fato adiciona um componente <code>SnakeHead</code> à entidade desejada.</p>
 <p>Primeiro passo do teste será mover tudo que é relacionado a <code>snake</code> para um módulo chamado <code>snake.rs</code>:</p>
 <p><strong><code>main.rs</code></strong>:</p>
 <pre><pre class="playground"><code class="language-rust">use bevy::prelude::*;
-
+ 
 mod snake;
-
+ 
 use snake::spawn_snake;
-
+ 
 fn main() {
-    App::new()
-        .add_startup_system(setup_camera)
-        .add_startup_system(spawn_snake)
-        .add_plugins(DefaultPlugins)
-        .run();
+   App::new()
+       .add_startup_system(setup_camera)
+       .add_startup_system(spawn_snake)
+       .add_plugins(DefaultPlugins)
+       .run();
 }
-
+ 
 fn setup_camera(mut commands: Commands) {
-    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+   commands.spawn_bundle(OrthographicCameraBundle::new_2d());
 }
 </code></pre></pre>
 <p><strong><code>snake.rs</code></strong>:</p>
@@ -684,26 +684,26 @@ fn setup_camera(mut commands: Commands) {
 <span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>use bevy::prelude::*;
-
+ 
 const SNAKE_HEAD_COLOR: Color = Color::rgb(0.7, 0.7, 0.7);
-
+ 
 #[derive(Component)]
 pub struct SnakeHead;
-
+ 
 pub fn spawn_snake(mut commands: Commands) {
-    commands
-        .spawn_bundle(SpriteBundle {
-            sprite: Sprite {
-                color: SNAKE_HEAD_COLOR,
-                ..default()
-            },
-            transform: Transform {
-                scale: Vec3::new(10.0, 10.0, 10.0),
-                ..default()
-            },
-            ..default()
-        })
-        .insert(SnakeHead);
+   commands
+       .spawn_bundle(SpriteBundle {
+           sprite: Sprite {
+               color: SNAKE_HEAD_COLOR,
+               ..default()
+           },
+           transform: Transform {
+               scale: Vec3::new(10.0, 10.0, 10.0),
+               ..default()
+           },
+           ..default()
+       })
+       .insert(SnakeHead);
 }
 <span class="boring">}
 </span></code></pre></pre>
@@ -713,63 +713,63 @@ pub fn spawn_snake(mut commands: Commands) {
 </span><span class="boring">fn main() {
 </span>#[cfg(test)]
 mod test {
-    use super::*;
-
-    #[test]
-    fn entity_has_snake_head() {
-        // 1 Inicialização do App
-        let mut app = App::new();
-
-        // 2 Adicionar o `spawn_snake` startup system
-        app.add_startup_system(spawn_snake);
-
-        // 3 Executar todos os sistemas pelo menos uma vez
-        app.update();
-
-        // 4 Fazer uma query por entidades que contenham o componente `SnakeHead`
-        let mut query = app.world.query_filtered::&lt;Entity, With&lt;SnakeHead&gt;&gt;();
-
-        // 5 Verificar se a contagem de componentes da query foi igual a 1
-        assert_eq!(query.iter(&amp;app.world).count(), 1);
-    }
+   use super::*;
+ 
+   #[test]
+   fn entity_has_snake_head() {
+       // 1 Inicialização do App
+       let mut app = App::new();
+ 
+       // 2 Adicionar o `spawn_snake` startup system
+       app.add_startup_system(spawn_snake);
+ 
+       // 3 Executar todos os sistemas pelo menos uma vez
+       app.update();
+ 
+       // 4 Fazer uma query por entidades que contenham o componente `SnakeHead`
+       let mut query = app.world.query_filtered::&lt;Entity, With&lt;SnakeHead&gt;&gt;();
+ 
+       // 5 Verificar se a contagem de componentes da query foi igual a 1
+       assert_eq!(query.iter(&amp;app.world).count(), 1);
+   }
 }
 <span class="boring">}
 </span></code></pre></pre>
-<p>Descrevendo o teste <code>entity_has_snake_head</code> (verifica se entidade possui componente snake head) temos como primeiro passo (<code>1</code>) criar um <code>App</code> mutável para podermos adicionar sistemas como o <code>spawn_snake</code> (<code>2</code>) e executarmos todos os sistemas pelo menos uma vez com <code>app.update()</code> (<code>3</code>). Próximo passo é realizarmos uma <code>query</code> (<code>4</code>) no sistema de ECS para procurarmos por uma entidade que possua o componente <code>SnakeHead</code> (<code>With&lt;SnakeHead&gt;</code>). Com o resultado desta <code>query</code> verificamos se a quantidade de entidades que possuam o componente <code>SnakeHead</code> é igual a <code>1</code> (<code>5</code>).</p>
+<p>Descrevendo o teste <code>entity_has_snake_head</code> (verifica se entidade possui componente snake head) temos como primeiro passo (<code>1</code>) criar um <code>App</code> mutável para podermos adicionar sistemas como o <code>spawn_snake</code> (<code>2</code>) e executarmos todos os sistemas pelo menos uma vez com <code>app.update()</code> (<code>3</code>). O próximo passo é realizarmos uma <code>query</code> (<code>4</code>) no sistema de ECS para procurarmos por uma entidade que possua o componente <code>SnakeHead</code> (<code>With&lt;SnakeHead&gt;</code>). Com o resultado desta <code>query</code> verificamos se a quantidade de entidades que possuem o componente <code>SnakeHead</code> é igual a <code>1</code> (<code>5</code>).</p>
 <h2 id="queries"><a class="header" href="#queries">Queries</a></h2>
-<p>O principal objetivo de queries é nos permitir acessar componentes de entidades. No código a seguir, temos uma query do tipo <code>Query&lt;(&amp;Health, &amp;mut Transform, Option&lt;&amp;Player&gt;)&gt;</code> que representa todas as entidades que possuam <code>Health</code> e <code>Transform</code>, com a propriedade <code>Health</code> sendo apenas leitura e a propriedade <code>Transform</code> sendo mutável. Além disso, caso o componente <code>Player</code> esteja presente, permite leitura a ele. Depois disso iteramos sobre todos os ítens dessa query, de forma mutável, para podermos alterar a propriedade transform, <code>(health, mut transform, player) in query.iter_mut()</code>. Por último, caso o componente <code>Player</code> esteja presente, sabemos que está entidade é do tipo player e aplicamos uma lógica extra.</p>
+<p>O principal objetivo de queries é nos permitir acessar componentes de entidades. No código a seguir, temos uma query do tipo <code>Query&lt;(&amp;Health, &amp;mut Transform, Option&lt;&amp;Player&gt;)&gt;</code> que representa todas as entidades que possuam <code>Health</code> e <code>Transform</code>, com a propriedade <code>Health</code> sendo apenas leitura e a propriedade <code>Transform</code> sendo mutável. Além disso, caso o componente <code>Player</code> esteja presente, permite a leitura dele. Depois disso iteramos sobre todos os ítens dessa query, de forma mutável, para podermos alterar a propriedade transform, <code>(health, mut transform, player) in query.iter_mut()</code>. Por último, caso o componente <code>Player</code> esteja presente, sabemos que esta entidade é do tipo player e aplicamos uma lógica extra.</p>
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>fn check_zero_health(
-    mut query: Query&lt;(&amp;Health, &amp;mut Transform, Option&lt;&amp;Player&gt;)&gt;,
+   mut query: Query&lt;(&amp;Health, &amp;mut Transform, Option&lt;&amp;Player&gt;)&gt;,
 ) {
-    // Obtem todas as entidades do tipo
-    for (health, mut transform, player) in query.iter_mut() {
-        eprintln!(&quot;Entity at {} has {} HP.&quot;, transform.translation, health.hp);
-
-        // centraliza se `hp` é menor ou igual a `0.0`
-        if health.hp &lt;= 0.0 {
-            transform.translation = Vec3::ZERO;
-        }
-
-        if let Some(player) = player {
-            // entidade é do tipo `Player`
-            // lógica extra
-        }
-    }
+   // Obtem todas as entidades do tipo
+   for (health, mut transform, player) in query.iter_mut() {
+       eprintln!(&quot;Entity at {} has {} HP.&quot;, transform.translation, health.hp);
+ 
+       // centraliza se `hp` é menor ou igual a `0.0`
+       if health.hp &lt;= 0.0 {
+           transform.translation = Vec3::ZERO;
+       }
+ 
+       if let Some(player) = player {
+           // entidade é do tipo `Player`
+           // lógica extra
+       }
+   }
 }
 <span class="boring">}
 </span></code></pre></pre>
-<p>para obter o ID de uma entidade com queries basta adicionar <code>Entity</code> a query e a variável <code>entity_id</code> correspodnerá ao id:</p>
+<p>para obter o ID de uma entidade com queries basta adicionar <code>Entity</code> a query e a variável <code>entity_id</code> corresponderá ao id:</p>
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>// adicione `Entity` a `Query` para obter os IDs
 fn query_entities(q: Query&lt;(Entity, /* ... */)&gt;) {
-    for (entity_id, /* ... */) in q.iter() {
-        // `entity_id` é o ID da entidade que estamos acessando.
-    }
+   for (entity_id, /* ... */) in q.iter() {
+       // `entity_id` é o ID da entidade que estamos acessando.
+   }
 }
 <span class="boring">}
 </span></code></pre></pre>
@@ -778,8 +778,8 @@ fn query_entities(q: Query&lt;(Entity, /* ... */)&gt;) {
 <span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>fn query_player(mut q: Query&lt;(&amp;Player, &amp;mut Transform)&gt;) {
-    let (player, mut transform) = q.single_mut();
-    // lógica
+   let (player, mut transform) = q.single_mut();
+   // lógica
 }
 <span class="boring">}
 </span></code></pre></pre>
@@ -788,11 +788,11 @@ fn query_entities(q: Query&lt;(Entity, /* ... */)&gt;) {
 <span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>fn debug_player_hp(
-    query: Query&lt;(&amp;Health, Option&lt;&amp;PlayerName&gt;), (With&lt;Player&gt;, Without&lt;Enemy&gt;)&gt;,
+   query: Query&lt;(&amp;Health, Option&lt;&amp;PlayerName&gt;), (With&lt;Player&gt;, Without&lt;Enemy&gt;)&gt;,
 ) {
-    for (health, name) in query.iter() {
-        // ...
-    }
+   for (health, name) in query.iter() {
+       // ...
+   }
 }
 <span class="boring">}
 </span></code></pre></pre>
@@ -810,94 +810,94 @@ fn query_entities(q: Query&lt;(Entity, /* ... */)&gt;) {
 </span><span class="boring">fn main() {
 </span>#[test]
 fn snake_head_has_moved_up() {
-    // Setup
-    let mut app = App::new();
-    let default_transform = Transform {..default()};
-
-    // Adicionando sistemas
-    app.add_startup_system(spawn_snake)
-    .add_system(snake_movement);
-
-    // Adicionando inputs de `KeyCode`s
-    let mut input = Input::&lt;KeyCode&gt;::default();
-    input.press(KeyCode::W);
-    app.insert_resource(input);
-
-    // Executando sistemas pelo menos uma vez
-    app.update();
-
-    // Query para obter entidades com `SnakeHead` e `Transform`
-    let mut query = app.world.query::&lt;(&amp;SnakeHead, &amp;Transform)&gt;();
-
-    // Verificando se o valor de Y no `Transform` mudou
-    query.iter(&amp;app.world).for_each(|(_head, transform)| {
-        assert!(default_transform.translation.y &lt; transform.translation.y);
-        assert_eq!(default_transform.translation.x, transform.translation.x);
-    })
+   // Setup
+   let mut app = App::new();
+   let default_transform = Transform {..default()};
+ 
+   // Adicionando sistemas
+   app.add_startup_system(spawn_snake)
+   .add_system(snake_movement);
+ 
+   // Adicionando inputs de `KeyCode`s
+   let mut input = Input::&lt;KeyCode&gt;::default();
+   input.press(KeyCode::W);
+   app.insert_resource(input);
+ 
+   // Executando sistemas pelo menos uma vez
+   app.update();
+ 
+   // Query para obter entidades com `SnakeHead` e `Transform`
+   let mut query = app.world.query::&lt;(&amp;SnakeHead, &amp;Transform)&gt;();
+ 
+   // Verificando se o valor de Y no `Transform` mudou
+   query.iter(&amp;app.world).for_each(|(_head, transform)| {
+       assert!(default_transform.translation.y &lt; transform.translation.y);
+       assert_eq!(default_transform.translation.x, transform.translation.x);
+   })
 }
 <span class="boring">}
 </span></code></pre></pre>
 <p>Neste teste adicionamos um <code>Transform</code> com valores padrão de <code>translation</code> para comparar quando o transform da query mudar, adicionamos um novo sistema de movimento <code>add_system(snake_movement)</code> e criamos um recurso que gerencia inputs de teclado <code>Input::&lt;KeyCode&gt;::default()</code>, na qual setamos seu evento <code>press</code> como <code>KeyCode::W</code>. Para resolver este teste precisamos criar o sistema <code>snake_movement</code>, que é bastante trivial neste caso, apenas um sistema que busca por um query contendo <code>&amp;SnakeHead</code> e <code>&amp;Transform</code>, depois modifica o valor de Y de forma que sempre aumente:</p>
 <pre><pre class="playground"><code class="language-rust">// snake.rs
 pub fn snake_movement(mut head_positions: Query&lt;(&amp;SnakeHead, &amp;mut Transform)&gt;) {
-    for (_head, mut transform) in head_positions.iter_mut() {
-        transform.translation.y += 1.;
-    }
+   for (_head, mut transform) in head_positions.iter_mut() {
+       transform.translation.y += 1.;
+   }
 }
-
+ 
 // main.rs
 // ...
 mod snake;
 use snake::{spawn_snake, snake_movement};
-
+ 
 fn main() {
-    App::new()
-        .add_startup_system(setup_camera)
-        .add_startup_system(spawn_snake)
-        .add_plugins(DefaultPlugins)
-        .add_system(snake_movement)
-        .run();
+   App::new()
+       .add_startup_system(setup_camera)
+       .add_startup_system(spawn_snake)
+       .add_plugins(DefaultPlugins)
+       .add_system(snake_movement)
+       .run();
 }
 // ...
 </code></pre></pre>
 <h3 id="controlando-a-direção-de-movimento"><a class="header" href="#controlando-a-direção-de-movimento">Controlando a direção de movimento</a></h3>
-<p>Nosso movimento atual está longe de ser realista ou funcional, para isso precismos que a cobra se movimente com base nas teclas <code>wasd</code> e podemos começar com um teste que move a cobra 1 unidade para cima, verificando que apenas o <code>y</code> mudou em relacao ao original, depois uma unidade para direita, verificando que apenas o <code>x</code> mudou em relação ao anterior. Por último, um novo teste movendo para baixo e para esquerda, verificando se as posições são inferiores as originais em <code>x</code> e <code>y</code>. Assim, o primeiro teste fica:</p>
+<p>Nosso movimento atual está longe de ser realista ou funcional, para isso precisamos que a cobra se movimente com base nas teclas <code>wasd</code> e podemos começar com um teste que move a cobra 1 unidade para cima, verificando que apenas o <code>y</code> mudou em relacao ao original, depois uma unidade para direita, verificando que apenas o <code>x</code> mudou em relação ao anterior. Por último, um novo teste movendo para baixo e para esquerda, verificando se as posições são inferiores às originais em <code>x</code> e <code>y</code>. Assim, o primeiro teste fica:</p>
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>#[test]
 fn snake_head_moves_up_and_right() {
-    // Setup
-    let mut app = App::new();
-    let default_transform = Transform {..default()};
-
-    // Adiciona systemas
-    app.add_startup_system(spawn_snake)
-    .add_system(snake_movement);
-
-    // Testa movimento para cima
-    let mut up_transform = Transform {..default()};
-    let mut input = Input::&lt;KeyCode&gt;::default();
-    input.press(KeyCode::W);
-    app.insert_resource(input);
-    app.update();
-    let mut query = app.world.query::&lt;(&amp;SnakeHead, &amp;Transform)&gt;();
-    query.iter(&amp;app.world).for_each(|(_head, transform)| {
-        assert!(default_transform.translation.y &lt; transform.translation.y);
-        assert_eq!(default_transform.translation.x, transform.translation.x);
-        up_transform = transform.to_owned();
-    });
-
-    // Testa movimento para direita
-    let mut input = Input::&lt;KeyCode&gt;::default();
-    input.press(KeyCode::D);
-    app.insert_resource(input);
-    app.update();
-    let mut query = app.world.query::&lt;(&amp;SnakeHead, &amp;Transform)&gt;();
-    query.iter(&amp;app.world).for_each(|(_head, transform)| {
-        assert_eq!(up_transform.translation.y , transform.translation.y);
-        assert!(up_transform.translation.x &lt; transform.translation.x);
-    })
+   // Setup
+   let mut app = App::new();
+   let default_transform = Transform {..default()};
+ 
+   // Adiciona systemas
+   app.add_startup_system(spawn_snake)
+   .add_system(snake_movement);
+ 
+   // Testa movimento para cima
+   let mut up_transform = Transform {..default()};
+   let mut input = Input::&lt;KeyCode&gt;::default();
+   input.press(KeyCode::W);
+   app.insert_resource(input);
+   app.update();
+   let mut query = app.world.query::&lt;(&amp;SnakeHead, &amp;Transform)&gt;();
+   query.iter(&amp;app.world).for_each(|(_head, transform)| {
+       assert!(default_transform.translation.y &lt; transform.translation.y);
+       assert_eq!(default_transform.translation.x, transform.translation.x);
+       up_transform = transform.to_owned();
+   });
+ 
+   // Testa movimento para direita
+   let mut input = Input::&lt;KeyCode&gt;::default();
+   input.press(KeyCode::D);
+   app.insert_resource(input);
+   app.update();
+   let mut query = app.world.query::&lt;(&amp;SnakeHead, &amp;Transform)&gt;();
+   query.iter(&amp;app.world).for_each(|(_head, transform)| {
+       assert_eq!(up_transform.translation.y , transform.translation.y);
+       assert!(up_transform.translation.x &lt; transform.translation.x);
+   })
 }
 <span class="boring">}
 </span></code></pre></pre>
@@ -907,17 +907,17 @@ fn snake_head_moves_up_and_right() {
 </span><span class="boring">fn main() {
 </span>// snake.rs
 pub fn snake_movement(
-    keyboard_input: Res&lt;Input&lt;KeyCode&gt;&gt;, 
-    mut head_positions: Query&lt;(&amp;SnakeHead, &amp;mut Transform)&gt;
+   keyboard_input: Res&lt;Input&lt;KeyCode&gt;&gt;,
+   mut head_positions: Query&lt;(&amp;SnakeHead, &amp;mut Transform)&gt;
 ) {
-    for (_head, mut transform) in head_positions.iter_mut() {
-        if keyboard_input.pressed(KeyCode::D) {
-            transform.translation.x += 1.;
-        }
-        if keyboard_input.pressed(KeyCode::W) {
-            transform.translation.y += 1.;
-        }
-    }
+   for (_head, mut transform) in head_positions.iter_mut() {
+       if keyboard_input.pressed(KeyCode::D) {
+           transform.translation.x += 1.;
+       }
+       if keyboard_input.pressed(KeyCode::W) {
+           transform.translation.y += 1.;
+       }
+   }
 }
 <span class="boring">}
 </span></code></pre></pre>
@@ -927,32 +927,32 @@ pub fn snake_movement(
 </span><span class="boring">fn main() {
 </span>#[test]
 fn snake_head_moves_down_and_left() {
-    // Setup
-    let mut app = App::new();
-    let default_transform = Transform {..default()};
-
-    app.add_startup_system(spawn_snake)
-    .add_system(snake_movement);
-
-    // Movimenta para baixo
-    let mut input = Input::&lt;KeyCode&gt;::default();
-    input.press(KeyCode::S);
-    app.insert_resource(input);
-    app.update();
-
-
-    // Movimenta para esquerda
-    let mut input = Input::&lt;KeyCode&gt;::default();
-    input.press(KeyCode::A);
-    app.insert_resource(input);
-    app.update();
-
-    // Assert
-    let mut query = app.world.query::&lt;(&amp;SnakeHead, &amp;Transform)&gt;();
-    query.iter(&amp;app.world).for_each(|(_head, transform)| {
-        assert!(default_transform.translation.y &gt; transform.translation.y);
-        assert!(default_transform.translation.x &gt; transform.translation.x);
-    })
+   // Setup
+   let mut app = App::new();
+   let default_transform = Transform {..default()};
+ 
+   app.add_startup_system(spawn_snake)
+   .add_system(snake_movement);
+ 
+   // Movimenta para baixo
+   let mut input = Input::&lt;KeyCode&gt;::default();
+   input.press(KeyCode::S);
+   app.insert_resource(input);
+   app.update();
+ 
+ 
+   // Movimenta para esquerda
+   let mut input = Input::&lt;KeyCode&gt;::default();
+   input.press(KeyCode::A);
+   app.insert_resource(input);
+   app.update();
+ 
+   // Assert
+   let mut query = app.world.query::&lt;(&amp;SnakeHead, &amp;Transform)&gt;();
+   query.iter(&amp;app.world).for_each(|(_head, transform)| {
+       assert!(default_transform.translation.y &gt; transform.translation.y);
+       assert!(default_transform.translation.x &gt; transform.translation.x);
+   })
 }
 <span class="boring">}
 </span></code></pre></pre>
@@ -961,107 +961,281 @@ fn snake_head_moves_down_and_left() {
 <span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>pub fn snake_movement(
-    keyboard_input: Res&lt;Input&lt;KeyCode&gt;&gt;, 
-    mut head_positions: Query&lt;(&amp;SnakeHead, &amp;mut Transform)&gt;
+   keyboard_input: Res&lt;Input&lt;KeyCode&gt;&gt;,
+   mut head_positions: Query&lt;(&amp;SnakeHead, &amp;mut Transform)&gt;
 ) {
-    for (_head, mut transform) in head_positions.iter_mut() {
-        if keyboard_input.pressed(KeyCode::D) {
-            transform.translation.x += 1.;
-        }
-        if keyboard_input.pressed(KeyCode::W) {
-            transform.translation.y += 1.;
-        }
-        if keyboard_input.pressed(KeyCode::A) {
-            transform.translation.x -= 1.;
-        }
-        if keyboard_input.pressed(KeyCode::S) {
-            transform.translation.y -= 1.;
-        }
-    }
+   for (_head, mut transform) in head_positions.iter_mut() {
+       if keyboard_input.pressed(KeyCode::D) {
+           transform.translation.x += 1.;
+       }
+       if keyboard_input.pressed(KeyCode::W) {
+           transform.translation.y += 1.;
+       }
+       if keyboard_input.pressed(KeyCode::A) {
+           transform.translation.x -= 1.;
+       }
+       if keyboard_input.pressed(KeyCode::S) {
+           transform.translation.y -= 1.;
+       }
+   }
 }
 <span class="boring">}
 </span></code></pre></pre>
-<p>Tudo passa e podemos ir par ao próximo passo, explciar e melhorar este código. O argumento <code>keyboard_input</code> é um recurso que contém os eventos relacionados a tecla que foi pressionada no <code>input</code>, ou seja, <code>Res&lt;Input&lt;KeyCode&gt;&gt;,</code>. Nossa query faz sentido e está funcional, porém, como não estamos utilizando o componente <code>SnakeHead</code>, representado por <code>_head</code>, podemos mudar nossa query para <code>Query&lt;&amp;mut Transform, With&lt;SnakeHead&gt;&gt;</code>, que altera nosso código para utilizar apenas o transform como variável:</p>
+<p>Tudo passa e podemos ir para o próximo passo, explicar e melhorar este código. O argumento <code>keyboard_input</code> é um recurso que contém os eventos relacionados a tecla que foi pressionada no <code>input</code>, ou seja, <code>Res&lt;Input&lt;KeyCode&gt;&gt;,</code>. Nossa query faz sentido e está funcional, porém, como não estamos utilizando o componente <code>SnakeHead</code>, representado por <code>_head</code>, podemos mudar nossa query para <code>Query&lt;&amp;mut Transform, With&lt;SnakeHead&gt;&gt;</code>, que altera nosso código para utilizar apenas o transform como variável:</p>
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>pub fn snake_movement(
-    keyboard_input: Res&lt;Input&lt;KeyCode&gt;&gt;, 
-    mut head_positions: Query&lt;&amp;mut Transform, With&lt;SnakeHead&gt;&gt;
+   keyboard_input: Res&lt;Input&lt;KeyCode&gt;&gt;,
+   mut head_positions: Query&lt;&amp;mut Transform, With&lt;SnakeHead&gt;&gt;
 ) {
-    for mut transform in head_positions.iter_mut() {
-        if keyboard_input.pressed(KeyCode::D) {
-            transform.translation.x += 1.;
-        }
-        if keyboard_input.pressed(KeyCode::W) {
-            transform.translation.y += 1.;
-        }
-        if keyboard_input.pressed(KeyCode::A) {
-            transform.translation.x -= 1.;
-        }
-        if keyboard_input.pressed(KeyCode::S) {
-            transform.translation.y -= 1.;
-        }
-    }
+   for mut transform in head_positions.iter_mut() {
+       if keyboard_input.pressed(KeyCode::D) {
+           transform.translation.x += 1.;
+       }
+       if keyboard_input.pressed(KeyCode::W) {
+           transform.translation.y += 1.;
+       }
+       if keyboard_input.pressed(KeyCode::A) {
+           transform.translation.x -= 1.;
+       }
+       if keyboard_input.pressed(KeyCode::S) {
+           transform.translation.y -= 1.;
+       }
+   }
 }
 <span class="boring">}
 </span></code></pre></pre>
-<p>Como mencionamos antes sobre o <code>With</code>, ele nos permite buscar todas as entidades que possuam o componente <code>SnakeHead</code>, mas explicita para a Bevy que não nos importamos com o conteúdo de <code>SnakeHead</code>, apenas com o <code>Transform</code>. Isso é importante pois quanto menos componentes o systema precisar acessar, mais a bevy conseguirá paralelizar as coisas. </p>
+<p>Como mencionamos antes sobre o <code>With</code>, ele nos permite buscar todas as entidades que possuam o componente <code>SnakeHead</code>, mas explícita para a Bevy que não nos importamos com o conteúdo de <code>SnakeHead</code>, apenas com o <code>Transform</code>. Isso é importante pois quanto menos componentes o sistema precisar acessar, mais a bevy conseguirá paralelizar as coisas.</p>
 <h2 id="ci"><a class="header" href="#ci">CI</a></h2>
-<p>Uma coisa bastante importante enquanto desenvolvemos é termos um sistema de integracão continua executando. No caso do Rust no Github eu recomendo utilizar o <em>Github Actions</em> e minha configuração base para projetos Rust é:</p>
+<p>Uma coisa bastante importante enquanto desenvolvemos é termos um sistema de integração contínua executando. No caso do Rust no Github eu recomendo utilizar o <em>Github Actions</em> e minha configuração base para projetos Rust é:</p>
 <pre><code class="language-yaml">name: Rust
-
+ 
 on:
-  push:
-    branches: [ &quot;main&quot; ]
-  pull_request:
-    branches: [ &quot;*&quot; ]
-
+ push:
+   branches: [ &quot;main&quot; ]
+ pull_request:
+   branches: [ &quot;*&quot; ]
+ 
 env:
-  CARGO_TERM_COLOR: always
-
+ CARGO_TERM_COLOR: always
+ 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v3
-    - name: Install alsa and udev
-      run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
-    - name: Build
-      run: cargo build --release --verbose
-      
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-    - name: Install alsa and udev
-      run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
-    - name: tests
-      run: cargo test -- --nocapture
-  
+ build:
+   runs-on: ubuntu-latest
+ 
+   steps:
+   - uses: actions/checkout@v3
+   - name: Install alsa and udev
+     run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
+   - name: Build
+     run: cargo build --release --verbose
+    
+ test:
+   runs-on: ubuntu-latest
+ 
+   steps:
+   - uses: actions/checkout@v2
+   - name: Install alsa and udev
+     run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
+   - name: tests
+     run: cargo test -- --nocapture
   fmt:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-    - name: FMT
-      run: cargo fmt -- --check
-
-  clippy:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-    - name: Install alsa and udev
-      run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
-    - name: install-clippy
-      run: rustup component add clippy
-    - name: clippy
-      run: cargo clippy -- -W clippy::pedantic --deny &quot;warnings&quot;
-
+   runs-on: ubuntu-latest
+ 
+   steps:
+   - uses: actions/checkout@v2
+   - name: FMT
+     run: cargo fmt -- --check
+ 
+ clippy:
+   runs-on: ubuntu-latest
+ 
+   steps:
+   - uses: actions/checkout@v2
+   - name: Install alsa and udev
+     run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
+   - name: install-clippy
+     run: rustup component add clippy
+   - name: clippy
+     run: cargo clippy -- -W clippy::pedantic --deny &quot;warnings&quot;
+ 
 </code></pre>
+<p>Ao executarmos o CI, percebemos que a formatação não estava correta, que pode ser corrigida com <code>cargo fmt</code>, e há algumas sugestões de linting em relação a nomenclatura das funções e structs no módulo e declaração de argumentos. A questão de nomenclatura solicita que funções e structs não comecem com o nome do módulo. A declaração de argumentos solicita que o tipo de <code>keyboard_input</code> seja passado como referência <code>keyboard_input: &amp;Res&lt;Input&lt;KeyCode&gt;&gt;</code>, porém isso quebra a injeção de recursos da bevy, necessitando assim que o lint seja descartado com <code>#[allow(clippy::needless_pass_by_value)]</code>. Meu único problema com a questão de nomenclatura é perder o contexto de que os sistemas e as structs quando utilizamos importações absolutas em vez de qualificadas. A solução é utilizar importações qualificadas. O código ficou assim:</p>
+<pre><pre class="playground"><code class="language-rust">// Snake.rs
+use bevy::prelude::*;
+ 
+const SNAKE_HEAD_COLOR: Color = Color::rgb(0.7, 0.7, 0.7);
+ 
+#[derive(Component)]
+pub struct Head;
+ 
+pub fn spawn_system(mut commands: Commands) {
+   commands
+       .spawn_bundle(SpriteBundle {
+           sprite: Sprite {
+               color: SNAKE_HEAD_COLOR,
+               ..default()
+           },
+           transform: Transform {
+               scale: Vec3::new(10.0, 10.0, 10.0),
+               ..default()
+           },
+           ..default()
+       })
+       .insert(Head);
+}
+ 
+#[allow(clippy::needless_pass_by_value)]
+pub fn movement_system(
+   keyboard_input: Res&lt;Input&lt;KeyCode&gt;&gt;,
+   mut head_positions: Query&lt;&amp;mut Transform, With&lt;Head&gt;&gt;,
+) {
+   for mut transform in head_positions.iter_mut() {
+       if keyboard_input.pressed(KeyCode::D) {
+           transform.translation.x += 1.;
+       }
+       if keyboard_input.pressed(KeyCode::W) {
+           transform.translation.y += 1.;
+       }
+       if keyboard_input.pressed(KeyCode::A) {
+           transform.translation.x -= 1.;
+       }
+       if keyboard_input.pressed(KeyCode::S) {
+           transform.translation.y -= 1.;
+       }
+   }
+}
+ 
+#[cfg(test)]
+mod test {
+   use super::*;
+ 
+   #[test]
+   fn entity_has_snake_head() {
+       // Setup app
+       let mut app = App::new();
+ 
+       // Add startup system
+       app.add_startup_system(spawn_system);
+ 
+       // Run systems
+       app.update();
+ 
+       let mut query = app.world.query_filtered::&lt;Entity, With&lt;Head&gt;&gt;();
+       assert_eq!(query.iter(&amp;app.world).count(), 1);
+   }
+ 
+   #[test]
+   fn snake_head_has_moved_up() {
+       // Setup
+       let mut app = App::new();
+       let default_transform = Transform { ..default() };
+ 
+       // Add systems
+       app.add_startup_system(spawn_system)
+           .add_system(movement_system);
+ 
+       // Add input resource
+       let mut input = Input::&lt;KeyCode&gt;::default();
+       input.press(KeyCode::W);
+       app.insert_resource(input);
+ 
+       // Run systems
+       app.update();
+ 
+       let mut query = app.world.query::&lt;(&amp;Head, &amp;Transform)&gt;();
+       query.iter(&amp;app.world).for_each(|(_head, transform)| {
+           assert!(default_transform.translation.y &lt; transform.translation.y);
+           assert_eq!(default_transform.translation.x, transform.translation.x);
+       })
+   }
+ 
+   #[test]
+   fn snake_head_moves_up_and_right() {
+       // Setup
+       let mut app = App::new();
+       let default_transform = Transform { ..default() };
+ 
+       // Add systems
+       app.add_startup_system(spawn_system)
+           .add_system(movement_system);
+ 
+       // Move Up
+       let mut up_transform = Transform { ..default() };
+       let mut input = Input::&lt;KeyCode&gt;::default();
+       input.press(KeyCode::W);
+       app.insert_resource(input);
+       app.update();
+       let mut query = app.world.query::&lt;(&amp;Head, &amp;Transform)&gt;();
+       query.iter(&amp;app.world).for_each(|(_head, transform)| {
+           assert!(default_transform.translation.y &lt; transform.translation.y);
+           assert_eq!(default_transform.translation.x, transform.translation.x);
+           up_transform = transform.to_owned();
+       });
+ 
+       // Move Right
+       let mut input = Input::&lt;KeyCode&gt;::default();
+       input.press(KeyCode::D);
+       app.insert_resource(input);
+       app.update();
+       let mut query = app.world.query::&lt;(&amp;Head, &amp;Transform)&gt;();
+       query.iter(&amp;app.world).for_each(|(_head, transform)| {
+           assert_eq!(up_transform.translation.y, transform.translation.y);
+           assert!(up_transform.translation.x &lt; transform.translation.x);
+       })
+   }
+ 
+   #[test]
+   fn snake_head_moves_down_and_left() {
+       // Setup
+       let mut app = App::new();
+       let default_transform = Transform { ..default() };
+ 
+       // Add systems
+       app.add_startup_system(spawn_system)
+           .add_system(movement_system);
+ 
+       // Move down
+       let mut input = Input::&lt;KeyCode&gt;::default();
+       input.press(KeyCode::S);
+       app.insert_resource(input);
+       app.update();
+ 
+       // Move Left
+       let mut input = Input::&lt;KeyCode&gt;::default();
+       input.press(KeyCode::A);
+       app.insert_resource(input);
+       app.update();
+ 
+       // Assert
+       let mut query = app.world.query::&lt;(&amp;Head, &amp;Transform)&gt;();
+       query.iter(&amp;app.world).for_each(|(_head, transform)| {
+           assert!(default_transform.translation.y &gt; transform.translation.y);
+           assert!(default_transform.translation.x &gt; transform.translation.x);
+       })
+   }
+}
+ 
+// Main.rs
+use bevy::prelude::*;
+ 
+mod snake;
+ 
+fn main() {
+   App::new()
+       .add_startup_system(setup_camera)
+       .add_startup_system(snake::spawn_system)
+       .add_plugins(DefaultPlugins)
+       .add_system(snake::movement_system)
+       .run();
+}
+ 
+fn setup_camera(mut commands: Commands) {
+   commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+}
+ 
+</code></pre></pre>
 <p>A seguir vamos criar o conceito de Grid.</p>
 <h1 id="grid-de-movimento"><a class="header" href="#grid-de-movimento">Grid de Movimento</a></h1>
 
