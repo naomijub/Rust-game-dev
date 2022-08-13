@@ -12,3 +12,4 @@
     - [Entity Compoent System](part-2/02-ecs.md)
     - [A Cabeça da Cobra](part-2/03-cabeca.md)
     - [Grade de Movimento](part-2/04-grid.md)
+    - [Comidas Surgindo](part-2/05-spawnfood.md)

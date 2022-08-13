@@ -28,7 +28,7 @@ const GRID_HEIGHT: u32 = 10;
 // components.rs
 use bevy::prelude::Component;
 
-#[derive(Component, Clone, Copy, PartialEq, Eq)]
+#[derive(Component, Clone, Debug, PartialEq, Eq)]
 pub struct Position {
     pub x: i32,
     pub y: i32,
@@ -198,7 +198,7 @@ fn translate_position(transform: &mut Transform, pos: &Position, window: &Window
 // mod test:
 #[test]
 fn translate_position_to_window() {
-    let position = Position{x: 2, y: 8};
+    let position = Position {x: 2, y: 8};
     let mut default_transform= Transform::default();
     let expected = Transform { translation: Vec3::new(-100., 140., 0.,),..default() };
 
@@ -265,7 +265,160 @@ fn main() {
 ![Resultado do código até agora](../imagens/simpleblock.png)
 
 ## Corrigindo a Movimentação na Grade
-<!-- 
+
+Até agora nosso sistema de movimento, `snake::movement_system`, era baseado em movimentar o componente `Transform` pela janela, porém com a implementação de grade precisamos atualizar o sistema para utilizar o componente `Position`. Primeiro passo será atualizar os testes para utilizar `Position`:
+
+```rust
+// snake.rs
+#[cfg(test)]
+mod test {
+    // ...
+
+    #[test]
+    fn snake_head_has_moved_up() {
+        // Setup
+        let mut app = App::new();
+        let default_position = Position{x: 3, y: 4}; // <--
+
+        // Add systems
+        app.add_startup_system(spawn_system)
+            .add_system(movement_system);
+
+        // Add input resource
+        let mut input = Input::<KeyCode>::default();
+        input.press(KeyCode::W);
+        app.insert_resource(input);
+
+        // Run systems
+        app.update();
+
+        let mut query = app.world.query::<(&Head, &Position)>();  // <--
+        query.iter(&app.world).for_each(|(_head, position)| {  // <--
+            assert_eq!(&default_position, position);  // <--
+        })
+    }
+
+    #[test]
+    fn snake_head_moves_up_and_right() {
+        // Setup
+        let mut app = App::new();
+        let up_position = Position{x: 3, y: 4};  // <--
+
+        // Add systems
+        app.add_startup_system(spawn_system)
+            .add_system(movement_system);
+
+        // Move Up
+        let mut input = Input::<KeyCode>::default();
+        input.press(KeyCode::W);
+        app.insert_resource(input);
+        app.update();
+
+        let mut query = app.world.query::<(&Head, &Position)>();  // <--
+        query.iter(&app.world).for_each(|(_head, position)| {  // <--
+            assert_eq!(position, &up_position);  // <--
+        });
+
+        let up_right_position = Position{x: 4, y: 4};  // <--
+
+        // Move Right
+        let mut input = Input::<KeyCode>::default();
+        input.press(KeyCode::D);
+        app.insert_resource(input);
+        app.update();
+
+        let mut query = app.world.query::<(&Head, &Position)>();  // <--
+        query.iter(&app.world).for_each(|(_head, position)| {  // <--
+            assert_eq!(&up_right_position, position);  // <--
+        })
+    }
+
+    #[test]
+    fn snake_head_moves_down_and_left() {
+        // Setup
+        let mut app = App::new();
+        let down_left_position = Position{x: 2, y: 2};  // <--
+
+        // Add systems
+        app.add_startup_system(spawn_system)
+            .add_system(movement_system);
+
+        // Move down
+        let mut input = Input::<KeyCode>::default();
+        input.press(KeyCode::S);
+        app.insert_resource(input);
+        app.update();
+        
+        // Move Left
+        let mut input = Input::<KeyCode>::default();
+        input.press(KeyCode::A);
+        app.insert_resource(input);
+        app.update();
+
+        // Assert
+        let mut query = app.world.query::<(&Head, &Position)>();  // <--
+        query.iter(&app.world).for_each(|(_head, position)| {  // <--
+            assert_eq!(&down_left_position, position);  // <--
+        })
+    }
+}
+
+```
+Como agora estamos lidando com valores inteiros, nossos testes podem verificar se a posição mudou com `assert_eq!` em vez de utilizar expressões lógicas com `assert!`. Além disso, Position inicial com o valor `Position { x: 3, y: 3 }`, por isso os valores são maiores que `0`. Ao executarmos os testes veremos que todas as positions estão iguais a ``Position { x: 3, y: 3 }`, corrigimos isso modificando a função de input:
+
+```rs
+// snake.rs
+#[allow(clippy::needless_pass_by_value)]
+pub fn movement_system(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut head_positions: Query<&mut Position, With<Head>>,
+) {
+    for mut position in head_positions.iter_mut() {
+        if keyboard_input.pressed(KeyCode::D) {
+            position.x += 1;
+        }
+        if keyboard_input.pressed(KeyCode::W) {
+            position.y += 1;
+        }
+        if keyboard_input.pressed(KeyCode::A) {
+            position.x -= 1;
+        }
+        if keyboard_input.pressed(KeyCode::S) {
+            position.y -= 1;
+        }
+    }
+}
+```
+
+Agora sim, movimentamos o bloco célula a célula, infelizmente muito sensivel.
+
 ## Configurando a Janela
 
-Próximo passo é fazermos com que a janela seja mais coerente com o snake game. Para isso ... -->
+Próximo passo é fazermos com que a janela seja mais coerente com o snake game, já que por padrão a janela do snake game é quadrada enquanto a janela padrão da bevy é retangular. Para fazer isso, precisamos adicionar um recurso chamado `WindowDescriptor` que nos permite configurar o tamanha da tela e o título da janela:
+
+```rs
+// mains.rs
+
+fn main() {
+    App::new()
+        .insert_resource(WindowDescriptor {
+            title: "Snake Game".to_string(),
+            width: 500.0,
+            height: 500.0,
+            ..default()         
+        }) // <--
+        .add_startup_system(setup_camera)
+        .add_startup_system(snake::spawn_system)
+        .add_plugins(DefaultPlugins)
+        .add_system(snake::movement_system)
+        .add_system_set_to_stage(
+            CoreStage::PostUpdate,
+            SystemSet::new()
+                .with_system(grid::position_translation)
+                .with_system(grid::size_scaling),
+        )
+        .run();
+}
+```
+
+Outra mudança que pode ser interessante fazer é mudar o fundo da tela para ficar um pouco mais escuro, podemos fazer isso adicionando o recurso `.insert_resource(ClearColor(Color::rgb(0.04, 0.04, 0.04)))` depois do `WindowDescriptor`. Próximo passo é fazermos a comida aparecer.

@@ -95,7 +95,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../0-capa.html"><strong aria-hidden="true">1.</strong> Capa</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../01-quemsou.html"><strong aria-hidden="true">1.1.</strong> Quem sou eu? (Sobre a autora)</a></li></ol></li><li class="chapter-item expanded "><a href="../part-1/00-capa.html"><strong aria-hidden="true">2.</strong> Conceitos Básicos</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../part-1/01-arq.html"><strong aria-hidden="true">2.1.</strong> Arquitetura de servidores</a></li><li class="chapter-item expanded "><a href="../part-1/02-prd-rec.html"><strong aria-hidden="true">2.2.</strong> Predição e Reconciliação</a></li><li class="chapter-item expanded "><a href="../part-1/03-interpolacao.html"><strong aria-hidden="true">2.3.</strong> Interpolação de Entidades</a></li><li class="chapter-item expanded "><a href="../part-1/04-lag.html"><strong aria-hidden="true">2.4.</strong> Compensacão de Lag</a></li></ol></li><li class="chapter-item expanded "><a href="../part-2/00-intro.html"><strong aria-hidden="true">3.</strong> Multiplayer Snake Game</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../part-2/01-bevy.html"><strong aria-hidden="true">3.1.</strong> Sobre a Bevy</a></li><li class="chapter-item expanded "><a href="../part-2/02-ecs.html"><strong aria-hidden="true">3.2.</strong> Entity Compoent System</a></li><li class="chapter-item expanded "><a href="../part-2/03-cabeca.html"><strong aria-hidden="true">3.3.</strong> A Cabeça da Cobra</a></li><li class="chapter-item expanded "><a href="../part-2/04-grid.html" class="active"><strong aria-hidden="true">3.4.</strong> Grade de Movimento</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../0-capa.html"><strong aria-hidden="true">1.</strong> Capa</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../01-quemsou.html"><strong aria-hidden="true">1.1.</strong> Quem sou eu? (Sobre a autora)</a></li></ol></li><li class="chapter-item expanded "><a href="../part-1/00-capa.html"><strong aria-hidden="true">2.</strong> Conceitos Básicos</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../part-1/01-arq.html"><strong aria-hidden="true">2.1.</strong> Arquitetura de servidores</a></li><li class="chapter-item expanded "><a href="../part-1/02-prd-rec.html"><strong aria-hidden="true">2.2.</strong> Predição e Reconciliação</a></li><li class="chapter-item expanded "><a href="../part-1/03-interpolacao.html"><strong aria-hidden="true">2.3.</strong> Interpolação de Entidades</a></li><li class="chapter-item expanded "><a href="../part-1/04-lag.html"><strong aria-hidden="true">2.4.</strong> Compensacão de Lag</a></li></ol></li><li class="chapter-item expanded "><a href="../part-2/00-intro.html"><strong aria-hidden="true">3.</strong> Multiplayer Snake Game</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../part-2/01-bevy.html"><strong aria-hidden="true">3.1.</strong> Sobre a Bevy</a></li><li class="chapter-item expanded "><a href="../part-2/02-ecs.html"><strong aria-hidden="true">3.2.</strong> Entity Compoent System</a></li><li class="chapter-item expanded "><a href="../part-2/03-cabeca.html"><strong aria-hidden="true">3.3.</strong> A Cabeça da Cobra</a></li><li class="chapter-item expanded "><a href="../part-2/04-grid.html" class="active"><strong aria-hidden="true">3.4.</strong> Grade de Movimento</a></li><li class="chapter-item expanded "><a href="../part-2/05-spawnfood.html"><strong aria-hidden="true">3.5.</strong> Comidas Surgindo</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -187,7 +187,7 @@ const GRID_HEIGHT: u32 = 10;
 // components.rs
 use bevy::prelude::Component;
 
-#[derive(Component, Clone, Copy, PartialEq, Eq)]
+#[derive(Component, Clone, Debug, PartialEq, Eq)]
 pub struct Position {
     pub x: i32,
     pub y: i32,
@@ -344,7 +344,7 @@ fn convert_position_y_for_grid_height() {
 // mod test:
 #[test]
 fn translate_position_to_window() {
-    let position = Position{x: 2, y: 8};
+    let position = Position {x: 2, y: 8};
     let mut default_transform= Transform::default();
     let expected = Transform { translation: Vec3::new(-100., 140., 0.,),..default() };
 
@@ -403,10 +403,157 @@ fn main() {
 </code></pre>
 <p><img src="../imagens/simpleblock.png" alt="Resultado do código até agora" /></p>
 <h2 id="corrigindo-a-movimentação-na-grade"><a class="header" href="#corrigindo-a-movimentação-na-grade">Corrigindo a Movimentação na Grade</a></h2>
-<!-- 
-## Configurando a Janela
+<p>Até agora nosso sistema de movimento, <code>snake::movement_system</code>, era baseado em movimentar o componente <code>Transform</code> pela janela, porém com a implementação de grade precisamos atualizar o sistema para utilizar o componente <code>Position</code>. Primeiro passo será atualizar os testes para utilizar <code>Position</code>:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// snake.rs
+#[cfg(test)]
+mod test {
+    // ...
 
-Próximo passo é fazermos com que a janela seja mais coerente com o snake game. Para isso ... -->
+    #[test]
+    fn snake_head_has_moved_up() {
+        // Setup
+        let mut app = App::new();
+        let default_position = Position{x: 3, y: 4}; // &lt;--
+
+        // Add systems
+        app.add_startup_system(spawn_system)
+            .add_system(movement_system);
+
+        // Add input resource
+        let mut input = Input::&lt;KeyCode&gt;::default();
+        input.press(KeyCode::W);
+        app.insert_resource(input);
+
+        // Run systems
+        app.update();
+
+        let mut query = app.world.query::&lt;(&amp;Head, &amp;Position)&gt;();  // &lt;--
+        query.iter(&amp;app.world).for_each(|(_head, position)| {  // &lt;--
+            assert_eq!(&amp;default_position, position);  // &lt;--
+        })
+    }
+
+    #[test]
+    fn snake_head_moves_up_and_right() {
+        // Setup
+        let mut app = App::new();
+        let up_position = Position{x: 3, y: 4};  // &lt;--
+
+        // Add systems
+        app.add_startup_system(spawn_system)
+            .add_system(movement_system);
+
+        // Move Up
+        let mut input = Input::&lt;KeyCode&gt;::default();
+        input.press(KeyCode::W);
+        app.insert_resource(input);
+        app.update();
+
+        let mut query = app.world.query::&lt;(&amp;Head, &amp;Position)&gt;();  // &lt;--
+        query.iter(&amp;app.world).for_each(|(_head, position)| {  // &lt;--
+            assert_eq!(position, &amp;up_position);  // &lt;--
+        });
+
+        let up_right_position = Position{x: 4, y: 4};  // &lt;--
+
+        // Move Right
+        let mut input = Input::&lt;KeyCode&gt;::default();
+        input.press(KeyCode::D);
+        app.insert_resource(input);
+        app.update();
+
+        let mut query = app.world.query::&lt;(&amp;Head, &amp;Position)&gt;();  // &lt;--
+        query.iter(&amp;app.world).for_each(|(_head, position)| {  // &lt;--
+            assert_eq!(&amp;up_right_position, position);  // &lt;--
+        })
+    }
+
+    #[test]
+    fn snake_head_moves_down_and_left() {
+        // Setup
+        let mut app = App::new();
+        let down_left_position = Position{x: 2, y: 2};  // &lt;--
+
+        // Add systems
+        app.add_startup_system(spawn_system)
+            .add_system(movement_system);
+
+        // Move down
+        let mut input = Input::&lt;KeyCode&gt;::default();
+        input.press(KeyCode::S);
+        app.insert_resource(input);
+        app.update();
+        
+        // Move Left
+        let mut input = Input::&lt;KeyCode&gt;::default();
+        input.press(KeyCode::A);
+        app.insert_resource(input);
+        app.update();
+
+        // Assert
+        let mut query = app.world.query::&lt;(&amp;Head, &amp;Position)&gt;();  // &lt;--
+        query.iter(&amp;app.world).for_each(|(_head, position)| {  // &lt;--
+            assert_eq!(&amp;down_left_position, position);  // &lt;--
+        })
+    }
+}
+
+<span class="boring">}
+</span></code></pre></pre>
+<p>Como agora estamos lidando com valores inteiros, nossos testes podem verificar se a posição mudou com <code>assert_eq!</code> em vez de utilizar expressões lógicas com <code>assert!</code>. Além disso, Position inicial com o valor <code>Position { x: 3, y: 3 }</code>, por isso os valores são maiores que <code>0</code>. Ao executarmos os testes veremos que todas as positions estão iguais a ``Position { x: 3, y: 3 }`, corrigimos isso modificando a função de input:</p>
+<pre><code class="language-rs">// snake.rs
+#[allow(clippy::needless_pass_by_value)]
+pub fn movement_system(
+    keyboard_input: Res&lt;Input&lt;KeyCode&gt;&gt;,
+    mut head_positions: Query&lt;&amp;mut Position, With&lt;Head&gt;&gt;,
+) {
+    for mut position in head_positions.iter_mut() {
+        if keyboard_input.pressed(KeyCode::D) {
+            position.x += 1;
+        }
+        if keyboard_input.pressed(KeyCode::W) {
+            position.y += 1;
+        }
+        if keyboard_input.pressed(KeyCode::A) {
+            position.x -= 1;
+        }
+        if keyboard_input.pressed(KeyCode::S) {
+            position.y -= 1;
+        }
+    }
+}
+</code></pre>
+<p>Agora sim, movimentamos o bloco célula a célula, infelizmente muito sensivel.</p>
+<h2 id="configurando-a-janela"><a class="header" href="#configurando-a-janela">Configurando a Janela</a></h2>
+<p>Próximo passo é fazermos com que a janela seja mais coerente com o snake game, já que por padrão a janela do snake game é quadrada enquanto a janela padrão da bevy é retangular. Para fazer isso, precisamos adicionar um recurso chamado <code>WindowDescriptor</code> que nos permite configurar o tamanha da tela e o título da janela:</p>
+<pre><code class="language-rs">// mains.rs
+
+fn main() {
+    App::new()
+        .insert_resource(WindowDescriptor {
+            title: &quot;Snake Game&quot;.to_string(),
+            width: 500.0,
+            height: 500.0,
+            ..default()         
+        }) // &lt;--
+        .add_startup_system(setup_camera)
+        .add_startup_system(snake::spawn_system)
+        .add_plugins(DefaultPlugins)
+        .add_system(snake::movement_system)
+        .add_system_set_to_stage(
+            CoreStage::PostUpdate,
+            SystemSet::new()
+                .with_system(grid::position_translation)
+                .with_system(grid::size_scaling),
+        )
+        .run();
+}
+</code></pre>
+<p>Outra mudança que pode ser interessante fazer é mudar o fundo da tela para ficar um pouco mais escuro, podemos fazer isso adicionando o recurso <code>.insert_resource(ClearColor(Color::rgb(0.04, 0.04, 0.04)))</code> depois do <code>WindowDescriptor</code>. Próximo passo é fazermos a comida aparecer.</p>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
@@ -417,6 +564,10 @@ Próximo passo é fazermos com que a janela seja mais coerente com o snake game.
                             </a>
                         
 
+                        
+                            <a rel="next" href="../part-2/05-spawnfood.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
                         
 
                         <div style="clear: both"></div>
@@ -431,6 +582,10 @@ Próximo passo é fazermos com que a janela seja mais coerente com o snake game.
                     </a>
                 
 
+                
+                    <a rel="next" href="../part-2/05-spawnfood.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
                 
             </nav>
 
