@@ -1,6 +1,6 @@
 # A Cabeça da Cobra
  
-Para começar o jogo precisamos do primeiro componente, neste caso a cabeça da cobra, que definirá os próximos possíveis passos, assim como para onde os blocos seguintes se moverão. Este primeiro componente se chamará `SnakeHead` e será uma struct vazia com a trait `Compoent` associada a ela:
+Para começar o jogo precisamos do primeiro componente, neste caso a cabeça da cobra, que definirá os próximos possíveis passos, assim como para onde os blocos seguintes se moverão. Este primeiro componente se chamará `SnakeHead` e será uma struct vazia com a trait `Component` associada a ela:
  
 ```rust
 #[derive(Component)]

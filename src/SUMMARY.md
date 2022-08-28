@@ -9,7 +9,7 @@
     - [Compensacão de Lag](part-1/04-lag.md)
 - [Multiplayer Snake Game](part-2/00-intro.md)
     - [Sobre a Bevy](part-2/01-bevy.md)
-    - [Entity Compoent System](part-2/02-ecs.md)
+    - [Entity Component System](part-2/02-ecs.md)
     - [A Cabeça da Cobra](part-2/03-cabeca.md)
     - [Grade de Movimento](part-2/04-grid.md)
     - [Gerador de Comidas](part-2/05-spawnfood.md)
