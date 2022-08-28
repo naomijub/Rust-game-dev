@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../0-capa.html"><strong aria-hidden="true">1.</strong> Capa</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../01-quemsou.html"><strong aria-hidden="true">1.1.</strong> Quem sou eu? (Sobre a autora)</a></li></ol></li><li class="chapter-item expanded "><a href="../part-1/00-capa.html"><strong aria-hidden="true">2.</strong> Conceitos Básicos</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../part-1/01-arq.html"><strong aria-hidden="true">2.1.</strong> Arquitetura de servidores</a></li><li class="chapter-item expanded "><a href="../part-1/02-prd-rec.html"><strong aria-hidden="true">2.2.</strong> Predição e Reconciliação</a></li><li class="chapter-item expanded "><a href="../part-1/03-interpolacao.html"><strong aria-hidden="true">2.3.</strong> Interpolação de Entidades</a></li><li class="chapter-item expanded "><a href="../part-1/04-lag.html"><strong aria-hidden="true">2.4.</strong> Compensacão de Lag</a></li></ol></li><li class="chapter-item expanded "><a href="../part-2/00-intro.html"><strong aria-hidden="true">3.</strong> Multiplayer Snake Game</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../part-2/01-bevy.html"><strong aria-hidden="true">3.1.</strong> Sobre a Bevy</a></li><li class="chapter-item expanded "><a href="../part-2/02-ecs.html"><strong aria-hidden="true">3.2.</strong> Entity Component System</a></li><li class="chapter-item expanded "><a href="../part-2/03-cabeca.html"><strong aria-hidden="true">3.3.</strong> A Cabeça da Cobra</a></li><li class="chapter-item expanded "><a href="../part-2/04-grid.html"><strong aria-hidden="true">3.4.</strong> Grade de Movimento</a></li><li class="chapter-item expanded "><a href="../part-2/05-spawnfood.html"><strong aria-hidden="true">3.5.</strong> Gerador de Comidas</a></li><li class="chapter-item expanded "><a href="../part-2/06-cadencia.html" class="active"><strong aria-hidden="true">3.6.</strong> Melhorando a Cadência do Movimento</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../0-capa.html"><strong aria-hidden="true">1.</strong> Capa</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../01-quemsou.html"><strong aria-hidden="true">1.1.</strong> Quem sou eu? (Sobre a autora)</a></li></ol></li><li class="chapter-item expanded "><a href="../part-1/00-capa.html"><strong aria-hidden="true">2.</strong> Conceitos Básicos</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../part-1/01-arq.html"><strong aria-hidden="true">2.1.</strong> Arquitetura de servidores</a></li><li class="chapter-item expanded "><a href="../part-1/02-prd-rec.html"><strong aria-hidden="true">2.2.</strong> Predição e Reconciliação</a></li><li class="chapter-item expanded "><a href="../part-1/03-interpolacao.html"><strong aria-hidden="true">2.3.</strong> Interpolação de Entidades</a></li><li class="chapter-item expanded "><a href="../part-1/04-lag.html"><strong aria-hidden="true">2.4.</strong> Compensacão de Lag</a></li></ol></li><li class="chapter-item expanded "><a href="../part-2/00-intro.html"><strong aria-hidden="true">3.</strong> Multiplayer Snake Game</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../part-2/01-bevy.html"><strong aria-hidden="true">3.1.</strong> Sobre a Bevy</a></li><li class="chapter-item expanded "><a href="../part-2/02-ecs.html"><strong aria-hidden="true">3.2.</strong> Entity Component System</a></li><li class="chapter-item expanded "><a href="../part-2/03-cabeca.html"><strong aria-hidden="true">3.3.</strong> A Cabeça da Cobra</a></li><li class="chapter-item expanded "><a href="../part-2/04-grid.html"><strong aria-hidden="true">3.4.</strong> Grade de Movimento</a></li><li class="chapter-item expanded "><a href="../part-2/05-spawnfood.html"><strong aria-hidden="true">3.5.</strong> Gerador de Comidas</a></li><li class="chapter-item expanded "><a href="../part-2/06-cadencia.html" class="active"><strong aria-hidden="true">3.6.</strong> Melhorando a Cadência do Movimento</a></li><li class="chapter-item expanded "><a href="../part-2/07-rabo.html"><strong aria-hidden="true">3.7.</strong> Adicionando um Rabo a Cobra</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -143,6 +143,271 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="melhorando-a-cadência-do-movimento"><a class="header" href="#melhorando-a-cadência-do-movimento">Melhorando a Cadência do Movimento</a></h1>
+<p>O atual movimento da cobra está ligado aos comandos do teclado diferentemente do snale game que a cobra se movimenta independente dos comandos do teclado e a cada x segundos, em vez de a cada frame. Para podermos fazer com que a cobra se movimente independente dos comandos do teclado, precisamos de uma forma de armazenar a direção que ela está se movimentando, além de evitar que a cobra vá para a direção oposta. Assim, precisamos criar o enum que armazena a direção e criar uma função que indica a direção oposta.</p>
+<pre><code class="language-rs">// components.rs
+#[test]
+fn opposite_direction() {
+    assert_eq!(Direction::Up.opposite(), Direction::Down);
+    assert_eq!(Direction::Down.opposite(), Direction::Up);
+    assert_eq!(Direction::Right.opposite(), Direction::Left);
+    assert_eq!(Direction::Left.opposite(), Direction::Right);
+}
+
+// ...
+#[derive(PartialEq, Debug, Copy, Clone)]
+pub enum Direction {
+    Left,
+    Up,
+    Right,
+    Down,
+}
+
+impl Direction {
+    pub fn opposite(self) -&gt; Self {
+        match self {
+            Self::Left =&gt; Self::Right,
+            Self::Right =&gt; Self::Left,
+            Self::Up =&gt; Self::Down,
+            Self::Down =&gt; Self::Up,
+        }
+    }
+}
+</code></pre>
+<p>Em uma etapa inicial do desenvolvimento, eu adicionaria Direction como um componente na entidade cobra, porém, a medida que a cobra ficar maior, vai ser difícil sincronizar a direção de cada elemento. Sabendo disso, vamos fazer um pouco de overengineering, e colocar <code>Direction</code> como elemento do componente <code>snake::Head</code>. Além disso, definimos a direção padrão como <code>Direction::Up</code> utilizando a trait <code>Default</code>:</p>
+<pre><code class="language-rs">// snake.rs
+
+#[derive(Component)]
+pub struct Head {
+    direction: Direction
+}
+
+impl Default for Head {
+    fn default() -&gt; Self {
+        Self { direction: Direction::Up }
+    }
+}
+
+pub fn spawn_system(mut commands: Commands) {
+    commands
+        .spawn_bundle(SpriteBundle {
+            sprite: Sprite {
+                color: SNAKE_HEAD_COLOR,
+                ..default()
+            },
+            transform: Transform {
+                scale: Vec3::new(10.0, 10.0, 10.0),
+                ..default()
+            },
+            ..default()
+        })
+        .insert(Head::default() ) // &lt;--
+        .insert(Position { x: 3, y: 3 })
+        .insert(Size::square(0.8));
+}
+</code></pre>
+<h2 id="separando-o-movimento-em-duas-etapas"><a class="header" href="#separando-o-movimento-em-duas-etapas">Separando o movimento em duas etapas</a></h2>
+<p>Agora que nossa cobra possui uma direção armazenada na cabeça podemos mudar seu sistema de movimento para que seja executado a cada 0.15 segundos, fazemos isso da mesma forma que fizemos com o sistema de geração de comidas:</p>
+<pre><code class="language-rs">fn main() {
+    App::new()
+        // ...
+        .add_system_set(
+            SystemSet::new()
+                .with_run_criteria(FixedTimestep::step(1.0))
+                .with_system(food::spawn_system),
+        )
+        .add_system_set(
+            SystemSet::new()
+                .with_run_criteria(FixedTimestep::step(0.150)) // &lt;--
+                .with_system(snake::movement_system), // &lt;--
+        ) 
+        .run();
+}
+</code></pre>
+<p>Nosso sistema de movimento está atrelado à translação da cobra em uma posição para cada tecla que apertarmos e agora sabemos que o sistema de movimento deve ser independente do sistema de direção, que vamos chamar de <code>snake::movement_input_system</code>. Então precisamos que o sistema de input/direção aconteça antes do sistema de movimento, e, ainda, precisamos garantir que o sistema de movimento aconteça a cada <code>0.15</code> segundos. Para solucionar este problema, vamos adicionar uma função especial para sistemas <code>before</code>. Para utilizar está função, precisamos adicionar o sistema de input que vamos criar e indicar que ele deve ocorrer antes do sistema de movimento com <code>.add_system(snake::movement_input_system.before(snake::movement_system))</code>, adicione ao <code>App::new()</code> na função main. Agora vamos para o sistema <code>movement_input_system</code>.</p>
+<p>Primeira coisa que devemos fazer é alterar os testes para considerar que o <code>snake::movement_system</code> recebe uma query com <code>Position</code> e <code>snake::Head</code>, além de considerar que o movimento é feito com base no enum <code>Direction</code> contido dentro de <code>snake::Head</code>:</p>
+<pre><code class="language-rs">// snake.rs
+#[test]
+    fn snake_starts_moviment_up() { // &lt;-- novo teste
+        // Setup app
+        let mut app = App::new();
+
+        // Add startup system
+        app.add_startup_system(spawn_system);
+
+        // Run systems
+        app.update();
+
+        let mut query = app.world.query::&lt;&amp;Head&gt;();
+        let head = query.iter(&amp;app.world).next().unwrap();
+        assert_eq!(head.direction, Direction::Up);
+    }
+
+    #[test]
+    fn snake_head_has_moved_up() {
+        // Setup
+        let mut app = App::new();
+        let default_position = Position { x: 3, y: 4 };
+
+        // Add systems
+        app.add_startup_system(spawn_system)
+            .add_system(movement_system)
+            .add_system(movement_input_system.before(movement_system)); // &lt;--
+
+        // Add input resource
+        let mut input = Input::&lt;KeyCode&gt;::default();
+        input.press(KeyCode::W);
+        app.insert_resource(input);
+
+        // Run systems
+        app.update();
+
+        let mut query = app.world.query::&lt;(&amp;Head, &amp;Position)&gt;();
+        query.iter(&amp;app.world).for_each(|(head, position)| {
+            assert_eq!(&amp;default_position, position);
+            assert_eq!(head.direction, Direction::Up); // &lt;-- novo assert
+            
+        })
+    }
+
+    #[test]
+    fn snake_head_moves_up_and_right() {
+        // Setup
+        let mut app = App::new();
+        let up_position = Position { x: 3, y: 4 };
+
+        // Add systems
+        app.add_startup_system(spawn_system)
+            .add_system(movement_system)
+            .add_system(movement_input_system.before(movement_system)); // &lt;--
+
+        // Move Up
+        let mut input = Input::&lt;KeyCode&gt;::default();
+        input.press(KeyCode::W);
+        app.insert_resource(input);
+        app.update();
+
+        let mut query = app.world.query::&lt;(&amp;Head, &amp;Position)&gt;();
+        query.iter(&amp;app.world).for_each(|(_head, position)| {
+            assert_eq!(position, &amp;up_position);
+        });
+
+        let up_right_position = Position { x: 4, y: 4 };
+
+        // Move Right
+        let mut input = Input::&lt;KeyCode&gt;::default();
+        input.press(KeyCode::D);
+        app.insert_resource(input);
+        app.update();
+
+        let mut query = app.world.query::&lt;(&amp;Head, &amp;Position)&gt;();
+        query.iter(&amp;app.world).for_each(|(head, position)| {
+            assert_eq!(&amp;up_right_position, position);
+            assert_eq!(head.direction, Direction::Right);
+        })
+    }
+
+    #[test]
+    fn snake_head_moves_down_and_left() {
+        // Setup
+        let mut app = App::new();
+        let down_left_position = Position { x: 2, y: 2 };
+
+        // Add systems
+        app.add_startup_system(spawn_system)
+            .add_system(movement_system)
+            .add_system(movement_input_system.before(movement_system)); // &lt;--
+
+        // Move Left
+        let mut input = Input::&lt;KeyCode&gt;::default();
+        input.press(KeyCode::A);
+        app.insert_resource(input);
+        app.update();
+
+         // Move down
+         let mut input = Input::&lt;KeyCode&gt;::default();
+         input.press(KeyCode::S);
+         app.insert_resource(input);
+         app.update();
+
+        // Assert
+        let mut query = app.world.query::&lt;(&amp;Head, &amp;Position)&gt;();
+        query.iter(&amp;app.world).for_each(|(head, position)| {
+            assert_eq!(&amp;down_left_position, position);
+            assert_eq!(head.direction, Direction::Down);
+        })
+    }
+
+    #[test]
+    fn snake_cannot_start_moving_down() { // &lt;-- novo teste
+         // Setup
+         let mut app = App::new();
+         let down_left_position = Position { x: 3, y: 4 };
+ 
+         // Add systems
+         app.add_startup_system(spawn_system)
+             .add_system(movement_system)
+             .add_system(movement_input_system.before(movement_system));
+ 
+          // Move down
+          let mut input = Input::&lt;KeyCode&gt;::default();
+          input.press(KeyCode::S);
+          app.insert_resource(input);
+          app.update();
+ 
+         // Assert
+         let mut query = app.world.query::&lt;(&amp;Head, &amp;Position)&gt;();
+         query.iter(&amp;app.world).for_each(|(_head, position)| {
+             assert_eq!(&amp;down_left_position, position);
+         })
+    }
+
+</code></pre>
+<blockquote>
+<p>Novos testes: <code>snake_starts_moviment_up</code> que checa se a cobra inicia seu movimento para cima. <code>snake_cannot_start_moving_down</code> checa que não é possível se movimentar na direção oposta.</p>
+</blockquote>
+<p>Com estes testes sabemos que o movement system agora deve receber uma query com a posição mutável e com a <code>Head</code> para obtermos a direção. Com base na direção, movemos a posição da cabeça:</p>
+<pre><code class="language-rs">pub fn movement_system(mut heads: Query&lt;(&amp;mut Position, &amp;Head)&gt;) {
+    if let Some((mut pos, head)) = heads.iter_mut().next() {
+        match &amp;head.direction {
+            Direction::Left =&gt; {
+                pos.x -= 1;
+            }
+            Direction::Right =&gt; {
+                pos.x += 1;
+            }
+            Direction::Up =&gt; {
+                pos.y += 1;
+            }
+            Direction::Down =&gt; {
+                pos.y -= 1;
+            }
+        };
+    }
+}
+</code></pre>
+<p>Já o <code>movement_input_system</code> recebe uma leitura de teclado (<code>KeyCode</code>) e muda a direção com base nesta leitura do teclado e evita mudanças na direção oposta:</p>
+<pre><code class="language-rs">pub fn movement_input_system(
+    keyboard_input: Res&lt;Input&lt;KeyCode&gt;&gt;, 
+    mut heads: Query&lt;&amp;mut Head&gt;) {
+    if let Some(mut head) = heads.iter_mut().next() {
+        let dir: Direction = if keyboard_input.pressed(KeyCode::A) {
+            Direction::Left
+        } else if keyboard_input.pressed(KeyCode::S) {
+            Direction::Down
+        } else if keyboard_input.pressed(KeyCode::W) {
+            Direction::Up
+        } else if keyboard_input.pressed(KeyCode::D) {
+            Direction::Right
+        } else {
+            head.direction
+        };
+        if dir != head.direction.opposite() {
+            head.direction = dir;
+        }
+    }
+}
+</code></pre>
+<p>Ao executarmos <code>cargo run</code> podemos ver a cobra se movimentando sozinha e obedecendo o sistema de direção. Próximo passo é adicionarmos o rabo.</p>
 
                     </main>
 
@@ -152,6 +417,9 @@
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
+                            <a rel="next" href="../part-2/07-rabo.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -163,6 +431,9 @@
                         <i class="fa fa-angle-left"></i>
                     </a>
 
+                    <a rel="next" href="../part-2/07-rabo.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
             </nav>
 
         </div>

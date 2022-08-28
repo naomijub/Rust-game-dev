@@ -14,3 +14,4 @@
     - [Grade de Movimento](part-2/04-grid.md)
     - [Gerador de Comidas](part-2/05-spawnfood.md)
     - [Melhorando a Cadência do Movimento](part-2/06-cadencia.md)
+    - [Adicionando um Rabo a Cobra](part-2/07-rabo.md)
