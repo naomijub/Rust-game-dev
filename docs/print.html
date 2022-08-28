@@ -300,6 +300,19 @@
 <h2 id="conclusão"><a class="header" href="#conclusão">Conclusão</a></h2>
 <p>Primeira coisa que fizemos foi entender qual o grande problema do desenvolvimento de servidores para jogos, pessoas querendo trapacear, e a partir disso entendemos qual a solução básica, um cliente que só envia comandos pro servidor e um servidor autoritário. Vimos que com um servidor autoritário alguns problemas de defasamento temporal pode ocorrer entre a informação que temos e a informação que o servidor nos obriga a ter. Para reduzir estes problemas aprendemos as técncias de predição e de reconciliação, mas descobrimos problemas de sincronização com outros clientes. Para resolver os problemas de sincronização aprendemos as técncias de dead reckoning e interpolação de entidades, que são ótimas técnicas, mas ainda podem falhar na hora que ações muito sensíveis espacialmente são executadas. Para resolver este problema de ações sensíveis, aprendemos compensação de lag, mas ainda nos falta por a mão na massa. Nos próximos capítulos vamos explorar um jogo simples de tiro e um exemplo de servidor para ele.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="multiplayer-snake-game"><a class="header" href="#multiplayer-snake-game">Multiplayer Snake Game</a></h1>
+<p>Vulgo jogo da cobrinha online e em Rust.</p>
+<h2 id="sobre-esta-seção-do-livro"><a class="header" href="#sobre-esta-seção-do-livro">Sobre esta seção do livro</a></h2>
+<p>Este era um projeto que surgiu inicialmente como um livro para a Casa do Código (Visivelmente minha editora favorita), mas infelizmente a engine que eu estava usando foi &quot;descontinuada&quot; e decidi que queria um livro mais vivo, que pudesse se adaptar mais rapidamente a evolução das engines, assim como novas versões do Rust e o mundo de desenvolvimento de jogos. Assim, para este livro comecei a pesquisar qual seria o jogo mais didático e menos cansativo para desenvolver na <a href="https://bevyengine.org/">Bevy Engine</a>, a nova engine promissora de Rust, optando por traduzir este <a href="https://mbuffett.com/posts/bevy-snake-tutorial/">tutorial</a> e adicionar o fator multiplayer local nele. </p>
+<blockquote>
+<p>A engine descontinuada que menciono é a https://amethyst.rs/.</p>
+</blockquote>
+<h2 id="organização"><a class="header" href="#organização">Organização</a></h2>
+<ul>
+<li>Sobre a Bevy Engine e configurando uma janela vazia.</li>
+<li>ECS</li>
+<li>Snake Game</li>
+<li>Multiplayer local de Snake Game </li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="sobre-a-bevy"><a class="header" href="#sobre-a-bevy">Sobre a Bevy</a></h1>
 <p>Bevy engine é uma das game engines mais promissoras do mercado e um grande esforço coletivo para a comunidade rust_gamedev. Se trata de uma engine orientada a dados, gratuíta e open source, sob as licenças Apache e MIT, ou seja, perfeita para qualquer projeto. Ela possui como objetivos de design:</p>
 <ul>
