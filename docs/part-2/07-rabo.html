@@ -143,6 +143,136 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="adicionando-um-rabo-a-cobra"><a class="header" href="#adicionando-um-rabo-a-cobra">Adicionando um Rabo a Cobra</a></h1>
+<p>O rabo da cobra é uma parte um pouco mais complexa, pois para cada segmento é preciso saber o próximo segmento e para onde cada segmento esta se movendo. Assim, a forma mais simples de resolver este problema é adicionando todos os segmentos do rabo da cobra em um <code>Vec</code> e manter eles em um recurso ordenado em vez de entidades e componentes simples. Essa mudança nos garante que quando atualizarmos a posição de um segmento, atualizamos seu valor com relação ao segmento anterior. Isso pode ser feito iterando sobre todos os segmentos em pares com a função <a href="https://doc.rust-lang.org/std/slice/struct.Windows.html"><code>windows</code></a> que nos permite acessar o elemento anterior e o atual da lista. Outro elemento importante é que precisamos definir uma cor para o rabo da cobra, define que seria um tom de rosa com:</p>
+<pre><code class="language-rs">// snake.rs
+const SNAKE_SEGMENT_COLOR: Color = Color::rgb(0.8, 0.0, 0.8);
+</code></pre>
+<p>Agora que definimos uma cor, podemos começar a pensar no primeiro teste. O teste mais simples para este caso parece ser verificar se a entidade relacionada aos segmentos da cobra possui 2 segmento inicialmente:</p>
+<pre><code class="language-rs">// snake.rs
+#[test]
+fn entity_snake_has_two_segments() {
+    // Setup app
+    let mut app = App::new();
+
+    // Adicionar sistema de spawn e recurso com segmentos
+    app
+        .insert_resource(Segments::default())
+        .add_startup_system(spawn_system);
+
+    // Executar sistema
+    app.update();
+
+    // Buscar todas entidades com componente `Segment`
+    let mut query = app.world.query_filtered::&lt;Entity, With&lt;Segment&gt;&gt;();
+    assert_eq!(query.iter(&amp;app.world).count(), 2);
+}
+</code></pre>
+<p>Executando esse teste vemos que precisamos adicionar o recurso <code>Segments</code> ao nosso código, um vetor de entidades como falamos anteriormente:</p>
+<pre><code class="language-rs">// snake.rs
+#[derive(Default, Deref, DerefMut)]
+pub struct Segments(Vec&lt;Entity&gt;);
+</code></pre>
+<p>Com isso, precisamos reescrever nosso <code>snake::spawn_system</code> para utilizar <code>Segments</code>. Como é um startup system, será executado para iniciar entidades do jogo:</p>
+<pre><code class="language-rs">pub fn spawn_system(mut commands: Commands, mut segments: ResMut&lt;Segments&gt;) {
+    *segments = Segments(vec![
+        commands
+            .spawn_bundle(SpriteBundle {
+                sprite: Sprite {
+                    color: SNAKE_HEAD_COLOR,
+                    ..default()
+                },
+                transform: Transform {
+                    scale: Vec3::new(10.0, 10.0, 10.0),
+                    ..default()
+                },
+                ..default()
+            })
+            .insert(Head::default())
+            .insert(Segment)
+            .insert(Position { x: 3, y: 3 })
+            .insert(Size::square(0.8))
+            .id(),
+    ]);
+}
+</code></pre>
+<p>Neste novo <code>spawn_system</code> recebemos o recurso <code>Segments</code> como um recurso mutável <code>mut segments: ResMut&lt;Segments&gt;</code> e definimos <code>segments</code> através de uma dereferência mutável, <code>#[derive(.., DerefMut)]</code>, reasignando o <code>Segment::default()</code>, que equivale a um vetor vazio, ao nosso recem adicionado componente. Outra mudança que precisamos fazer é adicionar o recurso <code>Segments</code> ao nosso startup do app na <code>main.rs</code> e em todos testes de <code>snake.rs</code>:</p>
+<pre><code class="language-rs">// main.rs
+
+fn main() {
+    App::new()
+        .insert_resource(WindowDescriptor {
+            title: &quot;Snake Game&quot;.to_string(),
+            width: 500.0,
+            height: 500.0,
+            ..default()
+        })
+        .insert_resource(snake::Segments::default()) // &lt;-- adicionar
+        .add_startup_system(snake::spawn_system)
+        // ...
+        .run();
+}
+
+// snake.rs
+#[test]
+fn entity_has_snake_head() {
+    let mut app = App::new();
+
+    app
+        .insert_resource(Segments::default()) // &lt;-- adicionar em todos testes
+        .add_startup_system(spawn_system);
+
+    app.update();
+
+    let mut query = app.world.query_filtered::&lt;Entity, With&lt;Head&gt;&gt;();
+    assert_eq!(query.iter(&amp;app.world).count(), 1);
+}
+</code></pre>
+<p>Agora, executando nossos testes percebemos que o novo teste, <code>entity_snake_has_two_segments</code>, falha por possuir somente uma entidade. Para isso, precisamos criar um novo sistema que adiciona um novo <code>Segment</code> em posição específica e retorna uma <code>Entity</code> id para adicionarmos no recurso <code>Segments</code></p>
+<pre><code class="language-rs">pub fn spawn_segment_system(mut commands: Commands, position: Position) -&gt; Entity {
+    commands
+        .spawn_bundle(SpriteBundle {
+            sprite: Sprite {
+                color: SNAKE_SEGMENT_COLOR,
+                ..default()
+            },
+            transform: Transform {
+                    scale: Vec3::new(10.0, 10.0, 10.0),
+                    ..default()
+                },
+            ..default()
+        })
+        .insert(Segment)
+        .insert(position)
+        .insert(Size::square(0.65))
+        .id()
+}
+</code></pre>
+<p>Com este novo sistema, podemos adicionar um segmento extra no nosso <code>snake::spawn_system</code>:</p>
+<pre><code class="language-rs">pub fn spawn_system(mut commands: Commands, mut segments: ResMut&lt;Segments&gt;) {
+    *segments = Segments(vec![
+        commands
+            .spawn_bundle(SpriteBundle {
+                sprite: Sprite {
+                    color: SNAKE_HEAD_COLOR,
+                    ..default()
+                },
+                transform: Transform {
+                    scale: Vec3::new(10.0, 10.0, 10.0),
+                    ..default()
+                },
+                ..default()
+            })
+            .insert(Head::default())
+            .insert(Segment)
+            .insert(Position { x: 3, y: 3 })
+            .insert(Size::square(0.8))
+            .id(),
+            spawn_segment_system(commands, Position { x: 3, y: 2 }), // &lt;-- novo segmento
+    ]);
+}
+</code></pre>
+<p>Ao executarmos os teste agora, vemos que todos passam e podemos focar no próximo passo, fazer os segmentos se moverem seguindo a cabeça.</p>
+<h2 id="fazendo-o-rabo-seguir-a-cabeça"><a class="header" href="#fazendo-o-rabo-seguir-a-cabeça">Fazendo o rabo seguir a cabeça</a></h2>
 
                     </main>
 
