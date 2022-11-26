@@ -326,3 +326,171 @@ pub fn movement_system(
 Agora sim, nosso teste passa e se executarmos `cargo run` vemos que o segmento rosa sempre segue a cabeça. Próximo passo é entender como criar um sistema para expandir a cobra ao comer.
 
 ## Alimentando a cobra
+
+Faz algum tempo que nossa cobra está rodeada de comida, mas não pode comer, por isso chegou a hora de elaborarmos um teste que vai garatir que nossa cobra possa comer e que ela vai crescer ao comer. Nosso teste vai partir de um setup um pouco mais complexo, pois agora precisamos registrar um evento de crescimento, `GrowthEvenet`, precisamos registrar a última posição do vetor de segmentos, `LastTailPosition`, o nosso antigo sistema de spawn de comida, `crate::food::spawn_system`, e um system set organizado o que acontece primeiro. Algo como o seguinte bloco:
+
+```rs
+app.insert_resource(Segments::default())
+    .insert_resource(LastTailPosition::default())
+    .add_event::<GrowthEvent>()
+    .add_startup_system(spawn_system)
+    .add_system(crate::food::spawn_system)
+    .add_system_set(
+        SystemSet::new()
+            .with_system(movement_system)
+            .with_system(eating_system.after(movement_system))
+            .with_system(growth_system.after(eating_system))
+    );
+```
+
+Depois disso teremos dois updates, primeiro update cria o contexto de mundo e nos permite verificar que uma comida foi spawnada e que a cobra possui dois segmentos:
+
+```rs
+app.update();
+
+let mut query = app.world.query::<(&Segment, &Position)>();
+assert_eq!(query.iter(&app.world).count(), 2);
+let mut query = app.world.query::<(&Food, &Position)>();
+assert_eq!(query.iter(&app.world).count(), 1);
+```
+
+Por último, executamos mais uma vez o update e verificamos se a cobra possui 3 segmentos agora:
+
+```rs
+app.update();
+
+let mut query = app.world.query::<(&Segment, &Position)>();
+assert_eq!(query.iter(&app.world).count(), 3);
+```
+
+Infelizmente, um teste somento com isso não nos garantiria sucesso, já que o `crate::food::spawn_system` gera uma posição aleatória dentro do grid, para isso precisamos modificar a função `crate::food::spawn_system` para termos controle  da posição que a comida vai surgir. Fazemos isso adicionado uma macro de compilação exclusiva de teste, `cfg!`:
+
+```rs
+// food.rs
+#[allow(clippy::cast_possible_wrap)]
+pub fn spawn_system(mut commands: Commands) {
+    commands
+        .spawn_bundle(SpriteBundle {
+            sprite: Sprite {
+                color: FOOD_COLOR,
+                ..default()
+            },
+            ..default()
+        })
+        .insert(Food)
+        .insert(Position {
+            x: if cfg!(test) { 3 } else { (random::<u16>() % GRID_WIDTH) as i16 }, // <--
+            y: if cfg!(test) { 5 } else { (random::<u16>() % GRID_HEIGHT) as i16 }, // <--
+        })
+        .insert(Size::square(0.65));
+}
+```
+
+Agora sim, nosso teste poderá fazer sentido ao compilar:
+
+```rs
+// snake.rs
+#[test]
+fn snake_grows_when_eating() {
+    // Setup
+    let mut app = App::new();
+
+    // sistemas
+    app.insert_resource(Segments::default())
+        .insert_resource(LastTailPosition::default())
+        .add_event::<GrowthEvent>()
+        .add_startup_system(spawn_system)
+        .add_system(crate::food::spawn_system)
+        .add_system_set(
+            SystemSet::new()
+                .with_system(movement_system)
+                .with_system(eating_system.after(movement_system))
+                .with_system(growth_system.after(eating_system))
+        );
+
+    // update de configuração
+    app.update();
+
+    let mut query = app.world.query::<(&Segment, &Position)>();
+    assert_eq!(query.iter(&app.world).count(), 2);
+    let mut query = app.world.query::<(&Food, &Position)>();
+    assert_eq!(query.iter(&app.world).count(), 1);
+
+    // update de execução
+    app.update();
+
+    let mut query = app.world.query::<(&Segment, &Position)>();
+    assert_eq!(query.iter(&app.world).count(), 3);
+}
+```
+
+Pronto, agora podemos ir jantar, mas, infelizmente, nossa  cobra ainda não. Para isso, começamos com o `snake::eating_system`. O objetivo de `snake::eating_system` é simples, iterar sobre todas as entidades com componente comida, `Food`, e ver se a posição delas, `Position`, é igual a `Position` das entidades com `Head`. Caso, a firmação anterior seja verdade, removemos, `despawn`, a entidade `Food` e lançamos no sistema um evento para crescer a cobra, `GrowthEvent`, na sua última posição, `pub struct LastTailPosition(Option<Position>)`. Um detalhe importante, é que para publicar um evento, `EventWriter`, precisamos registrar esse evento no `App`, com `add_event::<GrowthEvent>()`, o mesmo vale para lermos os eventos, `EventReader`.
+
+```rs
+pub struct GrowthEvent;
+
+#[derive(Default)]
+pub struct LastTailPosition(Option<Position>);
+
+pub fn eating_system(
+    mut commands: Commands,
+    mut growth_writer: EventWriter<GrowthEvent>,
+    food_positions: Query<(Entity, &Position), With<Food>>,
+    head_positions: Query<&Position, With<Head>>,
+) {
+    for head_pos in head_positions.iter() {
+        for (ent, food_pos) in food_positions.iter() {
+            if food_pos == head_pos {
+                commands.entity(ent).despawn();
+                growth_writer.send(GrowthEvent);
+            }
+        }
+    }
+}
+```
+
+Na função anterior, recebemos um `EventWriter` do tipo `GrowthEvent`, que vai publicar quaisquer eventos necessários, uma query com todas as entidades e posições de comidas, `Query<(Entity, &Position), With<Food>>` e uma query com a posição das cabeças, no caso, apenas uma, `Query<&Position, With<Head>>`. Iteramos por tudo e checamos se as posições são iguais para então removermos a entidade associada a comida e publicarmos um evento de crescimento. Próximo passo é lermos o evento com `EventReader<GrowthEvent>` e adicionarmos um clone da última posição do rabo, como um novo segmento, aos segmentos, `Segments`:
+
+```rs
+pub fn growth_system(
+    commands: Commands,
+    last_tail_position: Res<LastTailPosition>,
+    mut segments: ResMut<Segments>,
+    mut growth_reader: EventReader<GrowthEvent>,
+) {
+    if growth_reader.iter().next().is_some() {
+        segments.push(spawn_segment_system(commands, last_tail_position.0.clone().unwrap()));
+    }
+}
+```
+
+Nosso teste está quase passando, precisamos adicionar a informação da última posição de segmentos quando nos movimentamos, senão `LastTailPosition`será sempre `None` e nossa cobra não crescerá. Para isso, adicionamos o recuso mutável, `ResMut`, ao sistema `movement_system` e no final dele, buscamos a última posição dos segmentos:
+
+```rs
+pub fn movement_system(
+    segments: ResMut<Segments>,
+    mut last_tail_position: ResMut<LastTailPosition>,
+    mut heads: Query<(Entity, &Head)>,
+    mut positions: Query<(Entity, &Segment, &mut Position)>,
+) {
+    let positions_clone: HashMap<Entity, Position> = positions
+        .iter()
+        .map(|(entity, _segment, position)| (entity, position.clone()))
+        .collect();
+    if let Some((id, head)) = heads.iter_mut().next() {
+        (*segments).windows(2).for_each(|entity| {
+            if let Ok((_, _segment, mut position)) = positions.get_mut(entity[1]) {
+                if let Some(new_position) = positions_clone.get(&entity[0]) {
+                    *position = new_position.clone();
+                }
+            };
+        });
+        // ...
+        *last_tail_position = LastTailPosition(Some(positions_clone.get(segments.last().unwrap()).unwrap().clone())); // <--
+    }
+}
+```
+
+Aghora sim, nosso teste passa! Sabrmos que podemos utilizar `unwrap`, pois a cobra inicia seu movimento com 2 segmentos e sabemos que ambos os segmentos possuem `Position`, assim, `positions_clone.get` , também, nunca será `None`. Possivelmente precisaremos adicionar alguns `.insert_resource(LastTailPosition::default())`no setup dos testes.
+
+No próximo capítulo vamos aprender um pouco mais sobre colisões.

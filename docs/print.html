@@ -2034,7 +2034,7 @@ fn entity_has_snake_head() {
     assert_eq!(query.iter(&amp;app.world).count(), 1);
 }
 </code></pre>
-<p>Agora, executando nossos testes percebemos que o novo teste, <code>entity_snake_has_two_segments</code>, falha por possuir somente uma entidade. Para isso, precisamos criar um novo sistema que adiciona um novo <code>Segment</code> em posição específica e retorna uma <code>Entity</code> id para adicionarmos no recurso <code>Segments</code></p>
+<p>Agora, executando nossos testes percebemos que o novo teste, <code>entity_snake_has_two_segments</code>, falha por possuir somente uma entidade. Para isso, precisamos criar um novo sistema que adiciona um novo <code>Segment</code> em posição específica e retorna uma <code>Entity</code> id para adicionarmos no recurso <code>Segments</code>. Este sistema que cria um novo segmento é bastante semelhante ao segmento que instancia a cobra em si, <code>spawn_system</code>, sua maior diferença é o fato de que passamos uma posição, <code>Position</code>, como argumento para o segmento e que o tamanho do quadrado é menor, com coloração diferente.</p>
 <pre><code class="language-rs">pub fn spawn_segment_system(mut commands: Commands, position: Position) -&gt; Entity {
     commands
         .spawn_bundle(SpriteBundle {
@@ -2054,7 +2054,7 @@ fn entity_has_snake_head() {
         .id()
 }
 </code></pre>
-<p>Com este novo sistema, podemos adicionar um segmento extra no nosso <code>snake::spawn_system</code>:</p>
+<p>Com este novo sistema, podemos adicionar um segmento extra no nosso <code>snake::spawn_system</code>, que armazenará os segmentos cabeça e o recem criado como entidades em <code>Segments</code>:</p>
 <pre><code class="language-rs">pub fn spawn_system(mut commands: Commands, mut segments: ResMut&lt;Segments&gt;) {
     *segments = Segments(vec![
         commands
@@ -2080,6 +2080,306 @@ fn entity_has_snake_head() {
 </code></pre>
 <p>Ao executarmos os teste agora, vemos que todos passam e podemos focar no próximo passo, fazer os segmentos se moverem seguindo a cabeça.</p>
 <h2 id="fazendo-o-rabo-seguir-a-cabeça"><a class="header" href="#fazendo-o-rabo-seguir-a-cabeça">Fazendo o rabo seguir a cabeça</a></h2>
+<p>Anteriormente já falamos que os segmentos da cobra estão armazenados em um <code>Vec</code> e podemos iterar sobre pares destes elementos utilizando a função <code>windows</code>, agora nos falta entender como criar um teste para verificar se um segmento assume a posição de seu antecessor ao andar, mantendo a direção de movimento. Assim, nosso novo teste considera que a cobra é inicializada na posição <code>x = 3</code> e <code>y = 3</code>, e seu segmento extra em <code>x = 3</code> e <code>y = 2</code>. A primeira parte do teste define as novas posições da cabeça, <code>Head</code>, e do segment, <code>Segment</code>, com <code>let new_position_head_right = Position { x: 4, y: 3 };</code> e <code>let new_position_segment_right = Position { x: 3, y: 3 };</code>, ou seja, <code>Head</code> se move para <code>x = 4</code> e <code>y = 3</code> e segment para <code>x = 3</code> e <code>y = 3</code> ao apertarmos a tecla <code>D</code> e executarmos um novo update:</p>
+<pre><code class="language-rs">#[test]
+fn snake_segment_has_followed_head() {
+    // Setup
+    let mut app = App::new();
+    let new_position_head_right = Position { x: 4, y: 3 };
+    let new_position_segment_right = Position { x: 3, y: 3 };
+
+    // Adiciona os systemas
+    app.insert_resource(Segments::default())
+        .add_startup_system(spawn_system)
+        .add_system(movement_system)
+        .add_system(movement_input_system.before(movement_system));
+
+    // adiciona resource apertando a tecla D, movimento para direita
+    let mut input = Input::&lt;KeyCode&gt;::default();
+    input.press(KeyCode::D);
+    app.insert_resource(input);
+
+    // executa sistemas
+    app.update();
+
+    let mut query = app.world.query::&lt;(&amp;Head, &amp;Position)&gt;();
+    query.iter(&amp;app.world).for_each(|(head, position)| {
+        // garante que nova posição da cabeçá é esperada:
+        assert_eq!(&amp;new_position_head_right, position); 
+        // garante que nova direção é para direita:
+        assert_eq!(head.direction, Direction::Right);
+    });
+
+    let mut query = app.world.query::&lt;(&amp;Segment, &amp;Position, Without&lt;Head&gt;)&gt;();
+    query.iter(&amp;app.world).for_each(|(_segment, position, _)| {
+        // garante que nova posição do segmento é esperada:
+        assert_eq!(&amp;new_position_segment_right, position);
+    });
+    // ...
+}
+</code></pre>
+<p>Por descargo de consciência podemos adicionar mais uma parte ao teste que muda a direção de movimento da cobra para cima:</p>
+<pre><code class="language-rs">#[test]
+fn snake_segment_has_followed_head() {
+    // Setup
+    let mut app = App::new();
+    let new_position_head_right = Position { x: 4, y: 3 };
+    let new_position_segment_right = Position { x: 3, y: 3 };
+
+    // Adiciona os systemas
+    app.insert_resource(Segments::default())
+        .add_startup_system(spawn_system)
+        .add_system(movement_system)
+        .add_system(movement_input_system.before(movement_system));
+
+    // adiciona resource apertando a tecla D, movimento para direita
+    let mut input = Input::&lt;KeyCode&gt;::default();
+    input.press(KeyCode::D);
+    app.insert_resource(input);
+
+    // executa sistemas
+    app.update();
+
+    let mut query = app.world.query::&lt;(&amp;Head, &amp;Position)&gt;();
+    query.iter(&amp;app.world).for_each(|(head, position)| {
+        // garante que nova posição da cabeça é esperada:
+        assert_eq!(&amp;new_position_head_right, position); 
+        // garante que nova direção é para direita:
+        assert_eq!(head.direction, Direction::Right);
+    });
+
+    let mut query = app.world.query::&lt;(&amp;Segment, &amp;Position, Without&lt;Head&gt;)&gt;();
+    query.iter(&amp;app.world).for_each(|(_segment, position, _)| {
+        // garante que nova posição do segmento é esperada:
+        assert_eq!(&amp;new_position_segment_right, position);
+    });
+
+    // NOVAS POSIÇÕES ESPERADAS
+    let new_position_head_up = Position { x: 4, y: 4 }; // &lt;--
+    let new_position_segment_up = Position { x: 4, y: 3 }; // &lt;--
+
+    // adiciona resource apertando a tecla W, movimento para cima
+    let mut input = Input::&lt;KeyCode&gt;::default();
+    input.press(KeyCode::W); // &lt;--
+    app.insert_resource(input);
+
+    // executa sistemas de novo
+    app.update();
+
+    let mut query = app.world.query::&lt;(&amp;Head, &amp;Position)&gt;();
+    query.iter(&amp;app.world).for_each(|(head, position)| {
+        // garante que nova posição da cabeça é esperada:
+        assert_eq!(&amp;new_position_head_up, position);
+        // garante que nova direção da cabeça é esperada:
+        assert_eq!(head.direction, Direction::Up); 
+    });
+
+    let mut query = app.world.query::&lt;(&amp;Segment, &amp;Position, Without&lt;Head&gt;)&gt;();
+    query.iter(&amp;app.world).for_each(|(_segment, position, _)| {
+        // garante que nova posição do segmento é esperada:
+        assert_eq!(&amp;new_position_segment_up, position);
+    })
+}
+</code></pre>
+<p>Ao exercutarmos este código veremos que o assert <code>assert_eq!(&amp;new_position_segment_right, position);</code> falha indicando que o segmento não se moveu, mas a cabeça se moveu. Como estamos falando de movimento, sabemos que precisamos alterar o sistema <code>movement_system</code> para incluir uma iteração sobre os elementos de <code>Segments</code>. Assim a primeira alteração é adicionar o recurso <code>segments</code> nos argumentos do sistema, <code>segments: ResMut&lt;Segments&gt;</code>. Depois disso vamos precisar extrair duas queries diferentes para posição, <code>Position</code>, e cabeça, <code>Head</code>, já que agora nem todas posições terão cabeças, mas todas posições terão <code>Segment</code>, fazemos isso com as queries <code>mut heads: Query&lt;(Entity, &amp;Head)&gt;</code> e <code>mut positions: Query&lt;(Entity, &amp;Segment, &amp;mut Position)&gt;</code>. Precisamos de <code>Segment</code>, pois <code>Food</code> também possui <code>Position</code> e queremos evitar iterar por elementos desnecessarios em um ECS.</p>
+<p>O código que vamos adicionar ao <code>movement_system</code> é simples, basicamente iteramos por <code>segments</code> dois a dois elementos por vez e adicionamos a posição do elementos anterior, <code>entity[0]</code>, na posição do elemento posterior, <code>entity[1]</code>. Algo como:</p>
+<pre><code class="language-rs">(*segments).windows(2).for_each(|entity| {
+    if let Ok((_, _segment, mut position)) = positions.get_mut(entity[1]) {
+        if let Ok((_, _, mut new_position)) = positions.get_mut(entity[0]) {
+            *position = new_position.clone();
+        }
+    };
+});
+</code></pre>
+<p>Infelizmente, esse código em particular não compila devido ao fato de acessarmos <code>positions</code> como referência mutável duas vezes, inverter uma referência imutável e outra mutável também não funcionaria devida a uma regra do borrow checker do Rust que impede que um mesmo valor seja acesso como mutável e imutável no mesmo bloco. O mesmo acontece com duas referências diferentes mutáveis no mesmo bloco, o compilador não teria garantia que ambas não mutaria o mesmo valor ao mesmo tempo. Uma solução para este problema é adicionar um clone de <code>positions</code>, mas podemos fazer este clone ser mais inteligente, transformando ele em um <code>HashMap</code> na qual a chave é a entidade e a position é o valor, para depois acessarmos este clone de <code>positions</code> de forma imutável:</p>
+<pre><code class="language-rs">pub fn movement_system(
+    segments: ResMut&lt;Segments&gt;,
+    mut heads: Query&lt;(Entity, &amp;Head)&gt;,
+    mut positions: Query&lt;(Entity, &amp;Segment, &amp;mut Position)&gt;,
+) {
+    // Criar um hashmap clonado de positions com `Entity =&gt; Position`
+    let positions_clone: HashMap&lt;Entity, Position&gt; = positions
+        .iter()
+        .map(|(entity, _segment, position)| (entity, position.clone()))
+        .collect();
+    // Acessar a cabeça (única existente por hora)
+    if let Some((id, head)) = heads.iter_mut().next() {
+        // Iterar sobre segments 2 a 2
+        (*segments).windows(2).for_each(|entity| {
+            // Acessar a posição da `entity[1]` em positions
+            if let Ok((_, _segment, mut position)) = positions.get_mut(entity[1]) {
+                // Acessar a posição da `entity[0]` em positions_clone
+                if let Some(new_position) = positions_clone.get(&amp;entity[0]) {
+                    // Substituir position por new_position
+                    *position = new_position.clone();
+                }
+            };
+        });
+
+        // mesmo código de antes para mover a cabeça
+        let _ = positions.get_mut(id).map(|(_, _segment, mut pos)| {
+            match &amp;head.direction {
+                Direction::Left =&gt; {
+                    pos.x -= 1;
+                }
+                Direction::Right =&gt; {
+                    pos.x += 1;
+                }
+                Direction::Up =&gt; {
+                    pos.y += 1;
+                }
+                Direction::Down =&gt; {
+                    pos.y -= 1;
+                }
+            };
+        });
+    }
+}
+</code></pre>
+<p>Agora sim, nosso teste passa e se executarmos <code>cargo run</code> vemos que o segmento rosa sempre segue a cabeça. Próximo passo é entender como criar um sistema para expandir a cobra ao comer.</p>
+<h2 id="alimentando-a-cobra"><a class="header" href="#alimentando-a-cobra">Alimentando a cobra</a></h2>
+<p>Faz algum tempo que nossa cobra está rodeada de comida, mas não pode comer, por isso chegou a hora de elaborarmos um teste que vai garatir que nossa cobra possa comer e que ela vai crescer ao comer. Nosso teste vai partir de um setup um pouco mais complexo, pois agora precisamos registrar um evento de crescimento, <code>GrowthEvenet</code>, precisamos registrar a última posição do vetor de segmentos, <code>LastTailPosition</code>, o nosso antigo sistema de spawn de comida, <code>crate::food::spawn_system</code>, e um system set organizado o que acontece primeiro. Algo como o seguinte bloco:</p>
+<pre><code class="language-rs">app.insert_resource(Segments::default())
+    .insert_resource(LastTailPosition::default())
+    .add_event::&lt;GrowthEvent&gt;()
+    .add_startup_system(spawn_system)
+    .add_system(crate::food::spawn_system)
+    .add_system_set(
+        SystemSet::new()
+            .with_system(movement_system)
+            .with_system(eating_system.after(movement_system))
+            .with_system(growth_system.after(eating_system))
+    );
+</code></pre>
+<p>Depois disso teremos dois updates, primeiro update cria o contexto de mundo e nos permite verificar que uma comida foi spawnada e que a cobra possui dois segmentos:</p>
+<pre><code class="language-rs">app.update();
+
+let mut query = app.world.query::&lt;(&amp;Segment, &amp;Position)&gt;();
+assert_eq!(query.iter(&amp;app.world).count(), 2);
+let mut query = app.world.query::&lt;(&amp;Food, &amp;Position)&gt;();
+assert_eq!(query.iter(&amp;app.world).count(), 1);
+</code></pre>
+<p>Por último, executamos mais uma vez o update e verificamos se a cobra possui 3 segmentos agora:</p>
+<pre><code class="language-rs">app.update();
+
+let mut query = app.world.query::&lt;(&amp;Segment, &amp;Position)&gt;();
+assert_eq!(query.iter(&amp;app.world).count(), 3);
+</code></pre>
+<p>Infelizmente, um teste somento com isso não nos garantiria sucesso, já que o <code>crate::food::spawn_system</code> gera uma posição aleatória dentro do grid, para isso precisamos modificar a função <code>crate::food::spawn_system</code> para termos controle  da posição que a comida vai surgir. Fazemos isso adicionado uma macro de compilação exclusiva de teste, <code>cfg!</code>:</p>
+<pre><code class="language-rs">// food.rs
+#[allow(clippy::cast_possible_wrap)]
+pub fn spawn_system(mut commands: Commands) {
+    commands
+        .spawn_bundle(SpriteBundle {
+            sprite: Sprite {
+                color: FOOD_COLOR,
+                ..default()
+            },
+            ..default()
+        })
+        .insert(Food)
+        .insert(Position {
+            x: if cfg!(test) { 3 } else { (random::&lt;u16&gt;() % GRID_WIDTH) as i16 }, // &lt;--
+            y: if cfg!(test) { 5 } else { (random::&lt;u16&gt;() % GRID_HEIGHT) as i16 }, // &lt;--
+        })
+        .insert(Size::square(0.65));
+}
+</code></pre>
+<p>Agora sim, nosso teste poderá fazer sentido ao compilar:</p>
+<pre><code class="language-rs">// snake.rs
+#[test]
+fn snake_grows_when_eating() {
+    // Setup
+    let mut app = App::new();
+
+    // sistemas
+    app.insert_resource(Segments::default())
+        .insert_resource(LastTailPosition::default())
+        .add_event::&lt;GrowthEvent&gt;()
+        .add_startup_system(spawn_system)
+        .add_system(crate::food::spawn_system)
+        .add_system_set(
+            SystemSet::new()
+                .with_system(movement_system)
+                .with_system(eating_system.after(movement_system))
+                .with_system(growth_system.after(eating_system))
+        );
+
+    // update de configuração
+    app.update();
+
+    let mut query = app.world.query::&lt;(&amp;Segment, &amp;Position)&gt;();
+    assert_eq!(query.iter(&amp;app.world).count(), 2);
+    let mut query = app.world.query::&lt;(&amp;Food, &amp;Position)&gt;();
+    assert_eq!(query.iter(&amp;app.world).count(), 1);
+
+    // update de execução
+    app.update();
+
+    let mut query = app.world.query::&lt;(&amp;Segment, &amp;Position)&gt;();
+    assert_eq!(query.iter(&amp;app.world).count(), 3);
+}
+</code></pre>
+<p>Pronto, agora podemos ir jantar, mas, infelizmente, nossa  cobra ainda não. Para isso, começamos com o <code>snake::eating_system</code>. O objetivo de <code>snake::eating_system</code> é simples, iterar sobre todas as entidades com componente comida, <code>Food</code>, e ver se a posição delas, <code>Position</code>, é igual a <code>Position</code> das entidades com <code>Head</code>. Caso, a firmação anterior seja verdade, removemos, <code>despawn</code>, a entidade <code>Food</code> e lançamos no sistema um evento para crescer a cobra, <code>GrowthEvent</code>, na sua última posição, <code>pub struct LastTailPosition(Option&lt;Position&gt;)</code>. Um detalhe importante, é que para publicar um evento, <code>EventWriter</code>, precisamos registrar esse evento no <code>App</code>, com <code>add_event::&lt;GrowthEvent&gt;()</code>, o mesmo vale para lermos os eventos, <code>EventReader</code>.</p>
+<pre><code class="language-rs">pub struct GrowthEvent;
+
+#[derive(Default)]
+pub struct LastTailPosition(Option&lt;Position&gt;);
+
+pub fn eating_system(
+    mut commands: Commands,
+    mut growth_writer: EventWriter&lt;GrowthEvent&gt;,
+    food_positions: Query&lt;(Entity, &amp;Position), With&lt;Food&gt;&gt;,
+    head_positions: Query&lt;&amp;Position, With&lt;Head&gt;&gt;,
+) {
+    for head_pos in head_positions.iter() {
+        for (ent, food_pos) in food_positions.iter() {
+            if food_pos == head_pos {
+                commands.entity(ent).despawn();
+                growth_writer.send(GrowthEvent);
+            }
+        }
+    }
+}
+</code></pre>
+<p>Na função anterior, recebemos um <code>EventWriter</code> do tipo <code>GrowthEvent</code>, que vai publicar quaisquer eventos necessários, uma query com todas as entidades e posições de comidas, <code>Query&lt;(Entity, &amp;Position), With&lt;Food&gt;&gt;</code> e uma query com a posição das cabeças, no caso, apenas uma, <code>Query&lt;&amp;Position, With&lt;Head&gt;&gt;</code>. Iteramos por tudo e checamos se as posições são iguais para então removermos a entidade associada a comida e publicarmos um evento de crescimento. Próximo passo é lermos o evento com <code>EventReader&lt;GrowthEvent&gt;</code> e adicionarmos um clone da última posição do rabo, como um novo segmento, aos segmentos, <code>Segments</code>:</p>
+<pre><code class="language-rs">pub fn growth_system(
+    commands: Commands,
+    last_tail_position: Res&lt;LastTailPosition&gt;,
+    mut segments: ResMut&lt;Segments&gt;,
+    mut growth_reader: EventReader&lt;GrowthEvent&gt;,
+) {
+    if growth_reader.iter().next().is_some() {
+        segments.push(spawn_segment_system(commands, last_tail_position.0.clone().unwrap()));
+    }
+}
+</code></pre>
+<p>Nosso teste está quase passando, precisamos adicionar a informação da última posição de segmentos quando nos movimentamos, senão <code>LastTailPosition</code>será sempre <code>None</code> e nossa cobra não crescerá. Para isso, adicionamos o recuso mutável, <code>ResMut</code>, ao sistema <code>movement_system</code> e no final dele, buscamos a última posição dos segmentos:</p>
+<pre><code class="language-rs">pub fn movement_system(
+    segments: ResMut&lt;Segments&gt;,
+    mut last_tail_position: ResMut&lt;LastTailPosition&gt;,
+    mut heads: Query&lt;(Entity, &amp;Head)&gt;,
+    mut positions: Query&lt;(Entity, &amp;Segment, &amp;mut Position)&gt;,
+) {
+    let positions_clone: HashMap&lt;Entity, Position&gt; = positions
+        .iter()
+        .map(|(entity, _segment, position)| (entity, position.clone()))
+        .collect();
+    if let Some((id, head)) = heads.iter_mut().next() {
+        (*segments).windows(2).for_each(|entity| {
+            if let Ok((_, _segment, mut position)) = positions.get_mut(entity[1]) {
+                if let Some(new_position) = positions_clone.get(&amp;entity[0]) {
+                    *position = new_position.clone();
+                }
+            };
+        });
+        // ...
+        *last_tail_position = LastTailPosition(Some(positions_clone.get(segments.last().unwrap()).unwrap().clone())); // &lt;--
+    }
+}
+</code></pre>
+<p>Aghora sim, nosso teste passa! Sabrmos que podemos utilizar <code>unwrap</code>, pois a cobra inicia seu movimento com 2 segmentos e sabemos que ambos os segmentos possuem <code>Position</code>, assim, <code>positions_clone.get</code> , também, nunca será <code>None</code>. Possivelmente precisaremos adicionar alguns <code>.insert_resource(LastTailPosition::default())</code>no setup dos testes.</p>
+<p>No próximo capítulo vamos aprender um pouco mais sobre colisões.</p>
 
                     </main>
 
