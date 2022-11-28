@@ -1,0 +1,494 @@
+<!DOCTYPE HTML>
+<html lang="pt" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Colisões - Desenvolvimento de Jogos online com Rust</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../0-capa.html"><strong aria-hidden="true">1.</strong> Capa</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../01-quemsou.html"><strong aria-hidden="true">1.1.</strong> Quem sou eu? (Sobre a autora)</a></li></ol></li><li class="chapter-item expanded "><a href="../part-1/00-capa.html"><strong aria-hidden="true">2.</strong> Conceitos Básicos</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../part-1/01-arq.html"><strong aria-hidden="true">2.1.</strong> Arquitetura de servidores</a></li><li class="chapter-item expanded "><a href="../part-1/02-prd-rec.html"><strong aria-hidden="true">2.2.</strong> Predição e Reconciliação</a></li><li class="chapter-item expanded "><a href="../part-1/03-interpolacao.html"><strong aria-hidden="true">2.3.</strong> Interpolação de Entidades</a></li><li class="chapter-item expanded "><a href="../part-1/04-lag.html"><strong aria-hidden="true">2.4.</strong> Compensacão de Lag</a></li></ol></li><li class="chapter-item expanded "><a href="../part-2/00-intro.html"><strong aria-hidden="true">3.</strong> Multiplayer Snake Game</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../part-2/01-bevy.html"><strong aria-hidden="true">3.1.</strong> Sobre a Bevy</a></li><li class="chapter-item expanded "><a href="../part-2/02-ecs.html"><strong aria-hidden="true">3.2.</strong> Entity Component System</a></li><li class="chapter-item expanded "><a href="../part-2/03-cabeca.html"><strong aria-hidden="true">3.3.</strong> A Cabeça da Cobra</a></li><li class="chapter-item expanded "><a href="../part-2/04-grid.html"><strong aria-hidden="true">3.4.</strong> Grade de Movimento</a></li><li class="chapter-item expanded "><a href="../part-2/05-spawnfood.html"><strong aria-hidden="true">3.5.</strong> Gerador de Comidas</a></li><li class="chapter-item expanded "><a href="../part-2/06-cadencia.html"><strong aria-hidden="true">3.6.</strong> Melhorando a Cadência do Movimento</a></li><li class="chapter-item expanded "><a href="../part-2/07-rabo.html"><strong aria-hidden="true">3.7.</strong> Adicionando um Rabo a Cobra</a></li><li class="chapter-item expanded "><a href="../part-2/08-colisoes.html" class="active"><strong aria-hidden="true">3.8.</strong> Colisões</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Desenvolvimento de Jogos online com Rust</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="colisões"><a class="header" href="#colisões">Colisões</a></h1>
+<p>Uma parte muito importante de jogos é a definição dos critérios de perda ou derrota. No caso do snake game, há dois critérios:</p>
+<ol>
+<li>A cobra &quot;come&quot; um pedaço dela mesma.</li>
+<li>A cobra sai dos limites, ou paredes, do jogo.</li>
+</ol>
+<p>Testar a cobra comendo um pedaço dela mesma é bastante complicado considerando um cenário na qual as comidas surgem de forma aleátoria, pois a cobra precisa possuir pelo menos 5 segmentos para que ocorra uma colisão da cabeça da cobra com um segmento. Neste caso, um teste de gameplay seria mais fácil e possivelmente mais valioso, porém não é algo que planejei dentro do escopo deste livro. Por outro lado, testar que a cobra sai dos limites do jogo é bastante trivial, basta definir uma direção e garantir que após <code>n</code> updates, a cobra vai colidir com as paredes. Uma vez que a condição de colisão ocorreu, podemos publicar um evento de game end, e pausa o jogo com um status de jogo. Único teste que não vou escrever neste caso é o teste de colisão com a parede de baixo, mas seria igual aos outros, porém com 3 updates extras para fazer retorno e mudar a direção para baixo.</p>
+<p>O primeiro teste consite basicamente em fazer com que a cobra se movimente para cima até ultrapassar a parede superior e ai detectamos um componente do tipo <code>GameEndEvent::GameOver</code>, derivado do evento <code>GameEndEvent</code>. Adicionaremos este teste em um novo módulo chamado <code>game.rs</code>:</p>
+<pre><code class="language-rs">#[test]
+fn game_end_event_with_game_over() {
+    // Setup
+    let mut app = App::new();
+
+    // Sistemas
+    app.insert_resource(Segments::default())
+        .insert_resource(LastTailPosition::default())
+        .add_event::&lt;GameEndEvent&gt;() // &lt;--
+        .add_startup_system(snake::spawn_system)
+        .add_system(snake::movement_system)
+        .add_system(snake::movement_input_system.before(snake::movement_system))
+        .add_system(game_over_system.after(snake::movement_system)); // &lt;--
+
+    // tecla para cima
+    let mut input = Input::&lt;KeyCode&gt;::default();
+    input.press(KeyCode::W);
+    app.insert_resource(input);
+
+    // executgar sistema algumas vezes
+    app.update(); // x: 3, y: 4
+    app.update(); // x: 3, y: 5
+    app.update(); // x: 3, y: 6
+    app.update(); // x: 3, y: 7
+    app.update(); // x: 3, y: 8
+    app.update(); // x: 3, y: 9
+
+    // Verificar que não há componente de game end
+    let mut query = app.world.query::&lt;&amp;GameEndEvent&gt;();
+    assert_eq!(query.iter(&amp;app.world).count(), 0);
+
+    app.update(); // x: 3, y: 10
+
+    // Verificar que há componente de game end
+    let mut query = app.world.query::&lt;&amp;GameEndEvent&gt;();
+    assert_eq!(query.iter(&amp;app.world).count(), 1);
+}
+</code></pre>
+<p>Com este teste podemos começar a implementar o primeiro critério de falha, que neste caso seria <code>y</code> da posição da cabça menor que zero ou maior ou igual a <code>GRID_HEIGHT</code>, ou seja, <code>head.position.y &lt; 0 || head.position.y &gt;= GRID_HEIGHT</code>. Na função <code>snake::movement_system</code>, temos acesso a <code>head.position</code> dentro do block que contém o <code>match head.direction</code>, assim podemos adicionar a condicional de posições depois do match e publicar o evento <code>GameEndEvent::GameOver</code> pelo <code>EventWriter</code> que precisamos adicionar nos argumentos da função:</p>
+<pre><code class="language-rs">pub fn movement_system(
+    segments: ResMut&lt;Segments&gt;,
+    mut last_tail_position: ResMut&lt;LastTailPosition&gt;,
+    mut game_end_writer: EventWriter&lt;GameEndEvent&gt;, // &lt;-- Adicionar EventWriter
+    mut heads: Query&lt;(Entity, &amp;Head)&gt;,
+    mut positions: Query&lt;(Entity, &amp;Segment, &amp;mut Position)&gt;,
+    game_end: Query&lt;&amp;GameEndEvent&gt;,
+) {
+    let positions_clone: HashMap&lt;Entity, Position&gt; = positions
+        .iter()
+        .map(|(entity, _segment, position)| (entity, position.clone()))
+        .collect();
+    if let Some((id, head)) = heads.iter_mut().next() {
+        (*segments).windows(2).for_each(|entity| {
+            if let Ok((_, _segment, mut position)) = positions.get_mut(entity[1]) {
+                if let Some(new_position) = positions_clone.get(&amp;entity[0]) {
+                    *position = new_position.clone();
+                }
+            };
+        });
+        
+        let _ = positions.get_mut(id).map(|(_, _segment, mut pos)| {
+            match &amp;head.direction {
+                Direction::Left =&gt; {
+                    pos.x -= 1;
+                }
+                Direction::Right =&gt; {
+                    pos.x += 1;
+                }
+                Direction::Up =&gt; {
+                    pos.y += 1;
+                }
+                Direction::Down =&gt; {
+                    pos.y -= 1;
+                }
+            };
+            if pos.y &lt; 0
+                || pos.y as u16 &gt;= GRID_HEIGHT // &lt;-- Condicional de limites do grid
+            {
+                game_end_writer.send(GameEndEvent::GameOver); // &lt;-- publicar evento
+            }
+        });
+        
+        *last_tail_position = LastTailPosition(Some(
+            positions_clone
+                .get(segments.last().unwrap())
+                .unwrap()
+                .clone(),
+        ));
+    }
+}
+</code></pre>
+<p>Agora todos os testes que lidam com <code>movement_system</code> falham e é preciso adicionar <code>.add_event::&lt;GameEndEvent&gt;()</code> ao setup de sistemas, além disso, adicione a função <code>main</code>. Outro elemento importante é adicionar o <code>GameEndEvent</code>, que vamos adicionar no móduclo <code>components.rs</code>:</p>
+<pre><code class="language-rs">// components.rs
+
+#[derive(Component, Clone, Debug, PartialEq, Eq)]
+pub enum GameEndEvent {
+    GameOver,
+}
+
+impl Default for GameEndEvent {
+    fn default() -&gt; Self {
+        Self::GameOver
+    }
+}
+</code></pre>
+<p>Perfeito, mas o teste ainda não passa, pois não temos nenhum sistema escutando pelo evento <code>GameEndEvent</code>, podemos adicionar um sistema <code>game_over_system</code> que adicionará o componente <code>GameEndEvent::GameOver</code> que buscamos no teste. Este sistema verificará se existe algum evento do tipo <code>GameEndEvent</code>, se houver cria uma entidade com <code>GameEndEvent::GameOver</code> como componente e print no console <code>&quot;Game Over!&quot;</code>;</p>
+<pre><code class="language-rs">// game.rs
+
+pub fn game_over_system(mut commands: Commands, mut reader: EventReader&lt;GameEndEvent&gt;) {
+    if reader.iter().next().is_some() {
+        commands.spawn().insert(GameEndEvent::GameOver);
+        println!(&quot;{}&quot;, GameEndEvent::GameOver);
+    }
+}
+</code></pre>
+<p>Para printar no console um enum podemos implementar a trait Display:</p>
+<pre><code class="language-rs">// components.rs
+
+impl Display for GameEndEvent {
+    fn fmt(&amp;self, f: &amp;mut fmt::Formatter&lt;'_&gt;) -&gt; fmt::Result {
+        match self {
+            GameEndEvent::GameOver =&gt; write!(f, &quot;Game Over!&quot;),
+        }
+    }
+}
+</code></pre>
+<p>Agora nosso teste passa, mas quero adicionar um assert extra no nosso teste, que a posição da cobra não mudará após um game over. Fazemos isso adicionando uma verificação que a posição após o <code>GameEndEvent::GameOver</code> não mudará mesmo após updates.</p>
+<pre><code class="language-rs">#[test]
+fn game_end_event_with_game_over() {
+    // ...
+
+    let mut query = app.world.query::&lt;&amp;GameEndEvent&gt;();
+    assert_eq!(query.iter(&amp;app.world).count(), 1);
+
+    let mut query = app.world.query_filtered::&lt;&amp;Position, With&lt;Head&gt;&gt;();
+    let position_at_gameover = query.iter(&amp;app.world).next().unwrap();
+    let snake_position_after_game_over = position_at_gameover.clone();
+
+    app.update();
+
+    let mut query = app.world.query_filtered::&lt;&amp;Position, With&lt;Head&gt;&gt;();
+    let position_after_gameover = query.iter(&amp;app.world).next().unwrap();
+
+    assert_eq!(snake_position_after_game_over, position_after_gameover.clone());
+}
+</code></pre>
+<p>Essa mudança é facilmente resolvida adicionando uma query que busca por um <code>GameEndEvent</code>, <code>Query&lt;&amp;GameEndEvent&gt;</code>, e verificando se ela não está vazia em um <code>if</code>:</p>
+<pre><code class="language-rs">pub fn movement_system(
+    segments: ResMut&lt;Segments&gt;,
+    mut last_tail_position: ResMut&lt;LastTailPosition&gt;,
+    mut game_end_writer: EventWriter&lt;GameEndEvent&gt;,
+    heads: Query&lt;(Entity, &amp;Head)&gt;,
+    mut positions: Query&lt;(Entity, &amp;Segment, &amp;mut Position)&gt;,
+    game_end: Query&lt;&amp;GameEndEvent&gt;, // &lt;-- GameEndEvent Query
+) {
+    // ...
+    if let Some((id, head)) = heads.iter().next() {
+        (*segments).windows(2).for_each(|entity| {
+            if let Ok((_, _segment, mut position)) = positions.get_mut(entity[1]) {
+                if let Some(new_position) = positions_clone.get(&amp;entity[0]) {
+                    *position = new_position.clone();
+                }
+            };
+        });
+        if game_end.is_empty() {  // &lt;-- if verificando se houve um evento de fimd e jogo
+            let _ = positions.get_mut(id).map(|(_, _segment, mut pos)| {
+                match &amp;head.direction {
+                    // ...
+                };
+                if pos.y &lt; 0
+                    || pos.y as u16 &gt;= GRID_HEIGHT
+                {
+                    game_end_writer.send(GameEndEvent::GameOver);
+                }
+            });
+        }
+        // ...
+    }
+}
+</code></pre>
+<p>Próximo teste é verificar se o mesmo acontece se movendo para esquerda e para a direita. Começamos pela esquerda:</p>
+<pre><code class="language-rs">#[test]
+fn game_end_event_with_game_over_when_moving_left() {
+    // Setup
+    let mut app = App::new();
+
+    // Add systems
+    app.insert_resource(Segments::default())
+        .insert_resource(LastTailPosition::default())
+        .add_event::&lt;GameEndEvent&gt;()
+        .add_startup_system(snake::spawn_system)
+        .add_system(snake::movement_system)
+        .add_system(snake::movement_input_system.before(snake::movement_system))
+        .add_system(game_over_system.after(snake::movement_system));
+
+    // Add new input resource
+    let mut input = Input::&lt;KeyCode&gt;::default();
+    input.press(KeyCode::A);
+    app.insert_resource(input);
+
+    // Run systems again
+    app.update(); // x: 2, y: 3
+    app.update(); // x: 1, y: 3
+    app.update(); // x: 0, y: 3
+
+    let mut query = app.world.query::&lt;&amp;GameEndEvent&gt;();
+    assert_eq!(query.iter(&amp;app.world).count(), 0);
+
+    app.update(); // x: -1, y: 3
+
+    let mut query = app.world.query::&lt;&amp;GameEndEvent&gt;();
+    assert_eq!(query.iter(&amp;app.world).count(), 1);
+
+}
+</code></pre>
+<p>Com isso adicionamos a verificação se <code>head.position</code> não é menor que zero:</p>
+<pre><code class="language-rs">pub fn movement_system(
+    // ...
+) {
+    // ...
+    if let Some((id, head)) = heads.iter().next() {
+        // ...
+        if game_end.is_empty() {  // &lt;-- if verificando se houve um evento de fimd e jogo
+            let _ = positions.get_mut(id).map(|(_, _segment, mut pos)| {
+                match &amp;head.direction {
+                    // ...
+                };
+                if pos.x &lt; 0 // &lt;-- Nova Verificação
+                    || pos.y &lt; 0
+                    || pos.y as u16 &gt;= GRID_HEIGHT
+                {
+                    game_end_writer.send(GameEndEvent::GameOver);
+                }
+            });
+        }
+        // ...
+    }
+}
+</code></pre>
+<p>Depois, repetimos o teste se movendo para direita e com uma verificação se <code>head.position.x</code> maior ou igual a <code>GRID_WIDTH</code>:</p>
+<pre><code class="language-rs">#[test]
+fn game_end_event_with_game_over_when_moving_right() {
+    // Setup
+    let mut app = App::new();
+
+    // Add systems
+    app.insert_resource(Segments::default())
+        .insert_resource(LastTailPosition::default())
+        .add_event::&lt;GameEndEvent&gt;()
+        .add_startup_system(snake::spawn_system)
+        .add_system(snake::movement_system)
+        .add_system(snake::movement_input_system.before(snake::movement_system))
+        .add_system(game_over_system.after(snake::movement_system));
+
+    // Add new input resource
+    let mut input = Input::&lt;KeyCode&gt;::default();
+    input.press(KeyCode::D);
+    app.insert_resource(input);
+
+    // Run systems again
+    app.update(); // x: 4, y: 3
+    app.update(); // x: 5, y: 3
+    app.update(); // x: 6, y: 3
+    app.update(); // x: 7, y: 3
+    app.update(); // x: 8, y: 3
+    app.update(); // x: 9, y: 3
+    app.update(); // x: 10, y: 3
+
+    let mut query = app.world.query::&lt;&amp;GameEndEvent&gt;();
+    assert_eq!(query.iter(&amp;app.world).count(), 1);
+}
+</code></pre>
+<pre><code class="language-rs">pub fn movement_system(
+    // ...
+) {
+    // ...
+    if let Some((id, head)) = heads.iter().next() {
+        // ...
+        if game_end.is_empty() {  
+            let _ = positions.get_mut(id).map(|(_, _segment, mut pos)| {
+                match &amp;head.direction {
+                    // ...
+                };
+                if pos.x &lt; 0
+                    || pos.y &lt; 0
+                    || pos.x as u16 &gt;= GRID_WIDTH // &lt;-- Nova verificaçnao
+                    || pos.y as u16 &gt;= GRID_HEIGHT
+                {
+                    game_end_writer.send(GameEndEvent::GameOver);
+                }
+            });
+        }
+        // ...
+    }
+}
+</code></pre>
+<h2 id="colidindo-com-o-rabo"><a class="header" href="#colidindo-com-o-rabo">Colidindo com o rabo</a></h2>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../part-2/07-rabo.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../part-2/07-rabo.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </body>
+</html>
