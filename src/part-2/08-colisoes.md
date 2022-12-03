@@ -336,3 +336,55 @@ pub fn movement_system(
 ```
 
 ## Colidindo com o rabo
+
+Como mencionei antes, escrever um teste para este cenário é um pouco mais trabalhoso que eu gostariae acaba sendo mais fácil fazer com alguma ferramenta de testes automatizados, mas caso você queira um desafio, para escrever este teste você pode executar o sistema de spawn de segmentos (`spawn_segment_system`) com posições, `Position`, especificas e ao realizar um update a posição de `Head` vai ser igual a posição de um elemento do rabo. Agora vamos ao código, é uma mudança muito simples em movement system, basta adicionarmos mais uma cláusula `if` que checa se a posição de `Head` é a mesma que qualquer posição de `Segment`, infelizmente não temos uma estrutura de dados que possui todas a `Positions` com `Segments` identificadas, mas possuimos `positions_clone` que é um `HashMap<Entity, Position>`. 
+
+Para descobrirmos o valor de position que não contém `Head` precisamos filtrar por todas `Positions`, cuja `Entity` correspondente não é igual ao `id` de `Head`, algo como `positions_clone.iter().filter(|(k, _)| k != &&id)`. Com isso, teremos um iterável que possui todos os pares `Entity, Position` que não correspondem ao conjunto `Entity, Position, Head` e podemos continuar iterando somente com `Positions` adicionando `.map(|(_, v)| v)`, para depois verificamos se existe qualquer `Position` que equivale ao par `Head, Position`, utilizando o valor da variável `pos`, `.any(|segment_position| &*pos == segment_position)`.  Adicionamos esta lógica logo após o outro if de game over e publicamos outro `GameEndEvent::GameOver`:
+
+```rs
+pub fn movement_system(
+    segments: ResMut<Segments>,
+    mut last_tail_position: ResMut<LastTailPosition>,
+    mut game_end_writer: EventWriter<GameEndEvent>,
+    heads: Query<(Entity, &Head)>,
+    mut positions: Query<(Entity, &Segment, &mut Position)>,
+    game_end: Query<&GameEndEvent>,
+) {
+    let positions_clone: HashMap<Entity, Position> = positions
+        .iter()
+        .map(|(entity, _segment, position)| (entity, position.clone()))
+        .collect();
+    if let Some((id, head)) = heads.iter().next() {
+        // ...
+        if game_end.is_empty() {
+            let _ = positions.get_mut(id).map(|(_, _segment, mut pos)| {
+                match &head.direction {
+                    // ...
+                };
+                if pos.x < 0
+                    || pos.y < 0
+                    || pos.x as u16 >= GRID_WIDTH
+                    || pos.y as u16 >= GRID_HEIGHT
+                {
+                    game_end_writer.send(GameEndEvent::GameOver);
+                }
+
+                if positions_clone.iter()
+                    .filter(|(k, _)| k != &&id)
+                    .map(|(_, v)| v)
+                    .any(|segment_position| &*pos == segment_position)
+                {
+                    game_end_writer.send(GameEndEvent::GameOver);
+                }
+            });
+        }
+        // ...
+    }
+}
+```
+
+Agora é hora de um teste manual e voilá, "a cobra morde o rabo!". Proxima colisão que devemos impedir é a de comidas surgindo em posições já ocupadas. 
+
+## Colisões de surgimento de comdias
+
+Particularmente não sou fã dessa, pois na minha concepção uma comida deveria poder surgir embaixo da cobra, desde que não seja na cabeça, mas vale a explicação pelo exemplo.

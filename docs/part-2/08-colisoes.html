@@ -447,6 +447,51 @@ fn game_end_event_with_game_over_when_moving_right() {
 }
 </code></pre>
 <h2 id="colidindo-com-o-rabo"><a class="header" href="#colidindo-com-o-rabo">Colidindo com o rabo</a></h2>
+<p>Como mencionei antes, escrever um teste para este cenário é um pouco mais trabalhoso que eu gostariae acaba sendo mais fácil fazer com alguma ferramenta de testes automatizados, mas caso você queira um desafio, para escrever este teste você pode executar o sistema de spawn de segmentos (<code>spawn_segment_system</code>) com posições, <code>Position</code>, especificas e ao realizar um update a posição de <code>Head</code> vai ser igual a posição de um elemento do rabo. Agora vamos ao código, é uma mudança muito simples em movement system, basta adicionarmos mais uma cláusula <code>if</code> que checa se a posição de <code>Head</code> é a mesma que qualquer posição de <code>Segment</code>, infelizmente não temos uma estrutura de dados que possui todas a <code>Positions</code> com <code>Segments</code> identificadas, mas possuimos <code>positions_clone</code> que é um <code>HashMap&lt;Entity, Position&gt;</code>. </p>
+<p>Para descobrirmos o valor de position que não contém <code>Head</code> precisamos filtrar por todas <code>Positions</code>, cuja <code>Entity</code> correspondente não é igual ao <code>id</code> de <code>Head</code>, algo como <code>positions_clone.iter().filter(|(k, _)| k != &amp;&amp;id)</code>. Com isso, teremos um iterável que possui todos os pares <code>Entity, Position</code> que não correspondem ao conjunto <code>Entity, Position, Head</code> e podemos continuar iterando somente com <code>Positions</code> adicionando <code>.map(|(_, v)| v)</code>, para depois verificamos se existe qualquer <code>Position</code> que equivale ao par <code>Head, Position</code>, utilizando o valor da variável <code>pos</code>, <code>.any(|segment_position| &amp;*pos == segment_position)</code>.  Adicionamos esta lógica logo após o outro if de game over e publicamos outro <code>GameEndEvent::GameOver</code>:</p>
+<pre><code class="language-rs">pub fn movement_system(
+    segments: ResMut&lt;Segments&gt;,
+    mut last_tail_position: ResMut&lt;LastTailPosition&gt;,
+    mut game_end_writer: EventWriter&lt;GameEndEvent&gt;,
+    heads: Query&lt;(Entity, &amp;Head)&gt;,
+    mut positions: Query&lt;(Entity, &amp;Segment, &amp;mut Position)&gt;,
+    game_end: Query&lt;&amp;GameEndEvent&gt;,
+) {
+    let positions_clone: HashMap&lt;Entity, Position&gt; = positions
+        .iter()
+        .map(|(entity, _segment, position)| (entity, position.clone()))
+        .collect();
+    if let Some((id, head)) = heads.iter().next() {
+        // ...
+        if game_end.is_empty() {
+            let _ = positions.get_mut(id).map(|(_, _segment, mut pos)| {
+                match &amp;head.direction {
+                    // ...
+                };
+                if pos.x &lt; 0
+                    || pos.y &lt; 0
+                    || pos.x as u16 &gt;= GRID_WIDTH
+                    || pos.y as u16 &gt;= GRID_HEIGHT
+                {
+                    game_end_writer.send(GameEndEvent::GameOver);
+                }
+
+                if positions_clone.iter()
+                    .filter(|(k, _)| k != &amp;&amp;id)
+                    .map(|(_, v)| v)
+                    .any(|segment_position| &amp;*pos == segment_position)
+                {
+                    game_end_writer.send(GameEndEvent::GameOver);
+                }
+            });
+        }
+        // ...
+    }
+}
+</code></pre>
+<p>Agora é hora de um teste manual e voilá, &quot;a cobra morde o rabo!&quot;. Proxima colisão que devemos impedir é a de comidas surgindo em posições já ocupadas. </p>
+<h2 id="colisões-de-surgimento-de-comdias"><a class="header" href="#colisões-de-surgimento-de-comdias">Colisões de surgimento de comdias</a></h2>
+<p>Particularmente não sou fã dessa, pois na minha concepção uma comida deveria poder surgir embaixo da cobra, desde que não seja na cabeça, mas vale a explicação pelo exemplo.</p>
 
                     </main>
 
