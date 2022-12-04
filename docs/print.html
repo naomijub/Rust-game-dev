@@ -82,7 +82,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="0-capa.html"><strong aria-hidden="true">1.</strong> Capa</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="01-quemsou.html"><strong aria-hidden="true">1.1.</strong> Quem sou eu? (Sobre a autora)</a></li></ol></li><li class="chapter-item expanded "><a href="part-1/00-capa.html"><strong aria-hidden="true">2.</strong> Conceitos Básicos</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="part-1/01-arq.html"><strong aria-hidden="true">2.1.</strong> Arquitetura de servidores</a></li><li class="chapter-item expanded "><a href="part-1/02-prd-rec.html"><strong aria-hidden="true">2.2.</strong> Predição e Reconciliação</a></li><li class="chapter-item expanded "><a href="part-1/03-interpolacao.html"><strong aria-hidden="true">2.3.</strong> Interpolação de Entidades</a></li><li class="chapter-item expanded "><a href="part-1/04-lag.html"><strong aria-hidden="true">2.4.</strong> Compensacão de Lag</a></li></ol></li><li class="chapter-item expanded "><a href="part-2/00-intro.html"><strong aria-hidden="true">3.</strong> Multiplayer Snake Game</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="part-2/01-bevy.html"><strong aria-hidden="true">3.1.</strong> Sobre a Bevy</a></li><li class="chapter-item expanded "><a href="part-2/02-ecs.html"><strong aria-hidden="true">3.2.</strong> Entity Component System</a></li><li class="chapter-item expanded "><a href="part-2/03-cabeca.html"><strong aria-hidden="true">3.3.</strong> A Cabeça da Cobra</a></li><li class="chapter-item expanded "><a href="part-2/04-grid.html"><strong aria-hidden="true">3.4.</strong> Grade de Movimento</a></li><li class="chapter-item expanded "><a href="part-2/05-spawnfood.html"><strong aria-hidden="true">3.5.</strong> Gerador de Comidas</a></li><li class="chapter-item expanded "><a href="part-2/06-cadencia.html"><strong aria-hidden="true">3.6.</strong> Melhorando a Cadência do Movimento</a></li><li class="chapter-item expanded "><a href="part-2/07-rabo.html"><strong aria-hidden="true">3.7.</strong> Adicionando um Rabo a Cobra</a></li><li class="chapter-item expanded "><a href="part-2/08-colisoes.html"><strong aria-hidden="true">3.8.</strong> Colisões</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="0-capa.html"><strong aria-hidden="true">1.</strong> Capa</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="01-quemsou.html"><strong aria-hidden="true">1.1.</strong> Quem sou eu? (Sobre a autora)</a></li></ol></li><li class="chapter-item expanded "><a href="part-1/00-capa.html"><strong aria-hidden="true">2.</strong> Conceitos Básicos</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="part-1/01-arq.html"><strong aria-hidden="true">2.1.</strong> Arquitetura de servidores</a></li><li class="chapter-item expanded "><a href="part-1/02-prd-rec.html"><strong aria-hidden="true">2.2.</strong> Predição e Reconciliação</a></li><li class="chapter-item expanded "><a href="part-1/03-interpolacao.html"><strong aria-hidden="true">2.3.</strong> Interpolação de Entidades</a></li><li class="chapter-item expanded "><a href="part-1/04-lag.html"><strong aria-hidden="true">2.4.</strong> Compensacão de Lag</a></li></ol></li><li class="chapter-item expanded "><a href="part-2/00-intro.html"><strong aria-hidden="true">3.</strong> Multiplayer Snake Game</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="part-2/01-bevy.html"><strong aria-hidden="true">3.1.</strong> Sobre a Bevy</a></li><li class="chapter-item expanded "><a href="part-2/02-ecs.html"><strong aria-hidden="true">3.2.</strong> Entity Component System</a></li><li class="chapter-item expanded "><a href="part-2/03-cabeca.html"><strong aria-hidden="true">3.3.</strong> A Cabeça da Cobra</a></li><li class="chapter-item expanded "><a href="part-2/04-grid.html"><strong aria-hidden="true">3.4.</strong> Grade de Movimento</a></li><li class="chapter-item expanded "><a href="part-2/05-spawnfood.html"><strong aria-hidden="true">3.5.</strong> Gerador de Comidas</a></li><li class="chapter-item expanded "><a href="part-2/06-cadencia.html"><strong aria-hidden="true">3.6.</strong> Melhorando a Cadência do Movimento</a></li><li class="chapter-item expanded "><a href="part-2/07-rabo.html"><strong aria-hidden="true">3.7.</strong> Adicionando um Rabo a Cobra</a></li><li class="chapter-item expanded "><a href="part-2/08-colisoes.html"><strong aria-hidden="true">3.8.</strong> Colisões</a></li><li class="chapter-item expanded "><a href="part-2/09-migrando-versoes.html"><strong aria-hidden="true">3.9.</strong> Migrando versões da Bevy</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -2729,7 +2729,123 @@ fn game_end_event_with_game_over_when_moving_right() {
 </code></pre>
 <p>Agora é hora de um teste manual e voilá, &quot;a cobra morde o rabo!&quot;. Proxima colisão que devemos impedir é a de comidas surgindo em posições já ocupadas. </p>
 <h2 id="colisões-de-surgimento-de-comdias"><a class="header" href="#colisões-de-surgimento-de-comdias">Colisões de surgimento de comdias</a></h2>
-<p>Particularmente não sou fã dessa, pois na minha concepção uma comida deveria poder surgir embaixo da cobra, desde que não seja na cabeça, mas vale a explicação pelo exemplo.</p>
+<p>Particularmente não sou fã dessa, pois na minha concepção uma comida deveria poder surgir embaixo da cobra, desde que não seja na cabeça, mas vale a explicação pelo exemplo. Assim, o teste que vamos escrever é bastante simples, pois vamos apenas checar se a quantidade de entidades com os componentes <code>Food</code> e <code>Position</code> é <code>1</code>, apesar de termos dois updates. Podemos fazer isso por conta  da condição de <code>spawn</code> associada a testes em <code>food::spawn_system</code>, quando utilizados <code>if cfg!(test)</code> com valores pré-fixados.</p>
+<pre><code class="language-rs">#[test]
+fn food_only_spawns_once() {
+    // Setup
+    let mut app = App::new();
+
+    // Add systems
+    app.add_system(spawn_system);
+
+
+    // Run systems
+    app.update();
+
+    let mut query = app.world.query::&lt;(&amp;Food, &amp;Position)&gt;();
+    assert_eq!(query.iter(&amp;app.world).count(), 1);
+
+    // Run systems
+    app.update();
+
+    let mut query = app.world.query::&lt;(&amp;Food, &amp;Position)&gt;();
+    assert_eq!(query.iter(&amp;app.world).count(), 1)
+}
+</code></pre>
+<p>A solução para este teste é bastante simples, Precisamos obter uma posição que não coincide com outra posição, fazemos isso com um iterador infinito, que procura pela primeira posição que não coincide com outra. Esse iterator pode ser feita com um <code>Range</code> do tipo <code>(0..)</code> (de <code>0</code> a infinito), depois criamos instâncias aleatórias de <code>Position</code> e procuramos por uma <code>Position</code> que não está contida em um <code>HashSet</code> de <code>Position</code>.</p>
+<pre><code class="language-rs">(0..)
+    .map(|_| Position {
+        x: if cfg!(test) {
+            3
+        } else {
+            (random::&lt;u16&gt;() % GRID_WIDTH) as i16
+        },
+        y: if cfg!(test) {
+            5
+        } else {
+            (random::&lt;u16&gt;() % GRID_HEIGHT) as i16
+        },
+    })
+    .find(|position| !positions_set.contains(position))
+</code></pre>
+<p><code>positions_set</code> é o <code>HashSet&lt;Position&gt;</code> que falamos antes, podemos criar ele através de <code>let positions_set: HashSet&lt;&amp;Position&gt; = positions.iter().collect();</code>, porém <code>Position</code> não implementa a trait <code>Hash</code>, que é facilmente resolvível adicionando a macro <code>Hash</code> ao <code>derive</code> de <code>Position</code>:</p>
+<pre><code class="language-rs">#[derive(Component, Clone, Debug, PartialEq, Eq, Hash)]
+pub struct Position {
+    pub x: i16,
+    pub y: i16,
+}
+</code></pre>
+<p>Agora, precisamos adicionar uma comida ao jogo apenas se o retorno de find é existente, <code>Option::Some</code>:</p>
+<pre><code class="language-rs">pub fn spawn_system(mut commands: Commands, positions: Query&lt;&amp;Position&gt;) {
+    let positions_set: HashSet&lt;&amp;Position&gt; = positions.iter().collect();
+
+    if let Some(position) = (0..)
+        .map(|_| Position {
+            x: if cfg!(test) {
+                3
+            } else {
+                (random::&lt;u16&gt;() % GRID_WIDTH) as i16
+            },
+            y: if cfg!(test) {
+                5
+            } else {
+                (random::&lt;u16&gt;() % GRID_HEIGHT) as i16
+            },
+        })
+        .find(|position| !positions_set.contains(position))
+    {
+        commands
+            .spawn_bundle(SpriteBundle {
+                sprite: Sprite {
+                    color: FOOD_COLOR,
+                    ..default()
+                },
+                ..default()
+            })
+            .insert(Food)
+            .insert(position)
+            .insert(Size::square(0.65));
+    }
+}
+</code></pre>
+<p>Para resolvermos esse problema, encapsulamos nosso iterador infinito em um <code>if let</code> e em caso de <code>Option::Some</code>, adicionamos uma nova comida. Porém, do jeito que escrevemos o iterador infinito vai quebrar os testes já que nunca vai encontrar uma <code>Position</code> válida em testes. Assim, podemos fazer uma aproximação para o tamanho do grid, <code>(0..(GRID_WIDTH * GRID_HEIGHT))</code>:</p>
+<pre><code class="language-rs">pub fn spawn_system(mut commands: Commands, positions: Query&lt;&amp;Position&gt;) {
+    let positions_set: HashSet&lt;&amp;Position&gt; = positions.iter().collect();
+
+    if let Some(position) = (0..(GRID_WIDTH * GRID_HEIGHT))
+        .map(|_| Position {
+            x: if cfg!(test) {
+                3
+            } else {
+                (random::&lt;u16&gt;() % GRID_WIDTH) as i16
+            },
+            y: if cfg!(test) {
+                5
+            } else {
+                (random::&lt;u16&gt;() % GRID_HEIGHT) as i16
+            },
+        })
+        .find(|position| !positions_set.contains(position))
+    {
+        commands
+            .spawn_bundle(SpriteBundle {
+                sprite: Sprite {
+                    color: FOOD_COLOR,
+                    ..default()
+                },
+                ..default()
+            })
+            .insert(Food)
+            .insert(position)
+            .insert(Size::square(0.65));
+    }
+}
+</code></pre>
+<p>Agora sim, testes passando e comidas surgem de forma eficiente. Próximo passo antes de começar o multiplayer será atualizar o jogo para as duas versões mais novas da Bevy (0.8 e 0.9).</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="migrando-versões-da-bevy"><a class="header" href="#migrando-versões-da-bevy">Migrando versões da Bevy</a></h1>
+<p>A equipe da Bevy fez um trabalho sensacional auxiliando equipes que usam a engine a manter seus códigos atulizados com as novas versões e guias futuros podem ser encontrados em https://bevyengine.org/learn/book/migration-guides/. Neste momento a última versão é a 0.9, portanto migraremos para versão 0.8 e depois para 0.9.</p>
+<h2 id="migrando-para-versão-08"><a class="header" href="#migrando-para-versão-08">Migrando para versão 0.8</a></h2>
+<h2 id="migrando-para-versão-09"><a class="header" href="#migrando-para-versão-09">Migrando para versão 0.9</a></h2>
 
                     </main>
 

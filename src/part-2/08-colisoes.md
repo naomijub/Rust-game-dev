@@ -387,4 +387,131 @@ Agora é hora de um teste manual e voilá, "a cobra morde o rabo!". Proxima coli
 
 ## Colisões de surgimento de comdias
 
-Particularmente não sou fã dessa, pois na minha concepção uma comida deveria poder surgir embaixo da cobra, desde que não seja na cabeça, mas vale a explicação pelo exemplo.
+Particularmente não sou fã dessa, pois na minha concepção uma comida deveria poder surgir embaixo da cobra, desde que não seja na cabeça, mas vale a explicação pelo exemplo. Assim, o teste que vamos escrever é bastante simples, pois vamos apenas checar se a quantidade de entidades com os componentes `Food` e `Position` é `1`, apesar de termos dois updates. Podemos fazer isso por conta  da condição de `spawn` associada a testes em `food::spawn_system`, quando utilizados `if cfg!(test)` com valores pré-fixados.
+
+```rs
+#[test]
+fn food_only_spawns_once() {
+    // Setup
+    let mut app = App::new();
+
+    // Add systems
+    app.add_system(spawn_system);
+
+
+    // Run systems
+    app.update();
+
+    let mut query = app.world.query::<(&Food, &Position)>();
+    assert_eq!(query.iter(&app.world).count(), 1);
+
+    // Run systems
+    app.update();
+
+    let mut query = app.world.query::<(&Food, &Position)>();
+    assert_eq!(query.iter(&app.world).count(), 1)
+}
+```
+
+A solução para este teste é bastante simples, Precisamos obter uma posição que não coincide com outra posição, fazemos isso com um iterador infinito, que procura pela primeira posição que não coincide com outra. Esse iterator pode ser feita com um `Range` do tipo `(0..)` (de `0` a infinito), depois criamos instâncias aleatórias de `Position` e procuramos por uma `Position` que não está contida em um `HashSet` de `Position`.
+
+```rs
+(0..)
+    .map(|_| Position {
+        x: if cfg!(test) {
+            3
+        } else {
+            (random::<u16>() % GRID_WIDTH) as i16
+        },
+        y: if cfg!(test) {
+            5
+        } else {
+            (random::<u16>() % GRID_HEIGHT) as i16
+        },
+    })
+    .find(|position| !positions_set.contains(position))
+```
+
+`positions_set` é o `HashSet<Position>` que falamos antes, podemos criar ele através de `let positions_set: HashSet<&Position> = positions.iter().collect();`, porém `Position` não implementa a trait `Hash`, que é facilmente resolvível adicionando a macro `Hash` ao `derive` de `Position`:
+
+```rs
+#[derive(Component, Clone, Debug, PartialEq, Eq, Hash)]
+pub struct Position {
+    pub x: i16,
+    pub y: i16,
+}
+```
+
+Agora, precisamos adicionar uma comida ao jogo apenas se o retorno de find é existente, `Option::Some`:
+
+```rs
+pub fn spawn_system(mut commands: Commands, positions: Query<&Position>) {
+    let positions_set: HashSet<&Position> = positions.iter().collect();
+
+    if let Some(position) = (0..)
+        .map(|_| Position {
+            x: if cfg!(test) {
+                3
+            } else {
+                (random::<u16>() % GRID_WIDTH) as i16
+            },
+            y: if cfg!(test) {
+                5
+            } else {
+                (random::<u16>() % GRID_HEIGHT) as i16
+            },
+        })
+        .find(|position| !positions_set.contains(position))
+    {
+        commands
+            .spawn_bundle(SpriteBundle {
+                sprite: Sprite {
+                    color: FOOD_COLOR,
+                    ..default()
+                },
+                ..default()
+            })
+            .insert(Food)
+            .insert(position)
+            .insert(Size::square(0.65));
+    }
+}
+```
+
+Para resolvermos esse problema, encapsulamos nosso iterador infinito em um `if let` e em caso de `Option::Some`, adicionamos uma nova comida. Porém, do jeito que escrevemos o iterador infinito vai quebrar os testes já que nunca vai encontrar uma `Position` válida em testes. Assim, podemos fazer uma aproximação para o tamanho do grid, `(0..(GRID_WIDTH * GRID_HEIGHT))`:
+
+```rs
+pub fn spawn_system(mut commands: Commands, positions: Query<&Position>) {
+    let positions_set: HashSet<&Position> = positions.iter().collect();
+
+    if let Some(position) = (0..(GRID_WIDTH * GRID_HEIGHT))
+        .map(|_| Position {
+            x: if cfg!(test) {
+                3
+            } else {
+                (random::<u16>() % GRID_WIDTH) as i16
+            },
+            y: if cfg!(test) {
+                5
+            } else {
+                (random::<u16>() % GRID_HEIGHT) as i16
+            },
+        })
+        .find(|position| !positions_set.contains(position))
+    {
+        commands
+            .spawn_bundle(SpriteBundle {
+                sprite: Sprite {
+                    color: FOOD_COLOR,
+                    ..default()
+                },
+                ..default()
+            })
+            .insert(Food)
+            .insert(position)
+            .insert(Size::square(0.65));
+    }
+}
+```
+
+Agora sim, testes passando e comidas surgem de forma eficiente. Próximo passo antes de começar o multiplayer será atualizar o jogo para as duas versões mais novas da Bevy (0.8 e 0.9).

@@ -16,3 +16,4 @@
     - [Melhorando a Cadência do Movimento](part-2/06-cadencia.md)
     - [Adicionando um Rabo a Cobra](part-2/07-rabo.md)
     - [Colisões](part-2/08-colisoes.md)
+    - [Migrando versões da Bevy](part-2/09-migrando-versoes.md)
