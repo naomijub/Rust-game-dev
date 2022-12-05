@@ -145,7 +145,123 @@
                         <h1 id="migrando-versões-da-bevy"><a class="header" href="#migrando-versões-da-bevy">Migrando versões da Bevy</a></h1>
 <p>A equipe da Bevy fez um trabalho sensacional auxiliando equipes que usam a engine a manter seus códigos atulizados com as novas versões e guias futuros podem ser encontrados em https://bevyengine.org/learn/book/migration-guides/. Neste momento a última versão é a 0.9, portanto migraremos para versão 0.8 e depois para 0.9.</p>
 <h2 id="migrando-para-versão-08"><a class="header" href="#migrando-para-versão-08">Migrando para versão 0.8</a></h2>
+<p>Para iniciarmos a migração basta mudarmos a versão da <code>bevy</code> no Cargo.toml:</p>
+<pre><code class="language-toml">[dependencies]
+bevy = { version = &quot;0.8&quot;, features = [&quot;dynamic&quot;] }
+rand = &quot;0.7&quot;
+</code></pre>
+<p>Depois ao executar um <code>cargo check</code> veremos que já no arquivo <code>main.rs</code> há dois erros:</p>
+<ol>
+<li><code>OrthographicCameraBundle</code> é uma struct não declarada. Basta substituir <code>OrthographicCameraBundle::new_2d()</code> por <code>Camera2dBundle::default()</code>.</li>
+<li><code>FixedTimestep</code> não foi encontrado no módulo <code>core</code>. Isso acontece pois <code>FixedTimestep</code> e todas as coisas relacionadas a tempo foram movidas para o módulo time, assim mude o import para <code>use bevy::{time::FixedTimestep, prelude::*};</code>.</li>
+</ol>
+<p>Migração pronta!</p>
 <h2 id="migrando-para-versão-09"><a class="header" href="#migrando-para-versão-09">Migrando para versão 0.9</a></h2>
+<p>A migração para versão 0.9 é um pouco mais trabalhosa, pois algumas inferfaces da API mudaram.</p>
+<h3 id="spawn"><a class="header" href="#spawn">Spawn</a></h3>
+<p>Agora para utilizar a função <code>Commands.spawn</code> precisamos enviar uma tupla com quais serão os componentes spawnados, como era feito em  <code>spawn_bundle</code>, ou utilizar <code>spawn_empty</code> para criar uma entidade vazia. Além disso, <code>spawn_bundle</code> passa a ser deprecada. Assim a mudança fica:</p>
+<pre><code class="language-rs">// Antigo
+commands.spawn().insert_bundle((A, B, C));
+// Novo
+commands.spawn((A, B, C));
+</code></pre>
+<p>No nosso código, essa mudança reflete nos módulos <code>game.rs</code>:</p>
+<pre><code class="language-rs">pub fn game_over_system(mut commands: Commands, mut reader: EventReader&lt;GameEndEvent&gt;) {
+    if reader.iter().next().is_some() {
+        commands.spawn_empty().insert(GameEndEvent::GameOver);
+        println!(&quot;{}&quot;, GameEndEvent::GameOver);
+    }
+}
+</code></pre>
+<p>E mudamos <code>spawn_bundle</code> por <code>spawn</code> em <code>food.rs</code>, assim como em vários lugares de <code>snake.rs</code>:</p>
+<pre><code class="language-rs">pub fn spawn_system(mut commands: Commands, positions: Query&lt;&amp;Position&gt;) {
+    let positions_set: HashSet&lt;&amp;Position&gt; = positions.iter().collect();
+
+    if let Some(position) = (0..(GRID_WIDTH * GRID_HEIGHT))
+        .map(|_| Position {
+            x: if cfg!(test) {
+                3
+            } else {
+                (random::&lt;u16&gt;() % GRID_WIDTH) as i16
+            },
+            y: if cfg!(test) {
+                5
+            } else {
+                (random::&lt;u16&gt;() % GRID_HEIGHT) as i16
+            },
+        })
+        .find(|position| !positions_set.contains(position))
+    {
+        commands
+            .spawn(SpriteBundle {
+                sprite: Sprite {
+                    color: FOOD_COLOR,
+                    ..default()
+                },
+                ..default()
+            })
+            .insert(Food)
+            .insert(position)
+            .insert(Size::square(0.65));
+    }
+}
+</code></pre>
+<p>Outra possível otimização é:</p>
+<pre><code class="language-rs">commands
+    .spawn((SpriteBundle {
+        sprite: Sprite {
+            color: FOOD_COLOR,
+            ..default()
+        },
+        ..default()
+    }, Food, Size::square(0.65)))
+    .insert(position);
+</code></pre>
+<h3 id="resources"><a class="header" href="#resources">Resources</a></h3>
+<p>Uma mudança importante para resources é que agora todo resource precisa implementar a trait <code>Resource</code> através da macro derive, então no  módulo <code>snake.rs</code> precisamos adicionar:</p>
+<pre><code class="language-rs">#[derive(Default, Deref, DerefMut, Resource)] // &lt;-- Resource
+pub struct Segments(Vec&lt;Entity&gt;);
+
+#[derive(Default, Resource)] // &lt;-- Resource
+pub struct LastTailPosition(Option&lt;Position&gt;);
+</code></pre>
+<p>Além disso, o jeito de adicionar <code>WindowDescriptor</code> ao <code>App</code> mudou, pois agora o <code>WindowDescriptor</code> é parte do <code>WindowPlugin</code>, que deve ser configurado em <code>DefaultPlugins</code>:</p>
+<pre><code class="language-rs">fn main() {
+    App::new()
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+        window: WindowDescriptor {
+            title: &quot;Snake Game&quot;.to_string(),
+            width: 500.0,
+            height: 500.0,
+            ..default()
+        },
+        ..default()
+      }))
+        // REMOVER
+        // .insert_resource(WindowDescriptor {
+        //     title: &quot;Snake Game&quot;.to_string(),
+        //     width: 500.0,
+        //     height: 500.0,
+        //     ..default()
+        // })
+        // .add_plugins(DefaultPlugins)
+        .insert_resource(snake::Segments::default())
+        .insert_resource(snake::LastTailPosition::default())
+        .add_event::&lt;GrowthEvent&gt;()
+        .add_event::&lt;GameEndEvent&gt;()
+        .add_startup_system(setup_camera)
+        .add_startup_system(snake::spawn_system)
+        // ...
+}     
+</code></pre>
+<p>Last thing on handling <code>Window</code> resource, the <code>Window::new</code> function now receives an Optional <code>raw_handle</code>, então nos testes em <code>grid.rs</code> devemos remover <code>let raw_window_handle = Some(RawWindowHandle::Web(WebHandle::empty()));</code> e modificar Window para:</p>
+<pre><code class="language-rs"> let window = Window::new(
+    WindowId::new(),
+    &amp;descriptor, 400, 400, 1., None,
+    None, // &lt;--
+);
+</code></pre>
+<p>Migrações concluídas com esse código, caso haja incompatibilidade com uma nova versão, por favor abra uma <a href="https://github.com/naomijub/web-dev-rust-book/issues">issue</a> no repositório do github. </p>
 
                     </main>
 
