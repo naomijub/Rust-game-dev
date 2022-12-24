@@ -149,4 +149,4 @@ Last thing on handling `Window` resource, the `Window::new` function now receive
 );
 ```
 
-Migrações concluídas com esse código, caso haja incompatibilidade com uma nova versão, por favor abra uma [issue](https://github.com/naomijub/web-dev-rust-book/issues) no repositório do github. 
+Migrações concluídas com esse código, caso ocorra alguma incompatibilidade com uma versão nova, por favor abra uma [issue](https://github.com/naomijub/Rust-game-dev/issues) ou um PR nos repositórios do github [livro](https://github.com/naomijub/Rust-game-dev) e [codigo](https://github.com/naomijub/bevy-snake). 
