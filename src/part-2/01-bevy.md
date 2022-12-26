@@ -9,7 +9,7 @@ Bevy engine é uma das game engines mais promissoras do mercado e um grande esfo
 * Rápida, paralela e em Rust <3.
 * Compilação rápida
 
-A atual versão da Bevy é [![Crates.io](https://img.shields.io/crates/v/bevy.svg)](https://crates.io/crates/bevy) e este livro foi desenvolvido com a versão `0.7`.
+A atual versão da Bevy é [![Crates.io](https://img.shields.io/crates/v/bevy.svg)](https://crates.io/crates/bevy) e este livro foi desenvolvido com a versão `0.7`, mas contém guias de migração para as versões `0.8` e `0.9`. A compatibilidade com Rust esta garantida para a versão `1.66`.
 
 ## Iniciando o projeto
 

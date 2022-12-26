@@ -323,7 +323,7 @@ pub fn movement_system(
                 };
                 if pos.x < 0
                     || pos.y < 0
-                    || pos.x as u16 >= GRID_WIDTH // <-- Nova verificaçnao
+                    || pos.x as u16 >= GRID_WIDTH // <-- Nova verificação
                     || pos.y as u16 >= GRID_HEIGHT
                 {
                     game_end_writer.send(GameEndEvent::GameOver);
