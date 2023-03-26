@@ -1,13 +1,12 @@
 # Multiplayer Local
 
-**INICIALMENTE ESCRITO NA VERSAO 0.9 DA BEVY**
+**INICIALMENTE ESCRITO NA VERSÃO 0.9 DA BEVY**
 
-**CORRIGIR ACENTOS EM TECLADO COMPATIVEL**
-Primeiro passo para entendermos um jogo multiplayer é criarmos as regras para o jogo executar corretamente no modo multiplayer, podemos fazer isso adicionando mais um player de forma local. O suporte ao multiplayer exige uma pequena refatoração, que sera por onde comecaremos.
+Primeiro passo para entendermos um jogo multiplayer é criarmos as regras para o jogo executar corretamente no modo multiplayer, podemos fazer isso adicionando mais um player de forma local. O suporte ao multiplayer exige uma pequena refatoração, que será por onde começaremos.
 
 ## Refatorando
 
-Com a atualização do Rust para versão `1.66`, o linter do Rust sugeriu algumas novas refatorações bem simples, mas muito bem observadas no modulo `grid`. A primeira é na função `translate_position` e na função `scale_sprite` que possuiam um casting desnecessário, podendo-se remover o `as f32` das chamadas de funções `window.width()` e `window.height()`:
+Com a atualização do Rust para versão `1.66`, o linter do Rust sugeriu algumas novas refatorações bem simples, mas muito bem observadas no módulo `grid`. A primeira é na função `translate_position` e na função `scale_sprite` que possuíam um casting desnecessário, podendo-se remover o `as f32` das chamadas de funções `window.width()` e `window.height()`:
 
 ```rs
 // Grid.rs
@@ -46,7 +45,7 @@ fn translate_position(transform: &mut Transform, pos: &Position, window: &Window
 }
 ```
 
-A segunda refatoração é, no mesmo módulo, a simplificação da função `convert` para utilizar a função `mul_add` em vez de uma multiplicação seguida por uma adição. A vantagem do uso de `mul_add` é que reduz os erros por arrendondamento que poderiam ser causados pelo uso de `f32`:
+A segunda refatoração é, no mesmo módulo, a simplificação da função `convert` para utilizar a função `mul_add` em vez de uma multiplicação seguida por uma adição. A vantagem do uso de `mul_add` é que reduz os erros por arredondamento que poderiam ser causados pelo uso de `f32`:
 
 ```rs
 // grid.rs
@@ -65,7 +64,7 @@ fn convert(pos: f32, bound_window: f32, grid_side_lenght: f32) -> f32 {
 
 > **Trait `MulAdd`** equivale a representar `(self * a) + b` e tem como sintaxe `fn mul_add<A: Self, B: Self>(self, a: A, b: B) -> Self`.
 
-Outra refatoração que fiz foi para melhorar os resultados de testes em modo `release`  e em Windows, utilizando a biblioteca `approx = "0.5.1"`. Esta biblioteca garante uma comparação mais correta de epsilons de f32. Assim, podemos mudar todos os testes que contém comaprações de f32 para utilizar o `assert_relative_eq`, que recebe um epsilon de valor de erro na comparação:
+Outra refatoração que fiz foi para melhorar os resultados de testes em modo `release`  e em Windows, utilizando a biblioteca `approx = "0.5.1"`. Esta biblioteca garante uma comparação mais correta de epsilons de f32. Assim, podemos mudar todos os testes que contém comparações de f32 para utilizar o `assert_relative_eq`, que recebe um epsilon de valor de erro na comparação:
 
 ```rs
 // grid.rs
@@ -89,7 +88,7 @@ mod test {
 }
 ```
 
-Por último, vamos atualizar os testes com múltiplas chamadas de `app.update()`. Fazemos isso substituíndo todas as linhas por um `for` com range:
+Por último, vamos atualizar os testes com múltiplas chamadas de `app.update()`. Fazemos isso substituindo todas as linhas por um `for` com range:
 ```rs
 // Antes
 app.update(); // 3 + 1
@@ -200,7 +199,7 @@ Próximo passo é adicionarmos uma referência ao vetor de segmentos da segunda 
 
 ### Sistema de Geração de Cobras (Spawn)
 
-Agora nosso sistema de spawn exige que segments seja um Array com dois vetores de entidades, para isso podemos refatorar o código dentro de `spawn_system` para ser reutilizável. Fazemos isso criando a função privada `spawn_entity_with_segment`, que recebe uma referência mutável de `Commands` e um `u8` que corresponderá ao id do Player. É importante que o segmento da cabeça da cobra seja ciente de qual seu `player_id`, para isso adicionamos essa informação nos componentes da primeira entidade, `.insert(components::Player { id: player_id })`, e que player 1 e player 2 não iniciem na mesma posição, para isso utilizamos um `if/else` na posição X do componente `Position`, defindindo a posição do player 1 em `x = 3`, e do player 2 em `x = GRID_WIDTH - 3`, `if player_id == 0 { 3 } else { (GRID_WIDTH - 3) as i16 }`:
+Agora nosso sistema de spawn exige que segments seja um Array com dois vetores de entidades, para isso podemos refatorar o código dentro de `spawn_system` para ser reutilizável. Fazemos isso criando a função privada `spawn_entity_with_segment`, que recebe uma referência mutável de `Commands` e um `u8` que corresponderá ao id do Player. É importante que o segmento da cabeça da cobra seja ciente de qual seu `player_id`, para isso adicionamos essa informação nos componentes da primeira entidade, `.insert(components::Player { id: player_id })`, e que player 1 e player 2 não iniciem na mesma posição, para isso utilizamos um `if/else` na posição X do componente `Position`, definindo a posição do player 1 em `x = 3`, e do player 2 em `x = GRID_WIDTH - 3`, `if player_id == 0 { 3 } else { (GRID_WIDTH - 3) as i16 }`:
 
 ```rs
 fn spawn_entity_with_segment(commands: &mut Commands, player_id: u8) -> Vec<Entity> {
@@ -328,7 +327,7 @@ pub fn movement_input_system(
 }
 ```
 
-A mudança no `movement_system` é essencialmente a mesma, agora precisamos adicionar a informação de `Player` na `Query` de `heads`, `heads: Query<(Entity, &Head, &Player)>,`, e refatorar a iteração sobre `heads` para ser um `for` em vez de um `.next()`, considerando que agora possuimos o `id` de `Player`, que causa colisão com o antigo `id`, que mudei para `entity_id`. Note que estamos destruturando o valor de `Player` em `id` ao utilizarmos `Player { id }` no `for` loop. A única outra grande mudança é que agora para acessarmos `segments`, precisamos indicar qual o `player_id` do segment, fazemos isso substituindo as referências a `segments` por `segments[player_id]`:
+A mudança no `movement_system` é essencialmente a mesma, agora precisamos adicionar a informação de `Player` na `Query` de `heads`, `heads: Query<(Entity, &Head, &Player)>,`, e refatorar a iteração sobre `heads` para ser um `for` em vez de um `.next()`, considerando que agora possuímos o `id` de `Player`, que causa colisão com o antigo `id`, que mudei para `entity_id`. Note que estamos destruturando o valor de `Player` em `id` ao utilizarmos `Player { id }` no `for` loop. A única outra grande mudança é que agora para acessarmos `segments`, precisamos indicar qual o `player_id` do segment, fazemos isso substituindo as referências a `segments` por `segments[player_id]`:
 
 ```rs
 pub fn movement_system(
@@ -398,7 +397,7 @@ pub fn movement_system(
 
 ### Sistema de crescimento
 
-A única mudança realmente significativa no sistema de crescimento é que o evento `GrowthEvent` precisa ter informação de qual player deve crescer, fazmos isso adicionando a informação de player ao `GrowthEvent`:
+A única mudança realmente significativa no sistema de crescimento é que o evento `GrowthEvent` precisa ter informação de qual player deve crescer, fazemos isso adicionando a informação de player ao `GrowthEvent`:
 
 ```rs
 pub struct GrowthEvent {
