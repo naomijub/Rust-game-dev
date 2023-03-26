@@ -149,4 +149,216 @@ Last thing on handling `Window` resource, the `Window::new` function now receive
 );
 ```
 
-Migrações concluídas com esse código, caso ocorra alguma incompatibilidade com uma versão nova, por favor abra uma [issue](https://github.com/naomijub/Rust-game-dev/issues) ou um PR nos repositórios do github [livro](https://github.com/naomijub/Rust-game-dev) e [codigo](https://github.com/naomijub/bevy-snake). 
+## Migrando para versão 0.10
+
+Primeiro passo é utilizarmos `cargo outdated -R` para identificarmos quais bibliotecas podem ser atualizadas. O resultado eh:
+
+```sh
+$ cargo outdated -R
+warning: Feature dynamic of package bevy has been obsolete in version 0.10.0
+Name               Project  Compat  Latest  Kind         Platform
+----               -------  ------  ------  ----         --------
+bevy               0.9.1    ---     0.10.0  Normal       ---
+proptest           1.0.0    1.1.0   1.1.0   Development  ---
+rand               0.7.3    ---     0.8.5   Normal       ---
+raw-window-handle  0.4.3    ---     0.5.1   Development  ---
+```
+
+Assim, podemos iniciar subindo as versões das bibliotecas que não são a Bevy. Iniciamos por `proptest`, `rand` e `raw-window-handle`, que ao subirmos para as versões `1.1.0`, `0.8.5` e `remover`, respectivamente. Como `proptest` não trouxe nenhuma quebra de compatibilidade e estamos utilizando apenas a API mais simples de `rand`, não observamos nenhum problema de compatibilidade. 
+
+Proximo passo eh seguir os passos do tutorial de [migracao 0.9->0.10](https://bevyengine.org/learn/migration-guides/0.9-0.10/) e atualizarmos a versao da `Bevy` para `0.10`. Ao fazermos essa atualização, a primeira grande mudança é a feature `dynamic`, que agora se chama `dynamic_linking`:
+
+```toml
+[dependencies]
+bevy = { version = "0.10", features = ["dynamic_linking"] }
+rand = "0.8.5"
+``` 
+
+Com o upgrade de versão para a `0.10`, percebemos que os módulos `grid`, `main` e `snake`  contém erros. Começaremos pelo módulo `grid` que trata dos erros relacionados a `Window`, j'a que agora `Windows` passou a ser uma entidade e sua construção ficou simplificada. Assim, nos testes `translate_position_to_window` e `transform_has_correct_scale_for_window` podemos simplificar a criação de ` Window` com (e removendo o `WindowId` do `use`):
+
+```rs
+// grid.rs#test
+fn transform_has_correct_scale_for_window() {
+    // ...
+    // Antiga versão
+    // let mut descriptor = WindowDescriptor::default();
+    // descriptor.height = 200.;
+    // descriptor.width = 200.;
+    // let window = Window::new(WindowId::new(), &descriptor, 200, 200, 1., None, None);
+
+    let window = Window {
+        resolution: WindowResolution::new(200., 200.),
+        ..default()
+    };    
+    // ...
+}
+
+fn translate_position_to_window() {
+    // ...
+    // Antiga versão
+    // let mut descriptor = Window::default();
+    // descriptor.
+    // descriptor.height = 400.;
+    // descriptor.width = 400.;
+    // let window = Window::new(WindowId::new(), &descriptor, 400, 400, 1., None, None);
+    
+    let window = Window {
+        resolution: WindowResolution::new(400., 400.),
+        ..default()
+    };
+    // ...
+}
+```
+
+Já nas funções `size_scaling` e `position_translation` a mudança é bastante simples, pois `Window` deixou de ser um recurso (`Res`) para ser uma entidade, que devemos manusear com uma query pela window primária, `primary_window: Query<&Window, With<PrimaryWindow>>`:
+
+```rs
+// grid.rs
+
+use crate::components::{Position, Size};
+use bevy::{prelude::*, window::PrimaryWindow};
+
+// ...
+
+#[allow(clippy::missing_panics_doc)]
+#[allow(clippy::needless_pass_by_value)]
+pub fn size_scaling(primary_window: Query<&Window, With<PrimaryWindow>>, mut q: Query<(&Size, &mut Transform)>) {
+    let window = primary_window.get_single().unwrap();
+    for (sprite_size, mut transform) in q.iter_mut() {
+        scale_sprite(transform.as_mut(), sprite_size, window);
+    }
+}
+
+#[allow(clippy::missing_panics_doc)]
+#[allow(clippy::needless_pass_by_value)]
+pub fn position_translation(primary_window: Query<&Window, With<PrimaryWindow>>, mut q: Query<(&Position, &mut Transform)>) {
+    let window = primary_window.get_single().unwrap();
+    for (pos, mut transform) in q.iter_mut() {
+        translate_position(transform.as_mut(), pos, window);
+    }
+}
+// ...
+``` 
+
+Existe mais uma mudança relacionada a `Window` no codigo, que eh no módulo `main`, ao adicionarmos o plugin de window, `WindowPlugin`, pois a forma de declarar a window mudou para:
+
+```rs
+fn main() {
+    App::new()
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            primary_window: Some(Window { 
+                resolution: (1000., 1000.).into(), 
+                title: "Snake Game".to_string(),  
+                ..default()
+            }),
+            exit_condition: ExitCondition::OnAllClosed,
+            close_when_requested: true,
+        }))
+        // ...
+}
+```
+
+Agora vamos terminar o upgrade do modulo `snake.rs`.
+
+### System Set
+
+Podemos ver que o teste `snake_grows_when_eating` possui um erro de compilação em `add_system_set`, pois a forma como lidamos com system sets mudou bastante, já que o conceito de `SystemSet` passou a ser apenas uma tupla de sistemas:
+
+```rs
+// snake.rs
+#[test]
+fn snake_grows_when_eating() {
+    // Setup
+    let mut app = App::new();
+
+    // Add systems
+    app.
+    // ...
+    .add_systems((
+        movement_system, 
+        eating_system.after(movement_system), 
+        growth_system.after(eating_system)
+    ));
+    // ANTIGO
+    // .add_system_set(
+    //     SystemSet::new()
+    //         .with_system(movement_system)
+    //         .with_system(eating_system.after(movement_system))
+    //         .with_system(growth_system.after(eating_system)),
+    // );
+
+    // ...
+}
+```
+
+No módulo `main`  encontramos o mesmo problema, mas lá existem sistemas com `run_criteria`. A mudança nesse caso é simples:
+
+```rs
+// main.rs
+use std::time::Duration;
+
+use bevy::{prelude::*, time::{common_conditions::on_timer}, window::ExitCondition};
+use components::GameEndEvent;
+use snake::GrowthEvent;
+// ...
+
+fn main() {
+    // ...
+
+    // ANTIGO
+    // .add_system_set(
+    //     SystemSet::new()
+    //         .with_run_criteria(FixedTimestep::step(1.0))
+    //         .with_system(food::spawn_system),
+    // )
+
+    // NOVO
+    .add_system(
+        food::spawn_system
+            .run_if(on_timer(Duration::from_secs_f32(1.0)))
+    )
+
+    // ANTIGO
+    // .add_system_set(
+    //     SystemSet::new()
+    //         .with_run_criteria(FixedTimestep::step(0.150))
+    //         .with_system(snake::movement_system)
+    //         .with_system(snake::eating_system.after(snake::movement_system))
+    //         .with_system(snake::growth_system.after(snake::eating_system)),
+    // )
+
+    // NOVO
+    .add_system(
+        snake::movement_system.run_if(on_timer(Duration::from_secs_f32(0.15))))
+    .add_system(
+        snake::eating_system
+            .after(snake::movement_system)
+            .run_if(on_timer(Duration::from_secs_f32(0.15)))
+        )
+    .add_system(
+        snake::growth_system
+            .after(snake::eating_system)
+            .run_if(on_timer(Duration::from_secs_f32(0.15))),
+    )
+    // ...
+}
+```
+
+Por último, temos a atualização do momento de execução dos sistemas de `grid`. Na versão `0.9` executávamos eles com `add_system_set_to_stage` e definindo o estágio com  `CoreStage::PostUpdate`. Agora basta adicionarmos `.in_base_set(CoreSet::PostUpdate)` a chamado da tupla de sistemas:
+
+```rs
+// ANTIGO
+// .add_system_set_to_stage(
+//     CoreStage::PostUpdate,
+//     SystemSet::new()
+//         .with_system(grid::position_translation)
+//         .with_system(grid::size_scaling),
+// )
+
+// NOVO
+.add_systems(
+    (grid::position_translation, grid::size_scaling).in_base_set(CoreSet::PostUpdate),
+)
+```
+
+Migrações concluídas com esse código, caso ocorra alguma incompatibilidade com uma versão nova, por favor abra uma [issue](https://github.com/naomijub/Rust-game-dev/issues) ou um PR nos repositórios do github [livro](https://github.com/naomijub/Rust-game-dev) e [codigo](https://github.com/naomijub/bevy-snake). 

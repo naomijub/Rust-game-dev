@@ -18,4 +18,3 @@
     - [Colisões](part-2/08-colisoes.md)
     - [Migrando versões da Bevy](part-2/09-migrando-versoes.md)
     - [Multiplayer Local](part-2/10-multiplayer.md)
-- [Multiplayer ONLINE Snake Game](part-3/00-capa.md)
