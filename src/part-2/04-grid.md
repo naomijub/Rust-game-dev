@@ -173,7 +173,7 @@ fn convert_position_y_for_grid_height() {
 }
 ```
 
-Estes testes tem como principal objetivo, impedir mudanças que quebrem o código, assim, sua implementaçnao é apenas:
+Estes testes tem como principal objetivo, impedir mudanças que quebrem o código, assim, sua implementação é apenas:
 
 ```rs
 fn convert(pos: f32, bound_window: f32, grid_side_lenght: f32) -> f32 {
@@ -184,7 +184,7 @@ fn convert(pos: f32, bound_window: f32, grid_side_lenght: f32) -> f32 {
 
 Calculamos o `tilesize` como o tamanho da janela dividido pela quantidade de elementos da grade. Depois a posição passa a ser em relação à grade, algo como `5/ 10 = 0.5` multilicado pelo tamanho da window, porém como a bevy o ponto `(0,0)` é no centro da janela, precisamos deslocal meia janela (`- (bound_window / 2.)`) e centralizar o tile com `+ (tile_size / 2.)`. 
 
-Próximo passo é criar a função que executa a translação do valor do componente `Position` para o correspondente da posiçnao na janela no componente `Transform`, como é uma função muito simples, vamos adicionar apenas um teste básico:
+Próximo passo é criar a função que executa a translação do valor do componente `Position` para o correspondente da posição na janela no componente `Transform`, como é uma função muito simples, vamos adicionar apenas um teste básico:
 
 ```rs
 fn translate_position(transform: &mut Transform, pos: &Position, window: &Window) {
