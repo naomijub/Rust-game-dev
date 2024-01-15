@@ -1,6 +1,6 @@
 # Grade de Movimento
 
-Nosso sistema de movimentação tem utilizado coordenadas da janela para fazer a movimentação, sendo o ponto `(0,0)` o centro da janela e cada unidade corresponde a um pixel, porém o snake game utiliza um sistema de grade. Assim, precisamos definir uma grade básica com tamanho da grade de `10 x 10` e células da grade com mais de 1 pixel para evitar janelas de 10 px por 10 px. Além disso, definir uma grade a aprtir do centro é bastante complexo, por isso vamos utilizar nosso próprio sistema de coordenadas e criar um sistema que faça a conversão. Nosso primeiro passo é adicionar constantes referentes ao tamnho da arena. É importante que estas constantes sejam definidas fora, pois quando iniciarmos o modo multiplayer `10 x 10` será muito pequena. 
+Nosso sistema de movimentação tem utilizado coordenadas da janela para fazer a movimentação, sendo o ponto `(0,0)` o centro da janela e cada unidade corresponde a um pixel, porém o snake game utiliza um sistema de grade. Assim, precisamos definir uma grade básica com tamanho da grade de `10 x 10` e células da grade com mais de 1 pixel para evitar janelas de 10 px por 10 px. Além disso, definir uma grade a partir do centro é bastante complexo, por isso vamos utilizar nosso próprio sistema de coordenadas e criar um sistema que faça a conversão. Nosso primeiro passo é adicionar constantes referentes ao tamnho da arena. É importante que estas constantes sejam definidas fora, pois quando iniciarmos o modo multiplayer `10 x 10` será muito pequena. 
 
 ```rs
 // main.rs
@@ -65,8 +65,11 @@ mod test {
 
 No arquivo de components precisamos apenas importar a trait `Component` e definir as structs `Position` com `x, y` e `Size` com `width,height`. O único teste presente é o `sized_square_is_created_calling_square_fn` pois ele testa se um quadrado de lado `f` é criado quando chamamos a função `Size::square`. Ou seja, `Size::square` é um método para ajudar a gerar células, ou qualquer outra coisa que tenha tamanho, de altura e largura iguais. Outra coisa importante de salientar são as várias traits derivadas em `Position`, no futuro elas devem nos ajudar a utilizar `Position`. Próximo passo é incorporar estes componentes na cobra que temos:
 
+`snake.rs`
 ```rust
 use crate::components::{Position, Size};
+use bevy::prelude::*;
+
 
 const SNAKE_HEAD_COLOR: Color = Color::rgb(0.7, 0.7, 0.7);
 
@@ -75,7 +78,7 @@ pub struct Head;
 
 pub fn spawn_system(mut commands: Commands) {
     commands
-        .spawn_bundle(SpriteBundle {
+        .spawn(SpriteBundle {
             sprite: Sprite {
                 color: SNAKE_HEAD_COLOR,
                 ..default()
@@ -97,13 +100,17 @@ Se executarmos os testes agora, vamos ver que não há nenhuma alteração signi
 ```rs
 // grid.rs
 use bevy::prelude::*;
-use crate::components::Size;
+use bevy::{prelude::*, window::PrimaryWindow};
+
 
 const GRID_WIDTH: u32 = 10;
 const GRID_HEIGHT: u32 = 10;
 
-pub fn size_scaling(windows: Res<Windows>, mut q: Query<(&Size, &mut Transform)>) {
-    let window = windows.get_primary().unwrap();
+pub fn size_scaling(
+    primary_window: Query<&Window, With<PrimaryWindow>>,
+    mut q: Query<(&Size, &mut Transform)>,
+) {
+    let window = primary_window.get_single().unwrap();
     for (sprite_size, mut transform) in q.iter_mut() {
         scale_sprite(transform.as_mut(), sprite_size, window);
     }
@@ -111,17 +118,17 @@ pub fn size_scaling(windows: Res<Windows>, mut q: Query<(&Size, &mut Transform)>
 
 fn scale_sprite(transform: &mut Transform, sprite_size: &Size, window: &Window) {
     transform.scale = Vec3::new(
-        sprite_size.width / GRID_WIDTH as f32 * window.width() as f32,
-        sprite_size.height / GRID_HEIGHT as f32 * window.height() as f32,
+        sprite_size.width / GRID_WIDTH as f32 * window.width(),
+        sprite_size.height / GRID_HEIGHT as f32 * window.height(),
         1.0,
     );
 }
 
+
 #[cfg(test)]
 mod test {
-    use bevy::window::WindowId;
-    use raw_window_handle::{RawWindowHandle, WebHandle};
-    use crate::{components::Size};
+    use bevy::window::WindowResolution;
+    use crate::components::Size;
 
     use super::*;
 
@@ -133,11 +140,11 @@ mod test {
         let sprite_size = Size::square(1.);
 
         // Create window
-        let mut descriptor = WindowDescriptor::default();
-        descriptor.height = 200.;
-        descriptor.width = 200.;
-        let raw_window_handle = RawWindowHandle::Web(WebHandle::empty());
-        let window = Window::new(WindowId::new(), &descriptor, 200, 200, 1., None, raw_window_handle);
+        let window = Window {
+            resolution: WindowResolution::new(200., 200.),
+            ..default()
+        };
+
 
         // Apply scale
         scale_sprite(&mut default_transform, &sprite_size, &window);
@@ -148,8 +155,6 @@ mod test {
 ```
 
 Infelizmente, o recurso `Windows` é bastante complicado de testar pois causa muitos problemas com o sistema de sincronização e agendamento do ECS da Bevy, por isto, neste caso não vamos testar o sistema em si, mas sim a lógica que o sistema chama, a função `scale_sprite`. A lógica de `size_scaling` é a seguinte: Se algo possui uma `Size.width` e uma `Size.height`, neste caso `sprite_size.width` e `sprite_size.height`, igual a 1.0, em uma grade de tamanho 40, em uma janela de tamanho 400 px, então a largura deveria ser 10, pois `1.0 / 40. * 400. = 10`. Ou seja, para este teste, os valores iniciais de `default_transform` não importam, apenas os valores préconfigurados de `Size`, `Window`, `GRID_WIDTH`e `GRID_HEIGHT`.
-
-Note que no teste estamos utilizando a biblioteca `raw_window_handle`, na versão `0.4.3`, para gerar as informações de window e que criamos uma janela de `200 x 200`.
 
 A próxima função é a responsável por transformar a posição em uma coordenada de janela, então, de novo, não poderemos testar o sistema em si, apenas os blocos lógicos que serão divididos em 2:
 1. Função `convert` responsável por calcular o fator de conversão de posição para window.
@@ -189,8 +194,8 @@ Próximo passo é criar a função que executa a translação do valor do compon
 ```rs
 fn translate_position(transform: &mut Transform, pos: &Position, window: &Window) {
     transform.translation = Vec3::new(
-        convert(pos.x as f32, window.width() as f32, GRID_WIDTH as f32),
-        convert(pos.y as f32, window.height() as f32, GRID_HEIGHT as f32),
+        convert(pos.x as f32, window.width(), GRID_WIDTH as f32),
+        convert(pos.y as f32, window.height(), GRID_HEIGHT as f32),
         0.0,
     );
 }
@@ -203,11 +208,12 @@ fn translate_position_to_window() {
     let expected = Transform { translation: Vec3::new(-100., 140., 0.,),..default() };
 
     // Create window
-    let mut descriptor = WindowDescriptor::default();
-    descriptor.height = 400.;
-    descriptor.width = 400.;
-    let raw_window_handle = RawWindowHandle::Web(WebHandle::empty());
     let window = Window::new(WindowId::new(), &descriptor, 400, 400, 1., None, raw_window_handle);
+            let window = Window {
+            resolution: WindowResolution::new(400., 400.),
+            ..default()
+        };
+
     
     // Apply translation
     translate_position(&mut default_transform, &position, &window);
@@ -219,8 +225,11 @@ fn translate_position_to_window() {
 Agora agregando tudo na função `position_translation` temos:
 
 ```rs
-pub fn position_translation(windows: Res<Windows>, mut q: Query<(&Position, &mut Transform)>) {
-    let window = windows.get_primary().unwrap();
+pub fn position_translation(
+    primary_window: Query<&Window, With<PrimaryWindow>>,
+    mut q: Query<(&Position, &mut Transform)>,
+) {
+    let window = primary_window.get_single().unwrap();
     for (pos, mut transform) in q.iter_mut() {
         translate_position(transform.as_mut(), pos, window);
     }
@@ -233,33 +242,38 @@ fn convert(pos: f32, bound_window: f32, grid_side_lenght: f32) -> f32 {
 
 fn translate_position(transform: &mut Transform, pos: &Position, window: &Window) {
     transform.translation = Vec3::new(
-        convert(pos.x as f32, window.width() as f32, GRID_WIDTH as f32),
-        convert(pos.y as f32, window.height() as f32, GRID_HEIGHT as f32),
+        convert(pos.x as f32, window.width(), GRID_WIDTH as f32),
+        convert(pos.y as f32, window.height(), GRID_HEIGHT as f32),
         0.0,
     );
 }
+
 ```
 
-Próximo passo é adicionar os sistemas que criamos à função main utilizando o `App::Builder`. Este sistema é um caso especial, pois deve ser executado após o método update já que qualquer componente que seja adicionado no update corrente será visivel somente no próximo estágio (por exemplo `PostUpdate` e `Draw`) e as funções  `position_translation` e `size_scaling` somente conseguiram ver nodos novos da cobra ou comidas nova no estágio seguinte. Esta configuração especial é representada utilizando o `CoreStage::PostUpdate`  na função de adicionar sistemas  `add_system_set_to_stage`:
+Próximo passo é adicionar os sistemas que criamos à função main utilizando o `App::Builder`. Este sistema é um caso especial, pois deve ser executado após o método update já que qualquer componente que seja adicionado no update corrente será visivel somente no próximo estágio (por exemplo `PostUpdate` e `Draw`) e as funções  `position_translation` e `size_scaling` somente conseguiram ver nodos novos da cobra ou comidas nova no estágio seguinte. Esta configuração especial é representada utilizando o `PostUpdate`  na função de adicionar sistemas  `add_systems`:
 
 ```rs
 // main
+use bevy::prelude::*;
+
+pub mod components;
 pub mod grid;
+mod snake;
 
 fn main() {
     App::new()
-        .add_startup_system(setup_camera)
-        .add_startup_system(snake::spawn_system)
+        .add_systems(Startup, setup_camera)
+        .add_systems(Startup, snake::spawn_system)
         .add_plugins(DefaultPlugins)
-        .add_system(snake::movement_system)
-        .add_system_set_to_stage(
-            CoreStage::PostUpdate,
-            SystemSet::new()
-                .with_system(grid::position_translation)
-                .with_system(grid::size_scaling),
-        )
+        .add_systems(Update, snake::movement_system)
+        .add_systems(PostUpdate, (grid::position_translation, grid::size_scaling))
         .run();
 }
+
+fn setup_camera(mut commands: Commands) {
+    commands.spawn(Camera2dBundle::default());
+}
+
 ```
 
 ![Resultado do código até agora](../imagens/simpleblock.png)
@@ -278,87 +292,85 @@ mod test {
     fn snake_head_has_moved_up() {
         // Setup
         let mut app = App::new();
-        let default_position = Position{x: 3, y: 4}; // <--
+        let default_position = Position { x: 5, y: 6 }; // <--
 
-        // Add systems
-        app.add_startup_system(spawn_system)
-            .add_system(movement_system);
+        // Adicionando sistemas
+        app.add_systems(Startup, spawn_system)
+            .add_systems(Update, movement_system);
 
-        // Add input resource
+        // Adicionando inputs de `KeyCode`s
         let mut input = Input::<KeyCode>::default();
         input.press(KeyCode::W);
         app.insert_resource(input);
 
-        // Run systems
+        // Executando sistemas pelo menos uma vez
         app.update();
 
-        let mut query = app.world.query::<(&Head, &Position)>();  // <--
-        query.iter(&app.world).for_each(|(_head, position)| {  // <--
-            assert_eq!(&default_position, position);  // <--
+        //Assert
+        let mut query = app.world.query::<(&Head, &Position)>(); // <--
+        query.iter(&app.world).for_each(|(_head, position)| { // <--
+            assert_eq!(&default_position, position); // <--
         })
     }
-
     #[test]
     fn snake_head_moves_up_and_right() {
         // Setup
         let mut app = App::new();
-        let up_position = Position{x: 3, y: 4};  // <--
+        let up_position = Position { x: 5, y: 6 }; // <--
 
-        // Add systems
-        app.add_startup_system(spawn_system)
-            .add_system(movement_system);
+        // Adiciona systemas
+        app.add_systems(Startup, spawn_system)
+            .add_systems(Update, movement_system);
 
-        // Move Up
+        // Testa movimento para cima
         let mut input = Input::<KeyCode>::default();
         input.press(KeyCode::W);
         app.insert_resource(input);
         app.update();
 
-        let mut query = app.world.query::<(&Head, &Position)>();  // <--
-        query.iter(&app.world).for_each(|(_head, position)| {  // <--
-            assert_eq!(position, &up_position);  // <--
+        let mut query = app.world.query::<(&Head, &Position)>(); // <--
+        query.iter(&app.world).for_each(|(_head, position)| { // <--
+            assert_eq!(position, &up_position); // <--
         });
 
-        let up_right_position = Position{x: 4, y: 4};  // <--
+        let up_right_position = Position { x: 6, y: 6 }; // <--
 
-        // Move Right
+        // Testa movimento para direita
         let mut input = Input::<KeyCode>::default();
         input.press(KeyCode::D);
         app.insert_resource(input);
         app.update();
 
-        let mut query = app.world.query::<(&Head, &Position)>();  // <--
-        query.iter(&app.world).for_each(|(_head, position)| {  // <--
-            assert_eq!(&up_right_position, position);  // <--
+        let mut query = app.world.query::<(&Head, &Position)>(); // <--
+        query.iter(&app.world).for_each(|(_head, position)| { // <--
+            assert_eq!(&up_right_position, position); // <--
         })
     }
-
     #[test]
     fn snake_head_moves_down_and_left() {
         // Setup
         let mut app = App::new();
-        let down_left_position = Position{x: 2, y: 2};  // <--
+        let down_left_position = Position { x: 4, y: 4 }; // <--
 
-        // Add systems
-        app.add_startup_system(spawn_system)
-            .add_system(movement_system);
+        app.add_systems(Startup, spawn_system)
+            .add_systems(Update, movement_system);
 
-        // Move down
+        // Movimenta para baixo
         let mut input = Input::<KeyCode>::default();
         input.press(KeyCode::S);
         app.insert_resource(input);
         app.update();
-        
-        // Move Left
+
+        // Movimenta para esquerda
         let mut input = Input::<KeyCode>::default();
         input.press(KeyCode::A);
         app.insert_resource(input);
         app.update();
 
         // Assert
-        let mut query = app.world.query::<(&Head, &Position)>();  // <--
-        query.iter(&app.world).for_each(|(_head, position)| {  // <--
-            assert_eq!(&down_left_position, position);  // <--
+        let mut query = app.world.query::<(&Head, &Position)>(); // <--
+        query.iter(&app.world).for_each(|(_head, position)| { // <--
+            assert_eq!(&down_left_position, position); // <--
         })
     }
 }
@@ -394,29 +406,30 @@ Agora sim, movimentamos o bloco célula a célula, infelizmente muito sensivel.
 
 ## Configurando a Janela
 
-Próximo passo é fazermos com que a janela seja mais coerente com o snake game, já que por padrão a janela do snake game é quadrada enquanto a janela padrão da bevy é retangular. Para fazer isso, precisamos adicionar um recurso chamado `WindowDescriptor` que nos permite configurar o tamanha da tela e o título da janela:
+Próximo passo é fazermos com que a janela seja mais coerente com o snake game, já que por padrão a janela do snake game é quadrada enquanto a janela padrão da bevy é retangular. Para fazer isso, precisamos customizar o plugin `WindowsPlugin` dos plugins padrões do bevy, assim ele vai nos permitir configurar o tamanha da tela e o título da janela:
 
 ```rs
 // mains.rs
-
 fn main() {
     App::new()
-        .insert_resource(WindowDescriptor {
-            title: "Snake Game".to_string(),
-            width: 500.0,
-            height: 500.0,
-            ..default()         
-        }) // <--
-        .add_startup_system(setup_camera)
-        .add_startup_system(snake::spawn_system)
-        .add_plugins(DefaultPlugins)
-        .add_system(snake::movement_system)
-        .add_system_set_to_stage(
-            CoreStage::PostUpdate,
-            SystemSet::new()
-                .with_system(grid::position_translation)
-                .with_system(grid::size_scaling),
+        .add_systems(Startup, setup_camera)
+        .add_systems(Startup, snake::spawn_system)
+        .add_plugins(
+            DefaultPlugins
+                .set(WindowPlugin {
+                    primary_window: Some(Window {
+                        resolution: (500.0, 500.0).into(),
+                        title: "Snake".into(),
+                        resizable: false,
+                        ..default()
+                    }),
+                    ..default()
+                })
+                .build(),
         )
+        .add_systems(PostUpdate, (grid::position_translation, grid::size_scaling))
+        .add_systems(Update, snake::movement_system)
+        .add_systems(PostUpdate, (grid::position_translation, grid::size_scaling))
         .run();
 }
 ```
