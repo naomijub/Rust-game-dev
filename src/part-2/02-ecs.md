@@ -125,7 +125,6 @@ fn my_system(
 
 ### Gerenciando
 
-If you need to create/remove resources at runtime, you can do so using commands (Commands):
 Se você precisa criar/remover `resources` em tempo de execução, você pode usar um `commands` (Commands):
 
 ```rust
@@ -149,7 +148,6 @@ fn my_setup2(world: &mut World) {
 
     // verifica se o recurso existe
     if !world.contains_resource::<MyFancyResource>() {
-        // Get access to a resource, inserting a custom value if unavailable
         // Recebe acesso para o recuros, inserindo um valor customizado caso não tenha passado nenhum
         let _bonus = world.get_resource_or_insert_with(
             || GoalsReached { main_goal: false, bonus: 100 }
