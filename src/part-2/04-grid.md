@@ -6,8 +6,8 @@ Nosso sistema de movimentação tem utilizado coordenadas da janela para fazer a
 // main.rs
 mod snake;
 
-const GRID_WIDTH: u32 = 10;
-const GRID_HEIGHT: u32 = 10;
+const GRID_WIDTH: u16 = 10;
+const GRID_HEIGHT: u16 = 10;
 
 fn main() {
     // ...
@@ -21,8 +21,8 @@ As constantes `GRID_WIDTH` e `GRID_HEIGHT` referemm a largura da arena e a altur
 mod snake;
 pub mod components;
 
-const GRID_WIDTH: u32 = 10;
-const GRID_HEIGHT: u32 = 10;
+const GRID_WIDTH: u16 = 10;
+const GRID_HEIGHT: u16 = 10;
 // ...
 
 // components.rs
@@ -30,8 +30,8 @@ use bevy::prelude::Component;
 
 #[derive(Component, Clone, Debug, PartialEq, Eq)]
 pub struct Position {
-    pub x: i32,
-    pub y: i32,
+    pub x: i16,
+    pub y: i16,
 }
 
 #[derive(Component, Debug, PartialEq)]
@@ -41,6 +41,7 @@ pub struct Size {
 }
 
 impl Size {
+    #[must_use]
     pub fn square(x: f32) -> Self {
         Self {
             width: x,
@@ -63,7 +64,7 @@ mod test {
 }
 ```
 
-No arquivo de components precisamos apenas importar a trait `Component` e definir as structs `Position` com `x, y` e `Size` com `width,height`. O único teste presente é o `sized_square_is_created_calling_square_fn` pois ele testa se um quadrado de lado `f` é criado quando chamamos a função `Size::square`. Ou seja, `Size::square` é um método para ajudar a gerar células, ou qualquer outra coisa que tenha tamanho, de altura e largura iguais. Outra coisa importante de salientar são as várias traits derivadas em `Position`, no futuro elas devem nos ajudar a utilizar `Position`. Próximo passo é incorporar estes componentes na cobra que temos:
+No arquivo de components precisamos apenas importar a trait `Component` e definir as structs `Position` com `x, y` e `Size` com `width,height`. O único teste presente é o `sized_square_is_created_calling_square_fn` pois ele testa se um quadrado de lado `f` é criado quando chamamos a função `Size::square`. Ou seja, `Size::square` é um método para ajudar a gerar células, ou qualquer outra coisa que tenha tamanho, de altura e largura iguais. Precisamos também usar o `#[must_use]` que a função precisa ser usada e evitarmos um warning no clippy. Outra coisa importante de salientar são as várias traits derivadas em `Position`, no futuro elas devem nos ajudar a utilizar `Position`. Próximo passo é incorporar estes componentes na cobra que temos:
 
 `snake.rs`
 ```rust
@@ -103,23 +104,25 @@ use bevy::prelude::*;
 use bevy::{prelude::*, window::PrimaryWindow};
 
 
-const GRID_WIDTH: u32 = 10;
-const GRID_HEIGHT: u32 = 10;
+const GRID_WIDTH: u16 = 10;
+const GRID_HEIGHT: u16 = 10;
 
+#[allow(clippy::missing_panics_doc)]
+#[allow(clippy::needless_pass_by_value)]
 pub fn size_scaling(
     primary_window: Query<&Window, With<PrimaryWindow>>,
     mut q: Query<(&Size, &mut Transform)>,
 ) {
     let window = primary_window.get_single().unwrap();
-    for (sprite_size, mut transform) in q.iter_mut() {
+    for (sprite_size, mut transform) in &mut q.iter_mut() {
         scale_sprite(transform.as_mut(), sprite_size, window);
     }
 }
 
 fn scale_sprite(transform: &mut Transform, sprite_size: &Size, window: &Window) {
     transform.scale = Vec3::new(
-        sprite_size.width / GRID_WIDTH as f32 * window.width(),
-        sprite_size.height / GRID_HEIGHT as f32 * window.height(),
+        sprite_size.width / f32::from(GRID_WIDTH) * window.width(),
+        sprite_size.height / f32::from(GRID_HEIGHT) * window.height(),
         1.0,
     );
 }
@@ -154,7 +157,8 @@ mod test {
 }
 ```
 
-Infelizmente, o recurso `Windows` é bastante complicado de testar pois causa muitos problemas com o sistema de sincronização e agendamento do ECS da Bevy, por isto, neste caso não vamos testar o sistema em si, mas sim a lógica que o sistema chama, a função `scale_sprite`. A lógica de `size_scaling` é a seguinte: Se algo possui uma `Size.width` e uma `Size.height`, neste caso `sprite_size.width` e `sprite_size.height`, igual a 1.0, em uma grade de tamanho 40, em uma janela de tamanho 400 px, então a largura deveria ser 10, pois `1.0 / 40. * 400. = 10`. Ou seja, para este teste, os valores iniciais de `default_transform` não importam, apenas os valores préconfigurados de `Size`, `Window`, `GRID_WIDTH`e `GRID_HEIGHT`.
+Infelizmente, o recurso `Window` é bastante complicado de testar pois causa muitos problemas com o sistema de sincronização e agendamento do ECS da Bevy, por isto, neste caso não vamos testar o sistema em si, mas sim a lógica que o sistema chama, a função `scale_sprite`. A lógica de `size_scaling` é a seguinte: Se algo possui uma `Size.width` e uma `Size.height`, neste caso `sprite_size.width` e `sprite_size.height`, igual a 1.0, em uma grade de tamanho 40, em uma janela de tamanho 400 px, então a largura deveria ser 10, pois `1.0 / 40. * 400. = 10`. Ou seja, para este teste, os valores iniciais de `default_transform` não importam, apenas os valores préconfigurados de `Size`, `Window`, `GRID_WIDTH`e `GRID_HEIGHT`.
+Colocamos também `#[allow(clippy::missing_panics_doc)]` `#[allow(clippy::needless_pass_by_value)]` na função por alguns conflitos com a API atual do bevy e o clippy isso pode não ser necessário em versões futuras.
 
 A próxima função é a responsável por transformar a posição em uma coordenada de janela, então, de novo, não poderemos testar o sistema em si, apenas os blocos lógicos que serão divididos em 2:
 1. Função `convert` responsável por calcular o fator de conversão de posição para window.
@@ -194,8 +198,8 @@ Próximo passo é criar a função que executa a translação do valor do compon
 ```rs
 fn translate_position(transform: &mut Transform, pos: &Position, window: &Window) {
     transform.translation = Vec3::new(
-        convert(pos.x as f32, window.width(), GRID_WIDTH as f32),
-        convert(pos.y as f32, window.height(), GRID_HEIGHT as f32),
+        convert(f32::from(pos.x), window.width(), f32(GRID_WIDTH)),
+        convert(f32::from(pos.y), window.height(), f32::from(GRID_HEIGHT)),
         0.0,
     );
 }
@@ -225,12 +229,14 @@ fn translate_position_to_window() {
 Agora agregando tudo na função `position_translation` temos:
 
 ```rs
+#[allow(clippy::missing_panics_doc)]
+#[allow(clippy::needless_pass_by_value)]
 pub fn position_translation(
     primary_window: Query<&Window, With<PrimaryWindow>>,
     mut q: Query<(&Position, &mut Transform)>,
 ) {
     let window = primary_window.get_single().unwrap();
-    for (pos, mut transform) in q.iter_mut() {
+    for (pos, mut transform) in &mut q.iter_mut() {
         translate_position(transform.as_mut(), pos, window);
     }
 }
@@ -242,8 +248,8 @@ fn convert(pos: f32, bound_window: f32, grid_side_lenght: f32) -> f32 {
 
 fn translate_position(transform: &mut Transform, pos: &Position, window: &Window) {
     transform.translation = Vec3::new(
-        convert(pos.x as f32, window.width(), GRID_WIDTH as f32),
-        convert(pos.y as f32, window.height(), GRID_HEIGHT as f32),
+        convert(f32::from(pos.x), window.width(), f32::from(GRID_WIDTH)),
+        convert(f32::from(pos.y), window.height(), f32::from(GRID_HEIGHT)),
         0.0,
     );
 }

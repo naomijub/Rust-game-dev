@@ -550,7 +550,7 @@ pub fn movement_system(
     keyboard_input: Res<Input<KeyCode>>,
     mut head_positions: Query<&mut Transform, With<Head>>,
 ) {
-    for mut transform in head_positions.iter_mut() {
+    for mut transform in &mut head_positions.iter_mut() {
         if keyboard_input.pressed(KeyCode::D) {
             transform.translation.x += 1.;
         }
