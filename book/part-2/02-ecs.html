@@ -228,7 +228,7 @@ pub struct Player {
 </span>fn spawn_entity(mut commands: Commands) {
     commands
         .spawn()
-        .insert(Label(&quot;Player&quot;))
+        .insert(Label("Player"))
         .insert(Vida(10))
         .insert(Posição(0, 2, 0))
         .insert(Direção(0, 2, 0))
@@ -263,7 +263,7 @@ struct Player {
 <span class="boring">}</span></code></pre></pre>
 <p>Como podemos ver em <code>transform: Transform</code>, bundles também podem ser encadeados. Tuplas arbitrárias também são consideradas bundles. Note, que bundles não podem ser consultados com uma <em>query</em>.</p>
 <h2 id="recursos-resources"><a class="header" href="#recursos-resources">Recursos (<em>Resources</em>)</a></h2>
-<p>Recursos são um tipo de instância que permite armazenar um tipo de dado de forma global, independente de entidades, e qualquer tipo Rust pode ser usado como um recurso independente de implementação de traits. 
+<p>Recursos são um tipo de instância que permite armazenar um tipo de dado de forma global, independente de entidades, e qualquer tipo Rust pode ser usado como um recurso independente de implementação de traits.
 Para criar um novo recurso você pode simplesmente usar uma <code>Struct</code> ou um <code>enum</code> e derivar a trait <code>Resource</code>.</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {

@@ -63,7 +63,7 @@ pub fn spawn_system(mut commands: Commands) {
             ..default()
         })
         .insert(Head::default() ) // <--
-        .insert(Position { x: 3, y: 3 })
+        .insert(Position { x: 5, y: 5 })
         .insert(Size::square(0.8));
 }
 ```
@@ -111,7 +111,7 @@ Nosso sistema de movimento está atrelado à translação da cobra em uma posiç
 Primeira coisa que devemos fazer é alterar os testes para considerar que o `snake::movement_system` recebe uma query com `Position` e `snake::Head`, além de considerar que o movimento é feito com base no enum `Direction` contido dentro de `snake::Head`:
 
 
-```rs
+```rust
 // snake.rs
     #[test]
     fn snake_starts_moviment_up() { // <-- novo teste
@@ -255,11 +255,11 @@ Primeira coisa que devemos fazer é alterar os testes para considerar que o `sna
 
 ```
 
-> Novos testes: `snake_starts_moviment_up` que checa se a cobra inicia seu movimento para cima. `snake_cannot_start_moving_down` checa que não é possível se movimentar na direção oposta.
+> Foram criados dois novos testes: `snake_starts_moviment_up` que checa se a cobra inicia seu movimento para cima. `snake_cannot_start_moving_down` checa que não é possível se movimentar na direção oposta.
 
 Com estes testes sabemos que o movement system agora deve receber uma query com a posição mutável e com a `Head` para obtermos a direção. Com base na direção, movemos a posição da cabeça:
 
-```rs
+```rust
 pub fn movement_system(mut heads: Query<(&mut Position, &Head)>) {
     if let Some((mut pos, head)) = heads.iter_mut().next() {
         match &head.direction {

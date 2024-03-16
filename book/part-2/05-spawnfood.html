@@ -179,7 +179,7 @@
 #[derive(Component)]
 pub struct Food;
 </code></pre>
-<p>Próximo passo é criarmos um sistema que gera uma comida em um local aleatório da grade. Como este sistema utiliza aleatoriedade, podemos utilizar uma biblioteca de <code>property testing</code> semelhante a <em>proptest</em> do python, a <em>propcheck</em> do Elixir e a <em>quickcheck</em> do Haskell, chamada <code>proptest</code> para gerar centenas de cenários de teste. Para isso, adicionamos <code>proptest = &quot;1.4.0&quot;</code> como uma <code>dev-dependencies</code> no Cargo.toml ou <code>cargo add proptest@1.4.0 --dev</code> na linha de comando e para utilizarmos basta utilizar a macro <code>proptest!</code> e determinar os valores a serem executados (ou quantidade de cenários) como argumento da função de teste como em <code>_execution in 0u16..1000</code>:</p>
+<p>Próximo passo é criarmos um sistema que gera uma comida em um local aleatório da grade. Como este sistema utiliza aleatoriedade, podemos utilizar uma biblioteca de <code>property testing</code> semelhante a <em>proptest</em> do python, a <em>propcheck</em> do Elixir e a <em>quickcheck</em> do Haskell, chamada <code>proptest</code> para gerar centenas de cenários de teste. Para isso, adicionamos <code>proptest = "1.4.0"</code> como uma <code>dev-dependencies</code> no Cargo.toml ou <code>cargo add proptest@1.4.0 --dev</code> na linha de comando e para utilizarmos basta utilizar a macro <code>proptest!</code> e determinar os valores a serem executados (ou quantidade de cenários) como argumento da função de teste como em <code>_execution in 0u16..1000</code>:</p>
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>#[cfg(test)]
@@ -307,7 +307,7 @@ fn main() {
                 .set(WindowPlugin {
                     primary_window: Some(Window {
                         resolution: (500.0, 500.0).into(),
-                        title: &quot;Snake&quot;.into(),
+                        title: "Snake".into(),
                         resizable: false,
                         ..default()
                     }),

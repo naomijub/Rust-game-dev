@@ -230,7 +230,7 @@ fn convert(pos: f32, bound_window: f32, grid_side_lenght: f32) -&gt; f32 {
 <blockquote>
 <p><strong>Trait <code>MulAdd</code></strong> equivale a representar <code>(self * a) + b</code> e tem como sintaxe <code>fn mul_add&lt;A: Self, B: Self&gt;(self, a: A, b: B) -&gt; Self</code>.</p>
 </blockquote>
-<p>Outra refatoração que fiz foi para melhorar os resultados de testes em modo <code>release</code>  e em Windows, utilizando a biblioteca <code>approx = &quot;0.5.1&quot;</code>. Esta biblioteca garante uma comparação mais correta de epsilons de f32. Assim, podemos mudar todos os testes que contém comparações de f32 para utilizar o <code>assert_relative_eq</code>, que recebe um epsilon de valor de erro na comparação:</p>
+<p>Outra refatoração que fiz foi para melhorar os resultados de testes em modo <code>release</code>  e em Windows, utilizando a biblioteca <code>approx = "0.5.1"</code>. Esta biblioteca garante uma comparação mais correta de epsilons de f32. Assim, podemos mudar todos os testes que contém comparações de f32 para utilizar o <code>assert_relative_eq</code>, que recebe um epsilon de valor de erro na comparação:</p>
 <pre><code class="language-rs">// grid.rs
 mod test {
     use super::*;
@@ -281,7 +281,7 @@ impl Player {
 <p>Depois disso, podemos aumentar o tamanho do mapa para que duas cobras possam andar juntas sem se colidir constantemente, fazemos isso mudando o valor da janela gerada no <code>WindowPlugin</code> para <code>1000f32</code>:</p>
 <pre><code class="language-rs">.add_plugins(DefaultPlugins.set(WindowPlugin {
     window: WindowDescriptor {
-        title: &quot;Snake Game&quot;.to_string(),
+        title: "Snake Game".to_string(),
         width: 1000.0,
         height: 1000.0,
         ..default()

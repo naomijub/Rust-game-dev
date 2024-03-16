@@ -4,11 +4,11 @@ Uma parte muito importante de jogos é a definição dos critérios de perda ou 
 1. A cobra "come" um pedaço dela mesma.
 2. A cobra sai dos limites, ou paredes, do jogo.
 
-Testar a cobra comendo um pedaço dela mesma é bastante complicado considerando um cenário na qual as comidas surgem de forma aleátoria, pois a cobra precisa possuir pelo menos 5 segmentos para que ocorra uma colisão da cabeça da cobra com um segmento. Neste caso, um teste de gameplay seria mais fácil e possivelmente mais valioso, porém não é algo que planejei dentro do escopo deste livro. Por outro lado, testar que a cobra sai dos limites do jogo é bastante trivial, basta definir uma direção e garantir que após `n` updates, a cobra vai colidir com as paredes. Uma vez que a condição de colisão ocorreu, podemos publicar um evento de game end, e pausa o jogo com um status de jogo. Único teste que não vou escrever neste caso é o teste de colisão com a parede de baixo, mas seria igual aos outros, porém com 3 updates extras para fazer retorno e mudar a direção para baixo.
+Testar a cobra comendo um pedaço dela mesma é bastante complicado considerando um cenário na qual as comidas surgem de forma aleátoria, pois a cobra precisa possuir pelo menos 5 segmentos para que ocorra uma colisão da cabeça da cobra com um segmento. Neste caso, um teste de gameplay seria mais fácil e possivelmente mais valioso, porém não é algo que planejei dentro do escopo deste livro. Por outro lado, testar que a cobra sai dos limites do jogo é bastante trivial, basta definir uma direção e garantir que após `n` updates, a cobra vai colidir com as paredes. Uma vez que a condição de colisão ocorreu, podemos publicar um evento de _game end_, e pausa o jogo com um status de jogo. Único teste que não vou escrever neste caso é o teste de colisão com a parede de baixo, mas seria igual aos outros, porém com 3 updates extras para fazer retorno e mudar a direção para baixo.
 
 O primeiro teste consite basicamente em fazer com que a cobra se movimente para cima até ultrapassar a parede superior e ai detectamos um componente do tipo `GameEndEvent::GameOver`, derivado do evento `GameEndEvent`. Adicionaremos este teste em um novo módulo chamado `game.rs`:
 
-```rs
+```rust
 #[test]
 fn game_end_event_with_game_over() {
     // Setup
@@ -48,16 +48,15 @@ fn game_end_event_with_game_over() {
 }
 ```
 
-Com este teste podemos começar a implementar o primeiro critério de falha, que neste caso seria `y` da posição da cabça menor que zero ou maior ou igual a `GRID_HEIGHT`, ou seja, `head.position.y < 0 || head.position.y >= GRID_HEIGHT`. Na função `snake::movement_system`, temos acesso a `head.position` dentro do block que contém o `match head.direction`, assim podemos adicionar a condicional de posições depois do match e publicar o evento `GameEndEvent::GameOver` pelo `EventWriter` que precisamos adicionar nos argumentos da função:
+Com este teste podemos começar a implementar o primeiro critério de falha, que neste caso seria `y` da posição da cabeça menor que zero ou maior ou igual a `GRID_HEIGHT`, ou seja, `head.position.y < 0 || head.position.y >= GRID_HEIGHT`. Na função `snake::movement_system`, temos acesso a `head.position` dentro do block que contém o `match head.direction`, assim podemos adicionar a condicional de posições depois do match e publicar o evento `GameEndEvent::GameOver` pelo `EventWriter` que precisamos adicionar nos argumentos da função:
 
-```rs
+```rust
 pub fn movement_system(
     segments: ResMut<Segments>,
     mut last_tail_position: ResMut<LastTailPosition>,
     mut game_end_writer: EventWriter<GameEndEvent>, // <-- Adicionar EventWriter
     mut heads: Query<(Entity, &Head)>,
     mut positions: Query<(Entity, &Segment, &mut Position)>,
-    game_end: Query<&GameEndEvent>,
 ) {
     let positions_clone: HashMap<Entity, Position> = positions
         .iter()
@@ -104,12 +103,28 @@ pub fn movement_system(
 }
 ```
 
-Agora todos os testes que lidam com `movement_system` falham e é preciso adicionar `.add_event::<GameEndEvent>()` ao setup de sistemas, além disso, adicione a função `main`. Outro elemento importante é adicionar o `GameEndEvent`, que vamos adicionar no móduclo `components.rs`:
+Agora todos os testes que lidam com `movement_system` falham e é preciso adicionar `.add_event::<GameEndEvent>()` ao setup de sistemas, além disso, adicione a função `main`. Outro elemento importante que é adicionar o `GameEndEvent`, que vamos adicionar no módulo `components.rs`:
 
-```rs
+
+```rust
+// main.rs
+
+...
+fn main() {
+    App::new()
+        .add_systems(Startup, setup_camera)
+        .insert_resource(snake::Segments::default())
+        .insert_resource(snake::LastTailPosition::default())
+        .add_event::<GameEndEvent>() // <-- Adicionar
+        .add_event::<snake::GrowthEvent>()
+...
+
+```
+
+```rust
 // components.rs
 
-#[derive(Component, Clone, Debug, PartialEq, Eq)]
+#[derive(Component, Clone, Debug, Event, PartialEq, Eq)]
 pub enum GameEndEvent {
     GameOver,
 }
@@ -121,9 +136,9 @@ impl Default for GameEndEvent {
 }
 ```
 
-Perfeito, mas o teste ainda não passa, pois não temos nenhum sistema escutando pelo evento `GameEndEvent`, podemos adicionar um sistema `game_over_system` que adicionará o componente `GameEndEvent::GameOver` que buscamos no teste. Este sistema verificará se existe algum evento do tipo `GameEndEvent`, se houver cria uma entidade com `GameEndEvent::GameOver` como componente e print no console `"Game Over!"`;
+Perfeito, mas o teste ainda não passa, pois não temos nenhum sistema escutando pelo evento `GameEndEvent`, podemos adicionar um sistema `game_over_system` que adicionará o componente `GameEndEvent::GameOver` que buscamos no teste. Este sistema verificará se existe algum evento do tipo `GameEndEvent`, se houver cria uma entidade com `GameEndEvent::GameOver` como componente e da um print no console com `"Game Over!"`;
 
-```rs
+```rust
 // game.rs
 
 pub fn game_over_system(mut commands: Commands, mut reader: EventReader<GameEndEvent>) {
@@ -132,12 +147,23 @@ pub fn game_over_system(mut commands: Commands, mut reader: EventReader<GameEndE
         println!("{}", GameEndEvent::GameOver);
     }
 }
+...
+```
+
+```rust
+// main.rs
+
+...
+
 ```
 
 Para printar no console um enum podemos implementar a trait Display:
 
-```rs
+```rust
 // components.rs
+...
+use std::fmt::{self, Display};
+...
 
 impl Display for GameEndEvent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -146,11 +172,23 @@ impl Display for GameEndEvent {
         }
     }
 }
+...
 ```
+
+Os testes abaixo vão falhar.
+```bash
+    snake::test::snake_cannot_start_moving_down
+    snake::test::snake_grows_when_eating
+    snake::test::snake_head_has_moved_up
+    snake::test::snake_head_moves_down_and_left
+    snake::test::snake_head_moves_up_and_right
+    snake::test::snake_segment_has_followed_head
+```
+Para resolver isso precisamos adicionar o `.add_event::<GameEndEvent>()` no setup dos apps.
 
 Agora nosso teste passa, mas quero adicionar um assert extra no nosso teste, que a posição da cobra não mudará após um game over. Fazemos isso adicionando uma verificação que a posição após o `GameEndEvent::GameOver` não mudará mesmo após updates.
 
-```rs
+```rust
 #[test]
 fn game_end_event_with_game_over() {
     // ...
@@ -170,6 +208,8 @@ fn game_end_event_with_game_over() {
     assert_eq!(snake_position_after_game_over, position_after_gameover.clone());
 }
 ```
+
+Após adicionar essas linhas o teste quebrará.
 
 Essa mudança é facilmente resolvida adicionando uma query que busca por um `GameEndEvent`, `Query<&GameEndEvent>`, e verificando se ela não está vazia em um `if`:
 
@@ -210,40 +250,45 @@ pub fn movement_system(
 
 Próximo teste é verificar se o mesmo acontece se movendo para esquerda e para a direita. Começamos pela esquerda:
 
-```rs
-#[test]
-fn game_end_event_with_game_over_when_moving_left() {
-    // Setup
-    let mut app = App::new();
+```rust
+    #[test]
+    fn game_end_event_with_game_over_when_moving_left() {
+        // Setup
+        let mut app = App::new();
 
-    // Add systems
-    app.insert_resource(Segments::default())
-        .insert_resource(LastTailPosition::default())
-        .add_event::<GameEndEvent>()
-        .add_startup_system(snake::spawn_system)
-        .add_system(snake::movement_system)
-        .add_system(snake::movement_input_system.before(snake::movement_system))
-        .add_system(game_over_system.after(snake::movement_system));
+        // Add systems
+        app.insert_resource(Segments::default())
+            .insert_resource(LastTailPosition::default())
+            .add_event::<GameEndEvent>() // <--
+            .add_systems(Startup, snake::spawn_system)
+            .add_systems(Update, snake::movement_system)
+            .add_systems(
+                Update,
+                snake::movement_input_system.before(snake::movement_system),
+            )
+            .add_systems(Update, game_over_system.after(snake::movement_system)); // <--
 
-    // Add new input resource
-    let mut input = Input::<KeyCode>::default();
-    input.press(KeyCode::A);
-    app.insert_resource(input);
+        // Add new input resource
+        let mut input = Input::<KeyCode>::default();
+        input.press(KeyCode::A);
+        app.insert_resource(input);
 
-    // Run systems again
-    app.update(); // x: 2, y: 3
-    app.update(); // x: 1, y: 3
-    app.update(); // x: 0, y: 3
+        // Run systems again
+        app.update(); // x: 4, y: 5
+        app.update(); // x: 3, y: 5
+        app.update(); // x: 2, y: 5
+        app.update(); // x: 1, y: 5
+        app.update(); // x: 0, y: 5
 
-    let mut query = app.world.query::<&GameEndEvent>();
-    assert_eq!(query.iter(&app.world).count(), 0);
+        let mut query = app.world.query::<&GameEndEvent>();
+        assert_eq!(query.iter(&app.world).count(), 0);
 
-    app.update(); // x: -1, y: 3
+        app.update(); // x: -1, y: 5
 
-    let mut query = app.world.query::<&GameEndEvent>();
-    assert_eq!(query.iter(&app.world).count(), 1);
+        let mut query = app.world.query::<&GameEndEvent>();
+        assert_eq!(query.iter(&app.world).count(), 1);
+    }
 
-}
 ```
 
 Com isso adicionamos a verificação se `head.position` não é menor que zero:
@@ -275,7 +320,7 @@ pub fn movement_system(
 
 Depois, repetimos o teste se movendo para direita e com uma verificação se `head.position.x` maior ou igual a `GRID_WIDTH`:
 
-```rs
+```rust
 #[test]
 fn game_end_event_with_game_over_when_moving_right() {
     // Setup
@@ -284,11 +329,14 @@ fn game_end_event_with_game_over_when_moving_right() {
     // Add systems
     app.insert_resource(Segments::default())
         .insert_resource(LastTailPosition::default())
-        .add_event::<GameEndEvent>()
-        .add_startup_system(snake::spawn_system)
-        .add_system(snake::movement_system)
-        .add_system(snake::movement_input_system.before(snake::movement_system))
-        .add_system(game_over_system.after(snake::movement_system));
+        .add_event::<GameEndEvent>() // <--
+        .add_systems(Startup, snake::spawn_system)
+        .add_systems(Update, snake::movement_system)
+        .add_systems(
+            Update,
+            snake::movement_input_system.before(snake::movement_system),
+        )
+        .add_systems(Update, game_over_system.after(snake::movement_system)); // <--
 
     // Add new input resource
     let mut input = Input::<KeyCode>::default();
@@ -296,20 +344,22 @@ fn game_end_event_with_game_over_when_moving_right() {
     app.insert_resource(input);
 
     // Run systems again
-    app.update(); // x: 4, y: 3
-    app.update(); // x: 5, y: 3
-    app.update(); // x: 6, y: 3
-    app.update(); // x: 7, y: 3
-    app.update(); // x: 8, y: 3
-    app.update(); // x: 9, y: 3
-    app.update(); // x: 10, y: 3
+    app.update(); // x: 5, y: 5
+    app.update(); // x: 6, y: 5
+    app.update(); // x: 7, y: 5
+    app.update(); // x: 8, y: 5
+    app.update(); // x: 9, y: 5
+    app.update(); // x: 10, y: 5
+
+
 
     let mut query = app.world.query::<&GameEndEvent>();
     assert_eq!(query.iter(&app.world).count(), 1);
 }
 ```
+Agora adicionamos a condição para o teste passar.
 
-```rs
+```rust
 pub fn movement_system(
     // ...
 ) {
@@ -337,7 +387,7 @@ pub fn movement_system(
 
 ## Colidindo com o rabo
 
-Como mencionei antes, escrever um teste para este cenário é um pouco mais trabalhoso que eu gostariae acaba sendo mais fácil fazer com alguma ferramenta de testes automatizados, mas caso você queira um desafio, para escrever este teste você pode executar o sistema de spawn de segmentos (`spawn_segment_system`) com posições, `Position`, especificas e ao realizar um update a posição de `Head` vai ser igual a posição de um elemento do rabo. Agora vamos ao código, é uma mudança muito simples em movement system, basta adicionarmos mais uma cláusula `if` que checa se a posição de `Head` é a mesma que qualquer posição de `Segment`, infelizmente não temos uma estrutura de dados que possui todas a `Positions` com `Segments` identificadas, mas possuimos `positions_clone` que é um `HashMap<Entity, Position>`. 
+Como mencionei antes, escrever um teste para este cenário é um pouco mais trabalhoso que eu gostaria e acaba sendo mais fácil fazer com alguma ferramenta de testes automatizados, mas caso você queira um desafio, para escrever este teste você pode executar o sistema de spawn de segmentos (`spawn_segment_system`) com posições, `Position`, especificas e ao realizar um update a posição de `Head` vai ser igual a posição de um elemento do rabo. Agora vamos ao código, é uma mudança muito simples em movement system, basta adicionarmos mais uma cláusula `if` que checa se a posição de `Head` é a mesma que qualquer posição de `Segment`, infelizmente não temos uma estrutura de dados que possui todas a `Positions` com `Segments` identificadas, mas possuimos `positions_clone` que é um `HashMap<Entity, Position>`. 
 
 Para descobrirmos o valor de position que não contém `Head` precisamos filtrar por todas `Positions`, cuja `Entity` correspondente não é igual ao `id` de `Head`, algo como `positions_clone.iter().filter(|(k, _)| k != &&id)`. Com isso, teremos um iterável que possui todos os pares `Entity, Position` que não correspondem ao conjunto `Entity, Position, Head` e podemos continuar iterando somente com `Positions` adicionando `.map(|(_, v)| v)`, para depois verificamos se existe qualquer `Position` que equivale ao par `Head, Position`, utilizando o valor da variável `pos`, `.any(|segment_position| &*pos == segment_position)`.  Adicionamos esta lógica logo após o outro if de game over e publicamos outro `GameEndEvent::GameOver`:
 
@@ -389,7 +439,7 @@ Agora é hora de um teste manual e voilá, "a cobra morde o rabo!". Proxima coli
 
 Particularmente não sou fã dessa, pois na minha concepção uma comida deveria poder surgir embaixo da cobra, desde que não seja na cabeça, mas vale a explicação pelo exemplo. Assim, o teste que vamos escrever é bastante simples, pois vamos apenas checar se a quantidade de entidades com os componentes `Food` e `Position` é `1`, apesar de termos dois updates. Podemos fazer isso por conta  da condição de `spawn` associada a testes em `food::spawn_system`, quando utilizados `if cfg!(test)` com valores pré-fixados.
 
-```rs
+```rust
 #[test]
 fn food_only_spawns_once() {
     // Setup
@@ -413,9 +463,9 @@ fn food_only_spawns_once() {
 }
 ```
 
-A solução para este teste é bastante simples, Precisamos obter uma posição que não coincide com outra posição, fazemos isso com um iterador infinito, que procura pela primeira posição que não coincide com outra. Esse iterator pode ser feita com um `Range` do tipo `(0..)` (de `0` a infinito), depois criamos instâncias aleatórias de `Position` e procuramos por uma `Position` que não está contida em um `HashSet` de `Position`.
+A solução para este teste é bastante simples, precisamos obter uma posição que não coincide com outra posição, fazemos isso com um iterador infinito, que procura pela primeira posição que não coincide com outra. Esse iterator pode ser feita com um `Range` do tipo `(0..)` (de `0` a infinito), depois criamos instâncias aleatórias de `Position` e procuramos por uma `Position` que não está contida em um `HashSet` de `Position`.
 
-```rs
+```rust
 (0..)
     .map(|_| Position {
         x: if cfg!(test) {
@@ -434,17 +484,18 @@ A solução para este teste é bastante simples, Precisamos obter uma posição 
 
 `positions_set` é o `HashSet<Position>` que falamos antes, podemos criar ele através de `let positions_set: HashSet<&Position> = positions.iter().collect();`, porém `Position` não implementa a trait `Hash`, que é facilmente resolvível adicionando a macro `Hash` ao `derive` de `Position`:
 
-```rs
+```rust
 #[derive(Component, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Position {
     pub x: i16,
     pub y: i16,
 }
+
 ```
 
 Agora, precisamos adicionar uma comida ao jogo apenas se o retorno de find é existente, `Option::Some`:
 
-```rs
+```rust
 pub fn spawn_system(mut commands: Commands, positions: Query<&Position>) {
     let positions_set: HashSet<&Position> = positions.iter().collect();
 
@@ -480,7 +531,7 @@ pub fn spawn_system(mut commands: Commands, positions: Query<&Position>) {
 
 Para resolvermos esse problema, encapsulamos nosso iterador infinito em um `if let` e em caso de `Option::Some`, adicionamos uma nova comida. Porém, do jeito que escrevemos o iterador infinito vai quebrar os testes já que nunca vai encontrar uma `Position` válida em testes. Assim, podemos fazer uma aproximação para o tamanho do grid, `(0..(GRID_WIDTH * GRID_HEIGHT))`:
 
-```rs
+```rust
 pub fn spawn_system(mut commands: Commands, positions: Query<&Position>) {
     let positions_set: HashSet<&Position> = positions.iter().collect();
 
@@ -514,4 +565,4 @@ pub fn spawn_system(mut commands: Commands, positions: Query<&Position>) {
 }
 ```
 
-Agora sim, testes passando e comidas surgem de forma eficiente. Próximo passo antes de começar o multiplayer será atualizar o jogo para as duas versões mais novas da Bevy (0.8 e 0.9).
+Agora sim, testes passando e comidas surgem de forma eficiente. 

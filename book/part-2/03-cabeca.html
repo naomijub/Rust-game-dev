@@ -306,7 +306,7 @@ mod test {
 ) {
    // Obtem todas as entidades do tipo
    for (health, mut transform, player) in query.iter_mut() {
-       eprintln!(&quot;Entity at {} has {} HP.&quot;, transform.translation, health.hp);
+       eprintln!("Entity at {} has {} HP.", transform.translation, health.hp);
  
        // centraliza se `hp` é menor ou igual a `0.0`
        if health.hp &lt;= 0.0 {
@@ -555,9 +555,9 @@ fn snake_head_moves_down_and_left() {
  
 on:
  push:
-   branches: [ &quot;main&quot; ]
+   branches: [ "main" ]
  pull_request:
-   branches: [ &quot;*&quot; ]
+   branches: [ "*" ]
  
 env:
  CARGO_TERM_COLOR: always
@@ -600,7 +600,7 @@ jobs:
      - name: install-clippy
        run: rustup component add clippy
      - name: clippy
-       run: cargo clippy -- -W clippy::pedantic --deny &quot;warnings&quot;
+       run: cargo clippy -- -W clippy::pedantic --deny "warnings"
 </code></pre>
 <p>Assim temos a saída</p>
 <pre><code class="language-bash">error: item name starts with its containing module's name
@@ -649,7 +649,7 @@ error: it is more concise to loop over references to containers instead of using
    = note: `-D clippy::explicit-iter-loop` implied by `-D warnings`
    = help: to override `-D warnings` add `#[allow(clippy::explicit_iter_loop)]`
 
-error: could not compile `bevy-snake` (bin &quot;bevy-snake&quot;) due to 5 previous errors
+error: could not compile `bevy-snake` (bin "bevy-snake") due to 5 previous errors
 Error: Process completed with exit code 101.
 </code></pre>
 <p>Na execução do CI, percebemos que a formatação não estava correta, que pode ser corrigida com <code>cargo fmt</code>, e há algumas sugestões de linting em relação a nomenclatura das funções e structs no módulo e declaração de argumentos. A questão de nomenclatura solicita que funções e structs não comecem com o nome do módulo. A declaração de argumentos solicita que o tipo de <code>keyboard_input</code> seja passado como referência <code>keyboard_input: &amp;Res&lt;Input&lt;KeyCode&gt;&gt;</code>, porém isso quebra a injeção de recursos da bevy, necessitando assim que o lint seja descartado com <code>#[allow(clippy::needless_pass_by_value)]</code>. Meu único problema com a questão de nomenclatura é perder o contexto de que os sistemas e as structs quando utilizamos importações absolutas em vez de qualificadas. A solução é utilizar importações qualificadas. O código ficou assim:</p>

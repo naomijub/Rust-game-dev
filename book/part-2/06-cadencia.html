@@ -174,7 +174,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="melhorando-a-cadência-do-movimento"><a class="header" href="#melhorando-a-cadência-do-movimento">Melhorando a Cadência do Movimento</a></h1>
-<p>O atual movimento da cobra está ligado aos comandos do teclado diferentemente do snale game que a cobra se movimenta independente dos comandos do teclado e a cada x segundos, em vez de a cada frame. Para podermos fazer com que a cobra se movimente independente dos comandos do teclado, precisamos de uma forma de armazenar a direção que ela está se movimentando, além de evitar que a cobra vá para a direção oposta. Assim, precisamos criar o enum que armazena a direção e criar uma função que indica a direção oposta.</p>
+<p>O atual movimento da cobra está ligado aos comandos do teclado diferentemente do snake game que a cobra se movimenta independente dos comandos do teclado e a cada x segundos, em vez de a cada frame. Para podermos fazer com que a cobra se movimente independente dos comandos do teclado, precisamos de uma forma de armazenar a direção que ela está se movimentando, além de evitar que a cobra vá para a direção oposta. Assim, precisamos criar o enum que armazena a direção e criar uma função que indica a direção oposta.</p>
 <pre><code class="language-rs">// components.rs
 #[test]
 fn opposite_direction() {
@@ -232,7 +232,7 @@ pub fn spawn_system(mut commands: Commands) {
             ..default()
         })
         .insert(Head::default() ) // &lt;--
-        .insert(Position { x: 3, y: 3 })
+        .insert(Position { x: 5, y: 5 })
         .insert(Size::square(0.8));
 }
 </code></pre>
@@ -240,30 +240,49 @@ pub fn spawn_system(mut commands: Commands) {
 <p>Agora que nossa cobra possui uma direção armazenada na cabeça podemos mudar seu sistema de movimento para que seja executado a cada 0.15 segundos, fazemos isso da mesma forma que fizemos com o sistema de geração de comidas:</p>
 <pre><code class="language-rs">fn main() {
     App::new()
-        // ...
-        .add_system_set(
-            SystemSet::new()
-                .with_run_criteria(FixedTimestep::step(1.0))
-                .with_system(food::spawn_system),
+        .add_systems(Startup, setup_camera)
+        .add_systems(Startup, snake::spawn_system)
+        .insert_resource(ClearColor(Color::rgb(0.04, 0.04, 0.04)))
+        .add_plugins(
+            DefaultPlugins
+                .set(WindowPlugin {
+                    primary_window: Some(Window {
+                        resolution: (500.0, 500.0).into(),
+                        title: "Snake".into(),
+                        resizable: false,
+                        ..default()
+                    }),
+                    ..default()
+                })
+                .build(),
         )
-        .add_system_set(
-            SystemSet::new()
-                .with_run_criteria(FixedTimestep::step(0.150)) // &lt;--
-                .with_system(snake::movement_system), // &lt;--
-        ) 
+        .add_systems(PostUpdate, (grid::position_translation, grid::size_scaling))
+        .add_systems(Update, snake::movement_system)
+        .add_systems(
+            Update,
+            food::spawn_system.run_if(on_timer(Duration::from_secs_f32(1.0))),
+        )
+        .add_systems(
+            Update,
+            snake::movement_system.run_if(on_timer(Duration::from_secs_f32(0.150))),
+        )
+        .add_systems(PostUpdate, (grid::position_translation, grid::size_scaling))
         .run();
 }
 </code></pre>
-<p>Nosso sistema de movimento está atrelado à translação da cobra em uma posição para cada tecla que apertarmos e agora sabemos que o sistema de movimento deve ser independente do sistema de direção, que vamos chamar de <code>snake::movement_input_system</code>. Então precisamos que o sistema de input/direção aconteça antes do sistema de movimento, e, ainda, precisamos garantir que o sistema de movimento aconteça a cada <code>0.15</code> segundos. Para solucionar este problema, vamos adicionar uma função especial para sistemas <code>before</code>. Para utilizar está função, precisamos adicionar o sistema de input que vamos criar e indicar que ele deve ocorrer antes do sistema de movimento com <code>.add_system(snake::movement_input_system.before(snake::movement_system))</code>, adicione ao <code>App::new()</code> na função main. Agora vamos para o sistema <code>movement_input_system</code>.</p>
+<p>Nosso sistema de movimento está atrelado à translação da cobra em uma posição para cada tecla que apertarmos e agora sabemos que o sistema de movimento deve ser independente do sistema de direção, que vamos chamar de <code>snake::movement_input_system</code>. Então precisamos que o sistema de input/direção aconteça antes do sistema de movimento, e, ainda, precisamos garantir que o sistema de movimento aconteça a cada <code>0.15</code> segundos. Para solucionar este problema, vamos adicionar uma função especial para sistemas <code>before</code>. Para utilizar está função, precisamos adicionar o sistema de input que vamos criar e indicar que ele deve ocorrer antes do sistema de movimento com <code>.add_systems(Update, snake::movement_input_system.before(snake::movement_system)</code>, adicione ao <code>App::new()</code> na função main. Agora vamos para o sistema <code>movement_input_system</code>.</p>
 <p>Primeira coisa que devemos fazer é alterar os testes para considerar que o <code>snake::movement_system</code> recebe uma query com <code>Position</code> e <code>snake::Head</code>, além de considerar que o movimento é feito com base no enum <code>Direction</code> contido dentro de <code>snake::Head</code>:</p>
-<pre><code class="language-rs">// snake.rs
-#[test]
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// snake.rs
+    #[test]
     fn snake_starts_moviment_up() { // &lt;-- novo teste
         // Setup app
         let mut app = App::new();
 
         // Add startup system
-        app.add_startup_system(spawn_system);
+        app.add_systems(Startup, spawn_system);
+
 
         // Run systems
         app.update();
@@ -274,29 +293,31 @@ pub fn spawn_system(mut commands: Commands) {
     }
 
     #[test]
-    fn snake_head_has_moved_up() {
+        fn snake_head_has_moved_up() {
         // Setup
         let mut app = App::new();
-        let default_position = Position { x: 3, y: 4 };
+        let default_position = Position { x: 5, y: 6 };
 
-        // Add systems
-        app.add_startup_system(spawn_system)
-            .add_system(movement_system)
-            .add_system(movement_input_system.before(movement_system)); // &lt;--
+        // Adicionando sistemas
+        app.add_systems(Startup, spawn_system)
+            .add_systems(Update, movement_system)
+            .add_systems(Update, movement_input_system.before(movement_system));
 
-        // Add input resource
+
+        // Adicionando inputs de `KeyCode`s
         let mut input = Input::&lt;KeyCode&gt;::default();
         input.press(KeyCode::W);
         app.insert_resource(input);
 
-        // Run systems
+        // Executando sistemas pelo menos uma vez
         app.update();
 
+        //Assert
         let mut query = app.world.query::&lt;(&amp;Head, &amp;Position)&gt;();
         query.iter(&amp;app.world).for_each(|(head, position)| {
             assert_eq!(&amp;default_position, position);
             assert_eq!(head.direction, Direction::Up); // &lt;-- novo assert
-            
+
         })
     }
 
@@ -304,27 +325,28 @@ pub fn spawn_system(mut commands: Commands) {
     fn snake_head_moves_up_and_right() {
         // Setup
         let mut app = App::new();
-        let up_position = Position { x: 3, y: 4 };
+        let up_position = Position { x: 5, y: 6 };
 
-        // Add systems
-        app.add_startup_system(spawn_system)
-            .add_system(movement_system)
-            .add_system(movement_input_system.before(movement_system)); // &lt;--
+        // Adiciona systemas
+        app.add_systems(Startup, spawn_system)
+            .add_systems(Update, movement_system)
+            .add_systems(Update, movement_input_system.before(movement_system));
 
-        // Move Up
+        // Testa movimento para cima
         let mut input = Input::&lt;KeyCode&gt;::default();
         input.press(KeyCode::W);
         app.insert_resource(input);
         app.update();
 
         let mut query = app.world.query::&lt;(&amp;Head, &amp;Position)&gt;();
-        query.iter(&amp;app.world).for_each(|(_head, position)| {
+        query.iter(&amp;app.world).for_each(|(head, position)| {
             assert_eq!(position, &amp;up_position);
+            assert_eq!(head.direction, Direction::Up); // &lt;- Novo assert
         });
 
-        let up_right_position = Position { x: 4, y: 4 };
+        let up_right_position = Position { x: 6, y: 6 };
 
-        // Move Right
+        // Testa movimento para direita
         let mut input = Input::&lt;KeyCode&gt;::default();
         input.press(KeyCode::D);
         app.insert_resource(input);
@@ -333,15 +355,17 @@ pub fn spawn_system(mut commands: Commands) {
         let mut query = app.world.query::&lt;(&amp;Head, &amp;Position)&gt;();
         query.iter(&amp;app.world).for_each(|(head, position)| {
             assert_eq!(&amp;up_right_position, position);
-            assert_eq!(head.direction, Direction::Right);
+            assert_eq!(head.direction, Direction::Right); // &lt;- Novo assert
+
         })
     }
+
 
     #[test]
     fn snake_head_moves_down_and_left() {
         // Setup
         let mut app = App::new();
-        let down_left_position = Position { x: 2, y: 2 };
+        let down_left_position = Position { x: 4, y: 6 };
 
         // Add systems
         app.add_startup_system(spawn_system)
@@ -364,20 +388,19 @@ pub fn spawn_system(mut commands: Commands) {
         let mut query = app.world.query::&lt;(&amp;Head, &amp;Position)&gt;();
         query.iter(&amp;app.world).for_each(|(head, position)| {
             assert_eq!(&amp;down_left_position, position);
-            assert_eq!(head.direction, Direction::Down);
+            assert_eq!(head.direction, Direction::Left);
         })
     }
-
     #[test]
     fn snake_cannot_start_moving_down() { // &lt;-- novo teste
          // Setup
          let mut app = App::new();
-         let down_left_position = Position { x: 3, y: 4 };
+         let down_left_position = Position { x: 5, y: 6 };
  
          // Add systems
-         app.add_startup_system(spawn_system)
-             .add_system(movement_system)
-             .add_system(movement_input_system.before(movement_system));
+         app.add_systems(Startup, spawn_system)
+            .add_systems(Update, movement_system)
+ r          .add_systems(Update, movement_input_system.before(movement_system));
  
           // Move down
           let mut input = Input::&lt;KeyCode&gt;::default();
@@ -392,12 +415,14 @@ pub fn spawn_system(mut commands: Commands) {
          })
     }
 
-</code></pre>
+<span class="boring">}</span></code></pre></pre>
 <blockquote>
-<p>Novos testes: <code>snake_starts_moviment_up</code> que checa se a cobra inicia seu movimento para cima. <code>snake_cannot_start_moving_down</code> checa que não é possível se movimentar na direção oposta.</p>
+<p>Foram criados dois novos testes: <code>snake_starts_moviment_up</code> que checa se a cobra inicia seu movimento para cima. <code>snake_cannot_start_moving_down</code> checa que não é possível se movimentar na direção oposta.</p>
 </blockquote>
 <p>Com estes testes sabemos que o movement system agora deve receber uma query com a posição mutável e com a <code>Head</code> para obtermos a direção. Com base na direção, movemos a posição da cabeça:</p>
-<pre><code class="language-rs">pub fn movement_system(mut heads: Query&lt;(&amp;mut Position, &amp;Head)&gt;) {
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn movement_system(mut heads: Query&lt;(&amp;mut Position, &amp;Head)&gt;) {
     if let Some((mut pos, head)) = heads.iter_mut().next() {
         match &amp;head.direction {
             Direction::Left =&gt; {
@@ -415,7 +440,7 @@ pub fn spawn_system(mut commands: Commands) {
         };
     }
 }
-</code></pre>
+<span class="boring">}</span></code></pre></pre>
 <p>Já o <code>movement_input_system</code> recebe uma leitura de teclado (<code>KeyCode</code>) e muda a direção com base nesta leitura do teclado e evita mudanças na direção oposta:</p>
 <pre><code class="language-rs">pub fn movement_input_system(
     keyboard_input: Res&lt;Input&lt;KeyCode&gt;&gt;, 
