@@ -1,0 +1,398 @@
+<!DOCTYPE HTML>
+<html lang="pt" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Gerador de Comidas - Desenvolvimento de Jogos online com Rust</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../0-capa.html"><strong aria-hidden="true">1.</strong> Capa</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../01-quemsou.html"><strong aria-hidden="true">1.1.</strong> Quem sou eu? (Sobre a autora)</a></li></ol></li><li class="chapter-item expanded "><a href="../part-1/00-capa.html"><strong aria-hidden="true">2.</strong> Conceitos Básicos</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../part-1/01-arq.html"><strong aria-hidden="true">2.1.</strong> Arquitetura de servidores</a></li><li class="chapter-item expanded "><a href="../part-1/02-prd-rec.html"><strong aria-hidden="true">2.2.</strong> Predição e Reconciliação</a></li><li class="chapter-item expanded "><a href="../part-1/03-interpolacao.html"><strong aria-hidden="true">2.3.</strong> Interpolação de Entidades</a></li><li class="chapter-item expanded "><a href="../part-1/04-lag.html"><strong aria-hidden="true">2.4.</strong> Compensacão de Lag</a></li></ol></li><li class="chapter-item expanded "><a href="../part-2/00-intro.html"><strong aria-hidden="true">3.</strong> Multiplayer Local Snake Game</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../part-2/01-bevy.html"><strong aria-hidden="true">3.1.</strong> Sobre a Bevy</a></li><li class="chapter-item expanded "><a href="../part-2/02-ecs.html"><strong aria-hidden="true">3.2.</strong> Entity Component System</a></li><li class="chapter-item expanded "><a href="../part-2/03-cabeca.html"><strong aria-hidden="true">3.3.</strong> A Cabeça da Cobra</a></li><li class="chapter-item expanded "><a href="../part-2/04-grid.html"><strong aria-hidden="true">3.4.</strong> Grade de Movimento</a></li><li class="chapter-item expanded "><a href="../part-2/05-spawnfood.html" class="active"><strong aria-hidden="true">3.5.</strong> Gerador de Comidas</a></li><li class="chapter-item expanded "><a href="../part-2/06-cadencia.html"><strong aria-hidden="true">3.6.</strong> Melhorando a Cadência do Movimento</a></li><li class="chapter-item expanded "><a href="../part-2/07-rabo.html"><strong aria-hidden="true">3.7.</strong> Adicionando um Rabo a Cobra</a></li><li class="chapter-item expanded "><a href="../part-2/08-colisoes.html"><strong aria-hidden="true">3.8.</strong> Colisões</a></li><li class="chapter-item expanded "><a href="../part-2/09-migrando-versoes.html"><strong aria-hidden="true">3.9.</strong> Migrando versões da Bevy</a></li><li class="chapter-item expanded "><a href="../part-2/10-multiplayer.html"><strong aria-hidden="true">3.10.</strong> Multiplayer Local</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Desenvolvimento de Jogos online com Rust</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="gerador-de-comidas"><a class="header" href="#gerador-de-comidas">Gerador de Comidas</a></h1>
+<p>Nosso próximo passo é começarmos um sistema que gere comidas de forma aleatória pela grade. O primeiro passo é definir qual sera a cor da comida. Como pretendemos fazer um jogo multiplayer, não faz sentido termos comidas coloridas, já que estas serão dos jogadores, sendo assim podemos criar um módulo chamado <code>food</code> e adicionar a constante <code>const FOOD_COLOR: Color = Color::rgb(1.0, 1.0, 1.0)</code>. Próximo passo é criamos um componente chamado <code>Food</code> para representar a comida:</p>
+<pre><code class="language-rs">// food.rs
+#[derive(Component)]
+pub struct Food;
+</code></pre>
+<p>Próximo passo é criarmos um sistema que gera uma comida em um local aleatório da grade. Como este sistema utiliza aleatoriedade, podemos utilizar uma biblioteca de <code>property testing</code> semelhante a <em>proptest</em> do python, a <em>propcheck</em> do Elixir e a <em>quickcheck</em> do Haskell, chamada <code>proptest</code> para gerar centenas de cenários de teste. Para isso, adicionamos <code>proptest = "1.4.0"</code> como uma <code>dev-dependencies</code> no Cargo.toml ou <code>cargo add proptest@1.4.0 --dev</code> na linha de comando e para utilizarmos basta utilizar a macro <code>proptest!</code> e determinar os valores a serem executados (ou quantidade de cenários) como argumento da função de teste como em <code>_execution in 0u16..1000</code>:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[cfg(test)]
+mod test {
+    use crate::components::Position;
+
+    use super::*;
+    use proptest::prelude::*;
+
+    proptest!{
+        #[test]
+        fn spawns_food_inplace(_execution in 0u16..1000) {
+            // Setup app
+            let mut app = App::new();
+
+            // Add startup system
+            app.add_startup_system(spawn_system);
+
+            // Run systems
+            app.update();
+
+            let mut query = app.world.query_filtered::&lt;&amp;Position, With&lt;Food&gt;&gt;();
+            assert_eq!(query.iter(&amp;app.world).count(), 1);
+            query.iter(&amp;app.world).for_each(|position| {
+                let x = position.x;
+                let y = position.y;
+
+                assert!(x &gt;= 0 &amp;&amp; x as i16 &lt;= (GRID_WIDTH -1) as i16);
+                assert!(y &gt;= 0 &amp;&amp; y as i16 &lt;= (GRID_HEIGHT -1) as i16);
+            })
+        }
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Para usarmos nosso <code>GRID_WIDTH</code> e <code>GRID_HEIGHT</code> no nosso <code>food.rs</code> vamos precisar marcar nossa constante como uma crate publica pra isso precisamos fazer a modificação abaixo:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// grid.rs
+pub(crate) const GRID_WIDTH: u16 = 10;
+pub(crate) const GRID_HEIGHT: u16 = 10;
+<span class="boring">}</span></code></pre></pre>
+<p>A vantagem de um proptest é que ele permite executar diversos cenários e podemos definir regras de limite para falha, executando centenas de cenários em poucos segundos. Para este teste passar, precisamos implementar a função <code>spawn_system</code> para o módulo <code>food</code>:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// food.rs
+use bevy::prelude::*;
+use rand::random;
+
+use crate::{
+    components::{Position, Size},
+    grid::{GRID_HEIGHT, GRID_WIDTH},
+};
+
+const FOOD_COLOR: Color = Color::rgb(1.0, 1.0, 1.0);
+
+#[derive(Component)]
+pub struct Food;
+
+pub fn spawn_system(mut commands: Commands) {
+    commands
+        .spawn(SpriteBundle {
+            sprite: Sprite {
+                color: FOOD_COLOR,
+                ..default()
+            },
+            ..default()
+        })
+        .insert(Food)
+        .insert(Position {
+            x: (random::&lt;u16&gt;() % GRID_WIDTH) as i16,
+            y: (random::&lt;u16&gt;() % GRID_HEIGHT) as i16,
+        })
+        .insert(Size::square(0.8));
+}
+
+#[cfg(test)]
+mod test {
+    use crate::components::Position;
+
+    use super::*;
+    use proptest::prelude::*;
+
+    proptest! {
+        #[test]
+        fn spawns_food_inplace(_execution in 0u16..1000) {
+            // Setup app
+            let mut app = App::new();
+
+            // Add startup system
+            app.add_systems(Startup, spawn_system);
+
+            // Run systems
+            app.update();
+
+            let mut query = app.world.query_filtered::&lt;&amp;Position, With&lt;Food&gt;&gt;();
+            assert_eq!(query.iter(&amp;app.world).count(), 1);
+            query.iter(&amp;app.world).for_each(|position| {
+                let x = position.x;
+                let y = position.y;
+
+                assert!(x &gt;= 0 &amp;&amp; x &lt;= (GRID_WIDTH -1) as i16);
+                assert!(y &gt;= 0 &amp;&amp; y &lt;= (GRID_HEIGHT -1) as i16);
+            })
+        }
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p>O próximo passo é adicionar o sistema a <code>App</code> na função <code>main</code>, porém este sistema tem uma pegadinha. Como não queremos que o sistema gere uma nova comida para cada frame, precisamos definir um tempo de intervalo para as comidas serem geradas. Como este cenário de executar uma função somente a cada x segundos é muito comum no desenvolvimento de jogos a Bevy nos disponibiliza a struct <code>FixedTimestep</code> que nos permite definir um passo (<code>step</code>) em segundos, que será usada com a função <code>with_run_criteria</code>:</p>
+<pre><pre class="playground"><code class="language-rust">use std::time::Duration; // &lt;-- Import
+
+use bevy::{prelude::*, time::common_conditions::on_timer}; // &lt;-- Import de on_timer
+
+pub mod components;
+pub mod food;
+pub mod grid;
+mod snake;
+
+fn main() {
+    App::new()
+        .add_systems(Startup, setup_camera)
+        .add_systems(Startup, snake::spawn_system)
+        .insert_resource(ClearColor(Color::rgb(0.04, 0.04, 0.04)))
+        .add_plugins(
+            DefaultPlugins
+                .set(WindowPlugin {
+                    primary_window: Some(Window {
+                        resolution: (500.0, 500.0).into(),
+                        title: "Snake".into(),
+                        resizable: false,
+                        ..default()
+                    }),
+                    ..default()
+                })
+                .build(),
+        )
+        .add_systems(PostUpdate, (grid::position_translation, grid::size_scaling))
+        .add_systems(Update, snake::movement_system)
+        .add_systems( // &lt;--
+            Update, // &lt;-- Schedule
+            food::spawn_system // &lt;-- Sistema
+                .run_if(on_timer(Duration::from_secs_f32(1.0))), //&lt;-- Pegadinha
+        )
+        .add_systems(PostUpdate, (grid::position_translation, grid::size_scaling))
+        .run();
+}
+
+// código</code></pre></pre>
+<p>Próximo passo será melhorar o movimento da cabeça da cobra, tornando ele mais lento e cadenciado.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../part-2/04-grid.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../part-2/06-cadencia.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../part-2/04-grid.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../part-2/06-cadencia.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

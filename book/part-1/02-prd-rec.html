@@ -1,0 +1,286 @@
+<!DOCTYPE HTML>
+<html lang="pt" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Predição e Reconciliação - Desenvolvimento de Jogos online com Rust</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../0-capa.html"><strong aria-hidden="true">1.</strong> Capa</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../01-quemsou.html"><strong aria-hidden="true">1.1.</strong> Quem sou eu? (Sobre a autora)</a></li></ol></li><li class="chapter-item expanded "><a href="../part-1/00-capa.html"><strong aria-hidden="true">2.</strong> Conceitos Básicos</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../part-1/01-arq.html"><strong aria-hidden="true">2.1.</strong> Arquitetura de servidores</a></li><li class="chapter-item expanded "><a href="../part-1/02-prd-rec.html" class="active"><strong aria-hidden="true">2.2.</strong> Predição e Reconciliação</a></li><li class="chapter-item expanded "><a href="../part-1/03-interpolacao.html"><strong aria-hidden="true">2.3.</strong> Interpolação de Entidades</a></li><li class="chapter-item expanded "><a href="../part-1/04-lag.html"><strong aria-hidden="true">2.4.</strong> Compensacão de Lag</a></li></ol></li><li class="chapter-item expanded "><a href="../part-2/00-intro.html"><strong aria-hidden="true">3.</strong> Multiplayer Local Snake Game</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../part-2/01-bevy.html"><strong aria-hidden="true">3.1.</strong> Sobre a Bevy</a></li><li class="chapter-item expanded "><a href="../part-2/02-ecs.html"><strong aria-hidden="true">3.2.</strong> Entity Component System</a></li><li class="chapter-item expanded "><a href="../part-2/03-cabeca.html"><strong aria-hidden="true">3.3.</strong> A Cabeça da Cobra</a></li><li class="chapter-item expanded "><a href="../part-2/04-grid.html"><strong aria-hidden="true">3.4.</strong> Grade de Movimento</a></li><li class="chapter-item expanded "><a href="../part-2/05-spawnfood.html"><strong aria-hidden="true">3.5.</strong> Gerador de Comidas</a></li><li class="chapter-item expanded "><a href="../part-2/06-cadencia.html"><strong aria-hidden="true">3.6.</strong> Melhorando a Cadência do Movimento</a></li><li class="chapter-item expanded "><a href="../part-2/07-rabo.html"><strong aria-hidden="true">3.7.</strong> Adicionando um Rabo a Cobra</a></li><li class="chapter-item expanded "><a href="../part-2/08-colisoes.html"><strong aria-hidden="true">3.8.</strong> Colisões</a></li><li class="chapter-item expanded "><a href="../part-2/09-migrando-versoes.html"><strong aria-hidden="true">3.9.</strong> Migrando versões da Bevy</a></li><li class="chapter-item expanded "><a href="../part-2/10-multiplayer.html"><strong aria-hidden="true">3.10.</strong> Multiplayer Local</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Desenvolvimento de Jogos online com Rust</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="predição-e-reconciliação"><a class="header" href="#predição-e-reconciliação">Predição e Reconciliação</a></h1>
+<p>No capítulo anterior falamos sobre o lag, ou atraso entre ação no cliente e a atualização enviada pelo servidor nos baseando no modelo de cliente servidor na qual o cliente não responde seu estado, mas sim a ação desejada, para que o servidor atualize seu estado. Um jogo que pode levar algumas frações de segundo para atualizar o estado pode ser considerado de jogabilidade ruim ou injogável devido ao lag de renderização. Assim, neste capítulo vamos explorar uma solução para minimizar este problema.</p>
+<h2 id="predição-pelo-lado-do-cliente"><a class="header" href="#predição-pelo-lado-do-cliente">Predição pelo lado do cliente</a></h2>
+<p>Como a maior parte dos jogos é deterministico, ou seja, não há aleatoriedade no resultado, podemos prever qual vai ser o próximo passo do jogo antes do servidor responder. Para maior parte das pessoas jogando esta experiência será "idêntica" ao jogo sem servidor, mas para as pessoas trapaceando a experiência não será realistica, desfavorecendo o jogo com trapaças. Assim, podemos assumir que nosso servidor receberá ações válidas para 99% dos casos, nos permitindo prever o próximo instante.</p>
+<p>No cenário que descrevemos anteriormente nossa ação com o servidor levava 50 ms para atualizar o estado do jogo, para só então uma animação ser ativada (digamos que ela leve mais 50 ms) como a imagem a seguir nos mostra:</p>
+<p><img src="../imagens/animation_time.jpg" alt="Diagrama de atraso na conexão cliente servidor com tempo de animação" /></p>
+<p>Nessa imagem podemos ver que o atraso do servidor (50 ms) mais o tempo de animação (50 ms) fará com que percebemos o tiro apenas 100 ms depois dele ter sido realizado, ou seja, no terceiro frame que nosso olho detecta, certamente uma experiência desagradável.</p>
+<p>Como o jogo nosso jogo é deterministico, podemos presumir que a ação será executada com sucesso no servidor, aplicar nossas regras locais de validação e iniciar a animação do tiro no momento em que pressionamos o botão para realizar a ação. Para a grande maioria dos casos a atualização do servidor e o final da animação vão coincidir em estado e fizemos um predição bem sucedida, fazendo com que não exista atrasos entre a ação e a renderização. Para os casos de trapaça a animação ocorrerá, mas em nada afetará o estado geral do jogo, somente afetará negativamente a experiência do usuário trapacendo.</p>
+<h3 id="problemas-de-sincronização"><a class="header" href="#problemas-de-sincronização">Problemas de sincronização</a></h3>
+<p>Infelizmente essa estratégia não é perfeita e problemas de sincronização ou eventos conflitantes podem acontecer. Imagine agora o cenário na qual o personagem está se movimentando e o tempo de atraso é 75 ms em vez dos 50 ms anteriores, o tempo da animação é de 30 ms e a pessoa pressiona para se movimentar para frente 2 vezes seguidas. A imagem a seguir e os passos marcados na imagem exemplificam:</p>
+<p><img src="../imagens/sync_problem.jpg" alt="Diagrama com problemas de sincronização de ações" /></p>
+<ol start="0">
+<li>Personagem está o ponto <code>(0,0)</code> no instante 0 ms.</li>
+<li>Neste mesmo instante a pessoa pressiona para se movimentar enviando uma ação para o servidor que durará 75 ms.</li>
+<li>A ação do passo 1 ativou uma animação que moveu o personagem para a posição <code>(0,1)</code> 30 ms depois.</li>
+<li>Na posição <code>(0,1)</code> uma nova ação de movimentação acontece, enviando esta nova ação para o servidor que durará mais 75 ms.</li>
+<li>A ação do passo 3 ativou uma nova animação que moveu o personagem para a posição <code>(0,2)</code> 30 ms depois. Já se passaram 60 ms.</li>
+<li>15 ms depois de terminar a ação 4, o servidor respondeu a ação 1 fazendo o personagem voltar para posição <code>(0,1)</code>. Já se passaram 75 ms.</li>
+<li>30 ms depois de terminar a ação 5, o servidor respondeu a æção 3 fazendo o personagem voltar para posição <code>(0,2)</code>. Ja se passaram 105 ms.</li>
+</ol>
+<p>Com este detalhamento podemos ver que pelo ponto de vista da pessoa jogando, o personagem vai responder as duas primeiras ações se movimentando até a posição <code>(0,2)</code> para então voltar para posição <code>(0,1)</code> e depois ainda voltar para posição <code>(0,2)</code> gerando uma péssima experiência de jogo, forçando assim a adotarmos uma estratégia de reconciliação.</p>
+<h2 id="reconciliacão-pelo-servidor"><a class="header" href="#reconciliacão-pelo-servidor">Reconciliacão pelo servidor</a></h2>
+<p>A chave deste problema é entender a diferença temporal dos cliente e do servidor, já que o cliente vê o jogo em tempo real (presente) e o servidor autoritário está no passado. Assim, sempre haverá uma diferença de sequência de comandos a serem processados entre o cliente e o servidor. Felizmente isso não é muito difícil de resolver.</p>
+<p>Primeiro passo é fazer com que o cliente salve suas ações em uma sequência de comandos, assim a primeira movimentação seria a ação <code>#1</code> e a segunda movimentação seria a ação <code>#2</code>. Logo, o servidor poderá respoderá responder uma ação identificando a qual comando ela pertence. A figura a seguir exemplifica o que acontece:</p>
+<p><img src="../imagens/reconciliacao.jpg" alt="Diagrama de reconciliação de ações" /></p>
+<ol>
+<li>O evento <code>#1</code> é lancado, 30 ms depois da animação a posição <code>#1 =&gt; (0,1)</code> é registrada e 38 ms depois o servidor recebe a ação <code>#1</code>. A sequência de comandos é <code>[#1 =&gt; (0,1)]</code>.</li>
+<li>O evento <code>#2</code> é lancado, 30 ms depois da animação a posição <code>#2 =&gt; (0,2)</code> é registrada e 38 ms depois o servidor recebe a ação <code>#2</code>.  A sequência de comandos é <code>[#1 =&gt; (0,1), #2 =&gt; (0,2)]</code>.</li>
+<li>O evento <code>#1</code> é retornado pelo servidor com o valor <code>#1 =&gt; (0,1)</code>. A função <code>check</code> para o estado da sequência de comandos atual (<code>[#1 =&gt; (0,1), #2 =&gt; (0,2)]</code>) e o evento <code>#1 =&gt; (0,1)</code> recebido é executado para reconciliar. Remove todos os comandos até <code>#1 =&gt; (0,1)</code> da sequência de comandos.</li>
+<li>O evento <code>#2</code> é retornado pelo servidor com o valor <code>#2 =&gt; (0,2)</code>. A função <code>check</code> para o estado da sequência de comandos atual (<code>[#2 =&gt; (0,2)]</code>) e o evento <code>#2 =&gt; (0,2)</code> recebido é executado para reconciliar. Remove todos os comandos até <code>#2 =&gt; (0,2)</code> da sequência de comandos.</li>
+<li>Sequência de comandos é <code>[]</code>.</li>
+</ol>
+<blockquote>
+<p><strong>Descrição da função <code>check</code></strong></p>
+<ol>
+<li>Argumentos são <strong>sequência de comandos executados</strong> e <strong>evento #</strong>.</li>
+<li>Verifica se o valor de <code>#n</code> na sequência de comando é igual ao que o servidor retornou. Caso não for igual retorna erro.</li>
+<li>Aplica o próximo evento, <code>#n+1</code>, ao resultado do evento <code>#n</code>. Caso o resultado de <code>#n</code> mais o evento <code>#n+1</code> não corresponder ao evento salvo na sequência de comandos para <code>#n+1</code> retornar erro.
+<strong>Observação</strong>: Se o evento que o servidor responder não for <code>#n</code> esperado, podemos concluir que o pacote se perdeu ou o servidor retornou um erro, assim existem duas alternativas <strong>1.</strong> descartar todos os pacotes até o evento recebido e fazer o check, ou <strong>2.</strong> aplciar todos os eventos anteriores até o evento recebido. Particularmente vejo a soluação <strong>1</strong> sendo a mais comum, pois sabemos que o estado anterior está certo.</li>
+</ol>
+</blockquote>
+<p>Este é um exemplo bem simples de movimentação e bastante intuitivo de visualizar, mas as aplicações de predição e reconciliação podem ser feitas em praticamente qualquer área do jogo e qualquer tipo de jogo. Imagine um jogo de corrida multiplayer e você está na linha de chegada em velocidade máxima, com um carro logo atrás de você. No próximo segundo considerando as atuais circunstâncias, é óbvio que você vai ganhar, pois você está na frente do outro carro e com uma velocidade maior, mas agora imagine que alguns milésimos antes do final da corrida a outra pessoa apertou o botão de nitro e te ultrapassou. A predição diria que seu carro ganharia a corrida, mas o servidor disse que não e você ficou em segundo lugar. Isso nos leva a um ponto interessante, mesmo em ambientes determinísticos, existe a chance da predição e da reconciliação não serem iguais, Para um cenário de fim de jogo como descrito aqui é bastante trivial a resposta, ignore a predição e responda com o resultado do servidor, porém se isso acontecer frequentemente no meio do jogo a experiência de jogabilidade vai ser ruim.</p>
+<p>No próximo capítulo vamos explorar como resolver este problema de predição e reconciliação através de interpolação de entidades.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../part-1/01-arq.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../part-1/03-interpolacao.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../part-1/01-arq.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../part-1/03-interpolacao.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
