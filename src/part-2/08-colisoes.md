@@ -469,12 +469,12 @@ A solução para este teste é bastante simples, precisamos obter uma posição 
 (0..)
     .map(|_| Position {
         x: if cfg!(test) {
-            3
+            5
         } else {
             (random::<u16>() % GRID_WIDTH) as i16
         },
         y: if cfg!(test) {
-            5
+            7
         } else {
             (random::<u16>() % GRID_HEIGHT) as i16
         },
@@ -502,12 +502,12 @@ pub fn spawn_system(mut commands: Commands, positions: Query<&Position>) {
     if let Some(position) = (0..)
         .map(|_| Position {
             x: if cfg!(test) {
-                3
+                5
             } else {
                 (random::<u16>() % GRID_WIDTH) as i16
             },
             y: if cfg!(test) {
-                5
+                7
             } else {
                 (random::<u16>() % GRID_HEIGHT) as i16
             },
@@ -538,12 +538,12 @@ pub fn spawn_system(mut commands: Commands, positions: Query<&Position>) {
     if let Some(position) = (0..(GRID_WIDTH * GRID_HEIGHT))
         .map(|_| Position {
             x: if cfg!(test) {
-                3
+                5
             } else {
                 (random::<u16>() % GRID_WIDTH) as i16
             },
             y: if cfg!(test) {
-                5
+                7
             } else {
                 (random::<u16>() % GRID_HEIGHT) as i16
             },
