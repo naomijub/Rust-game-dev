@@ -95,37 +95,124 @@ Como podemos ver em `transform: Transform`, bundles também podem ser encadeados
 
 ## Recursos (*Resources*)
 
-Recursos são um tipo de instância que permite armazenar um tipo de dado de forma global, independente de entidades, e qualquer tipo Rust pode ser usado como um recurso independente de implementação de traits. Existem duas formas de inicializar recursos, a primeira é definindo a trait `Default` para eles, quando eles possuem um tipo de dado simples, já a segunda é implementando a trait `FromWorld` que permite atuar sobre o recurso utilizando valores de `World`:
-
+Recursos são um tipo de instância que permite armazenar um tipo de dado de forma global, independente de entidades, e qualquer tipo Rust pode ser usado como um recurso independente de implementação de traits. 
+Para criar um novo recurso você pode simplesmente usar uma `Struct` ou um `enum` e derivar a trait `Resource`.
 ```rust
-#[derive(Default)]
-struct StartingLevel(usize);
+#[derive(Resource)]
+struct GoalsReached {
+    main_goal: bool,
+    bonus: u32,
+}
+```
+Bevy usa resources para muitas coisas. Você pode usa-la para acessar várias features da engine.
 
-struct MyFancyResource { /* stuff */ }
+### Acessando
 
-impl FromWorld for MyFancyResource {
-    fn from_world(world: &mut World) -> Self {
-        // You have full access to anything in the ECS from here.
-        // For instance, you can mutate other resources:
-        let mut x = world.get_resource_mut::<MyOtherResource>().unwrap();
-        x.do_mut_stuff();
-
-        MyFancyResource { /* stuff */ }
+Para acessar o valor de um recurso de um systema use `Res/ResMut`:
+```rust
+fn my_system(
+    // irá lançar um panic se o resources não existir
+    mut goals: ResMut<GoalsReached>,
+    other: Res<MyOtherResource>,
+    // use Option se o resource caso ele possa não existir
+    mut fancy: Option<ResMut<MyFancyResource>>,
+) {
+    if let Some(fancy) = &mut fancy {
+        // código
     }
 }
 ```
 
-E para inicializar seus recursos em um App basta usar a função `insert_resource`:
+### Gerenciando
+
+Se você precisa criar/remover `resources` em tempo de execução, você pode usar um `commands` (Commands):
 
 ```rust
-fn main() {
-    App::new()
-        // Caso implemente uma das traits `Default` ou `FromWorld`
-        .init_resource::<MyFancyResource>()
-        // se for necessário definir o valor inicial
-        .insert_resource(StartingLevel(3))
-        // ...
-        .run();
+fn my_setup(mut commands: Commands, /* ... */) {
+    // adicionar (ou sobreescrever) resource, usando os parametros enviados
+    commands.insert_resource(GoalsReached { main_goal: false, bonus: 100 });
+    // garente que o resource exista (criando se necessário)
+    commands.init_resource::<MyFancyResource>();
+    // remove um resource (se ele existir)
+    commands.remove_resource::<MyOtherResource>();
+}
+```
+
+Alternatively, using direct World access from an exclusive system:
+Alternativamente, usando diretamente `World` de um `system` exclusivo
+
+```rust
+fn my_setup2(world: &mut World) {
+    // Os mesmos metodos e comandos estão disponíveis aqui,
+    // mas nós podemos também fazer coisas mais sofisticadas
+
+    // verifica se o recurso existe
+    if !world.contains_resource::<MyFancyResource>() {
+        // Recebe acesso para o recuros, inserindo um valor customizado caso não tenha passado nenhum
+        let _bonus = world.get_resource_or_insert_with(
+            || GoalsReached { main_goal: false, bonus: 100 }
+        ).bonus;
+    }
+}
+```
+
+`Resources` pode também ser configurado no `app buildeer`. Faça isso para recursos que precisam sempre existam quando inicia o app.
+
+```rust
+App::new()
+    .add_plugins(DefaultPlugins)
+    .insert_resource(StartingLevel(3))
+    .init_resource::<MyFancyResource>()
+    // código
+```
+
+### Inicialização
+
+Existem duas formas de inicializar recursos, a primeira é definindo a trait `Default` para eles, quando eles possuem um tipo de dado simples, já a segunda é implementando a trait `FromWorld` que permite atuar sobre o recurso utilizando valores de `World`:
+
+Uma inicialização usando `Default`
+```rust
+// configurando todos os campos com seu valor default
+#[derive(Resource, Default)]
+struct GameProgress {
+    game_completed: bool,
+    secrets_unlocked: u32,
+}
+
+#[derive(Resource)]
+struct StartingLevel(usize);
+
+//  implementação para valores customizados
+impl Default for StartingLevel {
+    fn default() -> Self {
+        StartingLevel(1)
+    }
+}
+
+// para enums, você pode espeficar o valor default dele
+#[derive(Resource, Default)]
+enum GameMode {
+    Tutorial,
+    #[default]
+    Singleplayer,
+    Multiplayer,
+}
+```
+
+Para `resources` que precisam de uma inicialização um pouco mais complexa, podemos implementar o `FromWorld`
+```rust
+#[derive(Resource)]
+struct MyFancyResource { /* stuff */ }
+
+impl FromWorld for MyFancyResource {
+    fn from_world(world: &mut World) -> Self {
+        // Você tem controle total de tudo do seu ECS World aqui
+        // Por exemplo, você pode aceesar (e modificar!) outros resources
+        let mut x = world.resource_mut::<MyOtherResource>();
+        x.do_mut_stuff();
+
+        MyFancyResource { /* stuff */ }
+    }
 }
 ```
 
@@ -144,29 +231,24 @@ Um sistema pode conter no máximo 16 parâmetros, caso seja preciso mais parâme
 ```rust
 fn complex_system(
     (a, mut b): (Res<ResourceA>, ResMut<ResourceB>),
-    mut c: Option<ResMut<ResourceC>>,
+    (q0, q1, q2): (Query<(/* … */)>, Query<(/* … */)>, Query<(/* … */)>),
 ) {
-    if let Some(mut c) = c {
-        // lógica
-    }
+    // lógica
 }
 ```
 
-No sistema a cima `ResourceA` é um recurso imutável e esta compartilhando uma tupla com `ResourceB`que é um recurso mutável. Já `ResourceC` é um recurso que pode não existir e por isso está englobado por um tipo `Optional<T>`.
+No sistema a cima `ResourceA` é um recurso imutável e esta compartilhando uma tupla com `ResourceB`que é um recurso mutável. Já `q0, q1 e q2` são componentes de uma entidade.
 
 Existem dois tipos de funções para executar sistemas na Bevy
 
 ```rust
 fn main() {
     App::new()
-        // ...
+        .add_plugins(DefaultPlugins)
         // sistemas executados apenas quando o App é lançado
-        .add_startup_system(init_menu)
-        .add_startup_system(debug_start)
-
+        .add_systems(Startup, (setup_camera, debug_start))
         // sistemas executados todos os frames
-        .add_system(move_player)
-        .add_system(enemies_ai)
+        .add_systems(Update, (move_player, enemies_ai))
         // ...
         .run();
 }

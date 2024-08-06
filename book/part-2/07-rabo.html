@@ -1,0 +1,717 @@
+<!DOCTYPE HTML>
+<html lang="pt" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Adicionando um Rabo a Cobra - Desenvolvimento de Jogos online com Rust</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../0-capa.html"><strong aria-hidden="true">1.</strong> Capa</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../01-quemsou.html"><strong aria-hidden="true">1.1.</strong> Quem sou eu? (Sobre a autora)</a></li></ol></li><li class="chapter-item expanded "><a href="../part-1/00-capa.html"><strong aria-hidden="true">2.</strong> Conceitos Básicos</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../part-1/01-arq.html"><strong aria-hidden="true">2.1.</strong> Arquitetura de servidores</a></li><li class="chapter-item expanded "><a href="../part-1/02-prd-rec.html"><strong aria-hidden="true">2.2.</strong> Predição e Reconciliação</a></li><li class="chapter-item expanded "><a href="../part-1/03-interpolacao.html"><strong aria-hidden="true">2.3.</strong> Interpolação de Entidades</a></li><li class="chapter-item expanded "><a href="../part-1/04-lag.html"><strong aria-hidden="true">2.4.</strong> Compensacão de Lag</a></li></ol></li><li class="chapter-item expanded "><a href="../part-2/00-intro.html"><strong aria-hidden="true">3.</strong> Multiplayer Local Snake Game</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../part-2/01-bevy.html"><strong aria-hidden="true">3.1.</strong> Sobre a Bevy</a></li><li class="chapter-item expanded "><a href="../part-2/02-ecs.html"><strong aria-hidden="true">3.2.</strong> Entity Component System</a></li><li class="chapter-item expanded "><a href="../part-2/03-cabeca.html"><strong aria-hidden="true">3.3.</strong> A Cabeça da Cobra</a></li><li class="chapter-item expanded "><a href="../part-2/04-grid.html"><strong aria-hidden="true">3.4.</strong> Grade de Movimento</a></li><li class="chapter-item expanded "><a href="../part-2/05-spawnfood.html"><strong aria-hidden="true">3.5.</strong> Gerador de Comidas</a></li><li class="chapter-item expanded "><a href="../part-2/06-cadencia.html"><strong aria-hidden="true">3.6.</strong> Melhorando a Cadência do Movimento</a></li><li class="chapter-item expanded "><a href="../part-2/07-rabo.html" class="active"><strong aria-hidden="true">3.7.</strong> Adicionando um Rabo a Cobra</a></li><li class="chapter-item expanded "><a href="../part-2/08-colisoes.html"><strong aria-hidden="true">3.8.</strong> Colisões</a></li><li class="chapter-item expanded "><a href="../part-2/09-migrando-versoes.html"><strong aria-hidden="true">3.9.</strong> Migrando versões da Bevy</a></li><li class="chapter-item expanded "><a href="../part-2/10-multiplayer.html"><strong aria-hidden="true">3.10.</strong> Multiplayer Local</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Desenvolvimento de Jogos online com Rust</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="adicionando-um-rabo-a-cobra"><a class="header" href="#adicionando-um-rabo-a-cobra">Adicionando um Rabo a Cobra</a></h1>
+<p>O rabo da cobra é uma parte um pouco mais complexa, pois para cada segmento é preciso saber o próximo segmento e para onde cada segmento estará se movendo. Assim, a forma mais simples de resolver este problema é adicionando todos os segmentos do rabo da cobra em um <code>Vec</code> e manter eles em um recurso ordenado em vez de entidades e componentes simples. Essa mudança nos garante que quando atualizarmos a posição de um segmento, atualizamos seu valor com relação ao segmento anterior. Isso pode ser feito iterando sobre todos os segmentos em pares com a função <a href="https://doc.rust-lang.org/std/slice/struct.Windows.html"><code>windows</code></a> que nos permite acessar o elemento anterior e o atual da lista. Outro elemento importante é que precisamos definir uma cor para o rabo da cobra, define que seria um tom de rosa com:</p>
+<pre><code class="language-rs">// snake.rs
+const SNAKE_SEGMENT_COLOR: Color = Color::rgb(0.8, 0.0, 0.8);
+</code></pre>
+<p>Agora que definimos uma cor, podemos começar a pensar no primeiro teste. O teste mais simples para este caso parece ser verificar se a entidade relacionada aos segmentos da cobra possui 2 segmento inicialmente:</p>
+<pre><code class="language-rs">// snake.rs
+    #[test]
+    fn entity_snake_has_two_segments() {
+    // Setup app
+    let mut app = App::new();
+
+    // Adicionar sistema de spawn e recurso com segmentos
+    app.insert_resource(Segments::default()).add_systems(Startup, spawn_system)
+
+    // Executar sistema
+    app.update();
+
+    // Buscar todas entidades com componente `Segment`
+    let mut query = app.world.query_filtered::&lt;Entity, With&lt;Segment&gt;&gt;();
+    assert_eq!(query.iter(&amp;app.world).count(), 2);
+    }
+</code></pre>
+<p>Executando esse teste vemos que precisamos adicionar o recurso <code>Segments</code> ao nosso código, um vetor de entidades como falamos anteriormente:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// snake.rs
+#[derive(Component)]
+pub struct Segment;
+
+#[derive(Default, Deref, DerefMut, Resource)]
+pub struct Segments(Vec&lt;Entity&gt;);
+
+<span class="boring">}</span></code></pre></pre>
+<p>Com isso, precisamos reescrever nosso <code>snake::spawn_system</code> para utilizar <code>Segments</code>. Como é um startup system, será executado para iniciar entidades do jogo:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn spawn_system(mut commands: Commands, mut segments: ResMut&lt;Segments&gt;) {
+    *segments = Segments(vec![commands
+        .spawn(SpriteBundle {
+            sprite: Sprite {
+                color: SNAKE_HEAD_COLOR,
+                ..default()
+            },
+            transform: Transform {
+                scale: Vec3::new(10.0, 10.0, 10.0),
+                ..default()
+            },
+            ..default()
+        })
+        .insert(Head::default())
+        .insert(Segment) // &lt;--
+        .insert(Position { x: 5, y: 5 })
+        .insert(Size::square(0.8))
+        .id()]);
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Neste novo <code>spawn_system</code> recebemos o recurso <code>Segments</code> como um recurso mutável <code>mut segments: ResMut&lt;Segments&gt;</code> e definimos <code>segments</code> através de uma dereferência mutável, <code>#[derive(.., DerefMut)]</code>, reasignando o <code>Segment::default()</code>, que equivale a um vetor vazio, ao nosso recem adicionado componente. Outra mudança que precisamos fazer é adicionar o recurso <code>Segments</code> ao nosso startup do app na <code>main.rs</code> e em todos testes de <code>snake.rs</code>:</p>
+<pre><code class="language-rs">// main.rs
+
+fn main() {
+    App::new()
+        .add_systems(Startup, setup_camera)
+        .insert_resource(snake::Segments::default()) &lt;-- Adicionar
+        .add_systems(Startup, snake::spawn_system)
+        // ...
+        .run();
+}
+
+// snake.rs
+    #[test]
+    fn entity_has_snake_head() {
+        // 1 Inicialização do App
+        let mut app = App::new();
+
+        // 2 Adicionar o `spawn_snake` startup system
+        app 
+            .insert_resource(Segments::default()) &lt;-- Adicionar em todos os testes
+            .add_systems(Startup, spawn_system);
+
+        // 3 Executar todos os sistemas pelo menos uma vez
+        app.update();
+
+        // 4 Fazer uma query por entidades que contenham o componente `SnakeHead`
+        let mut query = app.world.query_filtered::&lt;Entity, With&lt;Head&gt;&gt;();
+
+        // 5 Verificar se a contagem de componentes da query foi igual a 1
+        assert_eq!(query.iter(&amp;app.world).count(), 1);
+    }
+
+</code></pre>
+<p>Agora, executando nossos testes percebemos que o novo teste, <code>entity_snake_has_two_segments</code>, falha por possuir somente uma entidade. Para isso, precisamos criar um novo sistema que adiciona um novo <code>Segment</code> em posição específica e retorna uma <code>Entity</code> id para adicionarmos no recurso <code>Segments</code>. Este sistema que cria um novo segmento é bastante semelhante ao segmento que instancia a cobra em si, <code>spawn</code>, sua maior diferença é o fato de que passamos uma posição, <code>Position</code>, como argumento para o segmento e que o tamanho do quadrado é menor, com coloração diferente.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn spawn_segment_system(mut commands: Commands, position: Position) -&gt; Entity {
+    commands
+        .spawn(SpriteBundle {
+            sprite: Sprite {
+                color: SNAKE_SEGMENT_COLOR,
+                ..default()
+            },
+            transform: Transform {
+                    scale: Vec3::new(10.0, 10.0, 10.0),
+                    ..default()
+                },
+            ..default()
+        })
+        .insert(Segment)
+        .insert(position)
+        .insert(Size::square(0.65))
+        .id()
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Com este novo sistema, podemos adicionar um segmento extra no nosso <code>snake::spawn_system</code>, que armazenará os segmentos cabeça e o recem criado como entidades em <code>Segments</code>:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn spawn_system(mut commands: Commands, mut segments: ResMut&lt;Segments&gt;) {
+    *segments = Segments(vec![
+        commands
+            .spawn(SpriteBundle {
+                sprite: Sprite {
+                    color: SNAKE_HEAD_COLOR,
+                    ..default()
+                },
+                transform: Transform {
+                    scale: Vec3::new(10.0, 10.0, 10.0),
+                    ..default()
+                },
+                ..default()
+            })
+            .insert(Head::default())
+            .insert(Segment)
+            .insert(Position { x: 5, y: 5 })
+            .insert(Size::square(0.8))
+            .id(),
+        spawn_segment_system(commands, Position { x: 5, y: 4 }), // &lt;-- novo segmento
+    ]);
+}
+
+
+<span class="boring">}</span></code></pre></pre>
+<p>Ao executarmos os teste agora, vemos que todos passam e podemos focar no próximo passo, fazer os segmentos se moverem seguindo a cabeça.</p>
+<h2 id="fazendo-o-rabo-seguir-a-cabeça"><a class="header" href="#fazendo-o-rabo-seguir-a-cabeça">Fazendo o rabo seguir a cabeça</a></h2>
+<p>Anteriormente já falamos que os segmentos da cobra estão armazenados em um <code>Vec</code> e podemos iterar sobre pares destes elementos utilizando a função <code>windows</code>, agora nos falta entender como criar um teste para verificar se um segmento assume a posição de seu antecessor ao andar, mantendo a direção de movimento. Assim, nosso novo teste considera que a cobra é inicializada na posição <code>x = 5</code> e <code>y = 5</code>, e seu segmento extra em <code>x = 5</code> e <code>y = 4</code>. A primeira parte do teste define as novas posições da cabeça, <code>Head</code>, e do segment, <code>Segment</code>, com <code>let new_position_head_right = Position { x: 6, y: 5 };</code> e <code>let new_position_segment_right = Position { x: 5, y: 5 };</code>, ou seja, <code>Head</code> se move para <code>x = 6</code> e <code>y = 5</code> e segment para <code>x = 5</code> e <code>y = 5</code> ao apertarmos a tecla <code>D</code> e executarmos um novo update:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[test]
+fn snake_segment_has_followed_head() {
+    // Setup
+    let mut app = App::new();
+    let new_position_head_right = Position { x: 6, y: 5 };
+    let new_position_segment_right = Position { x: 5, y: 5 };
+
+    // Adiciona os systemas
+    app.insert_resource(Segments::default())
+        .add_startup_system(spawn_system)
+        .add_system(movement_system)
+        .add_system(movement_input_system.before(movement_system));
+
+    // adiciona resource apertando a tecla D, movimento para direita
+    let mut input = Input::&lt;KeyCode&gt;::default();
+    input.press(KeyCode::D);
+    app.insert_resource(input);
+
+    // executa sistemas
+    app.update();
+
+    let mut query = app.world.query::&lt;(&amp;Head, &amp;Position)&gt;();
+    query.iter(&amp;app.world).for_each(|(head, position)| {
+        // garante que nova posição da cabeçá é esperada:
+        assert_eq!(&amp;new_position_head_right, position); 
+        // garante que nova direção é para direita:
+        assert_eq!(head.direction, Direction::Right);
+    });
+
+    let mut query = app.world.query::&lt;(&amp;Segment, &amp;Position, Without&lt;Head&gt;)&gt;();
+    query.iter(&amp;app.world).for_each(|(_segment, position, _)| {
+        // garante que nova posição do segmento é esperada:
+        assert_eq!(&amp;new_position_segment_right, position);
+    });
+    // ...
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Por descargo de consciência podemos adicionar mais uma parte ao teste que muda a direção de movimento da cobra para cima:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>    #[test]
+    fn snake_segment_has_followed_head() {
+        // Setup
+        let mut app = App::new();
+        let new_position_head_right = Position { x: 6, y: 5 };
+        let new_position_segment_right = Position { x: 5, y: 5 };
+
+        // Adiciona os systemas
+        app.insert_resource(Segments::default())
+            .add_systems(Startup, spawn_system)
+            .add_systems(Update, movement_system)
+            .add_systems(Update, movement_input_system.before(movement_system));
+
+        // adiciona resource apertando a tecla D, movimento para direita
+        let mut input = Input::&lt;KeyCode&gt;::default();
+        input.press(KeyCode::D);
+        app.insert_resource(input);
+
+        // executa sistemas
+        app.update();
+
+        let mut query = app.world.query::&lt;(&amp;Head, &amp;Position)&gt;();
+        query.iter(&amp;app.world).for_each(|(head, position)| {
+            // garante que nova posição da cabeça é esperada:
+            assert_eq!(&amp;new_position_head_right, position);
+            // garante que nova direção é para direita:
+            assert_eq!(head.direction, Direction::Right);
+        });
+
+        let mut query = app.world.query::&lt;(&amp;Segment, &amp;Position, Without&lt;Head&gt;)&gt;();
+        query.iter(&amp;app.world).for_each(|(_segment, position, _)| {
+            // garante que nova posição do segmento é esperada:
+            assert_eq!(&amp;new_position_segment_right, position);
+        });
+
+        // NOVAS POSIÇÕES ESPERADAS
+        let new_position_head_up = Position { x: 6, y: 6 }; // &lt;--
+        let new_position_segment_up = Position { x: 6, y: 5 }; // &lt;--
+
+        // adiciona resource apertando a tecla W, movimento para cima
+        let mut input = Input::&lt;KeyCode&gt;::default();
+        input.press(KeyCode::W); // &lt;--
+        app.insert_resource(input);
+
+        // executa sistemas de novo
+        app.update();
+
+        let mut query = app.world.query::&lt;(&amp;Head, &amp;Position)&gt;();
+        query.iter(&amp;app.world).for_each(|(head, position)| {
+            // garante que nova posição da cabeça é esperada:
+            assert_eq!(&amp;new_position_head_up, position);
+            // garante que nova direção da cabeça é esperada:
+            assert_eq!(head.direction, Direction::Up);
+        });
+
+        let mut query = app.world.query::&lt;(&amp;Segment, &amp;Position, Without&lt;Head&gt;)&gt;();
+        query.iter(&amp;app.world).for_each(|(_segment, position, _)| {
+            // garante que nova posição do segmento é esperada:
+            assert_eq!(&amp;new_position_segment_up, position);
+        })
+    }
+<span class="boring">}</span></code></pre></pre>
+<p>Ao exercutarmos este código veremos que o assert <code>assert_eq!(&amp;new_position_segment_right, position);</code> falha indicando que o segmento não se moveu, mas a cabeça se moveu. Como estamos falando de movimento, sabemos que precisamos alterar o sistema <code>movement_system</code> para incluir uma iteração sobre os elementos de <code>Segments</code>. Assim a primeira alteração é adicionar o recurso <code>segments</code> nos argumentos do sistema, <code>segments: ResMut&lt;Segments&gt;</code>. Depois disso vamos precisar extrair duas queries diferentes para posição, <code>Position</code>, e cabeça, <code>Head</code>, já que agora nem todas posições terão cabeças, mas todas posições terão <code>Segment</code>, fazemos isso com as queries <code>mut heads: Query&lt;(Entity, &amp;Head)&gt;</code> e <code>mut positions: Query&lt;(Entity, &amp;Segment, &amp;mut Position)&gt;</code>. Precisamos de <code>Segment</code>, pois <code>Food</code> também possui <code>Position</code> e queremos evitar iterar por elementos desnecessarios em um ECS.</p>
+<p>O código que vamos adicionar ao <code>movement_system</code> é simples, basicamente iteramos por <code>segments</code> dois a dois elementos por vez e adicionamos a posição do elementos anterior, <code>entity[0]</code>, na posição do elemento posterior, <code>entity[1]</code>. Algo como:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>(*segments).windows(2).for_each(|entity| {
+    if let Ok((_, _segment, mut position)) = positions.get_mut(entity[1]) {
+        if let Ok((_, _, mut new_position)) = positions.get_mut(entity[0]) {
+            *position = new_position.clone();
+        }
+    };
+});
+<span class="boring">}</span></code></pre></pre>
+<p>Infelizmente, esse código em particular não compila devido ao fato de acessarmos <code>positions</code> como referência mutável duas vezes, inverter uma referência imutável e outra mutável também não funcionaria devida a uma regra do borrow checker do Rust que impede que um mesmo valor seja acesso como mutável e imutável no mesmo bloco. O mesmo acontece com duas referências diferentes mutáveis no mesmo bloco, o compilador não teria garantia que ambas não mutaria o mesmo valor ao mesmo tempo. Uma solução para este problema é adicionar um clone de <code>positions</code>, mas podemos fazer este clone ser mais inteligente, transformando ele em um <code>HashMap</code> na qual a chave é a entidade e a position é o valor, para depois acessarmos este clone de <code>positions</code> de forma imutável:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn movement_system(
+    segments: ResMut&lt;Segments&gt;,
+    mut heads: Query&lt;(Entity, &amp;Head)&gt;,
+    mut positions: Query&lt;(Entity, &amp;Segment, &amp;mut Position)&gt;,
+) {
+    // Criar um hashmap clonado de positions com `Entity =&gt; Position`
+    let positions_clone: HashMap&lt;Entity, Position&gt; = positions
+        .iter()
+        .map(|(entity, _segment, position)| (entity, position.clone()))
+        .collect();
+    // Acessar a cabeça (única existente por hora)
+    if let Some((id, head)) = heads.iter_mut().next() {
+        // Iterar sobre segments 2 a 2
+        (*segments).windows(2).for_each(|entity| {
+            // Acessar a posição da `entity[1]` em positions
+            if let Ok((_, _segment, mut position)) = positions.get_mut(entity[1]) {
+                // Acessar a posição da `entity[0]` em positions_clone
+                if let Some(new_position) = positions_clone.get(&amp;entity[0]) {
+                    // Substituir position por new_position
+                    *position = new_position.clone();
+                }
+            };
+        });
+
+        // mesmo código de antes para mover a cabeça
+        let _ = positions.get_mut(id).map(|(_, _segment, mut pos)| {
+            match &amp;head.direction {
+                Direction::Left =&gt; {
+                    pos.x -= 1;
+                }
+                Direction::Right =&gt; {
+                    pos.x += 1;
+                }
+                Direction::Up =&gt; {
+                    pos.y += 1;
+                }
+                Direction::Down =&gt; {
+                    pos.y -= 1;
+                }
+            };
+        });
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Agora sim, nosso teste passa e se executarmos <code>cargo run</code> vemos que o segmento rosa sempre segue a cabeça. Próximo passo é entender como criar um sistema para expandir a cobra ao comer.</p>
+<h2 id="alimentando-a-cobra"><a class="header" href="#alimentando-a-cobra">Alimentando a cobra</a></h2>
+<p>Faz algum tempo que nossa cobra está rodeada de comida, mas não pode comer, por isso chegou a hora de elaborarmos um teste que vai garatir que nossa cobra possa comer e que ela vai crescer ao comer. Nosso teste vai partir de um setup um pouco mais complexo, pois agora precisamos registrar um evento de crescimento, <code>GrowthEvenet</code>, precisamos registrar a última posição do vetor de segmentos, <code>LastTailPosition</code>, o nosso antigo sistema de spawn de comida, <code>food::spawn_system</code>, e um system set organizado o que acontece primeiro. Algo como o seguinte bloco:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>        .add_systems(Startup, setup_camera)
+        .insert_resource(Segments::default())
+        .insert_resource(LastTailPosition::default())
+        .add_event::&lt;GrowthEvent&gt;()
+        .add_systems(Startup, spawn_system)
+        .add_systems(Update, food::spawn_system)
+        .add_systems(Update, snake::movement_system)
+        .add_systems(Update, eating_system.after(snake::movement_system))
+        .add_systems(Update, growth_system.after(snake::eating_system))
+<span class="boring">}</span></code></pre></pre>
+<p>Depois disso teremos dois updates no nosso teste, primeiro update cria o contexto de mundo e nos permite verificar que uma comida foi spawnada e que a cobra possui dois segmentos:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>app.update();
+
+let mut query = app.world.query::&lt;(&amp;Segment, &amp;Position)&gt;();
+assert_eq!(query.iter(&amp;app.world).count(), 2);
+let mut query = app.world.query::&lt;(&amp;Food, &amp;Position)&gt;();
+assert_eq!(query.iter(&amp;app.world).count(), 1);
+<span class="boring">}</span></code></pre></pre>
+<p>Por último, executamos mais uma vez o update e verificamos se a cobra possui 3 segmentos agora:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>app.update();
+
+let mut query = app.world.query::&lt;(&amp;Segment, &amp;Position)&gt;();
+assert_eq!(query.iter(&amp;app.world).count(), 3);
+<span class="boring">}</span></code></pre></pre>
+<p>Infelizmente, um teste somente com isso não nos garantiria sucesso, já que o <code>food::spawn_system</code> gera uma posição aleatória dentro do grid, para isso precisamos modificar a função <code>food::spawn_system</code> para termos controle  da posição que a comida vai surgir. Fazemos isso adicionado uma macro de compilação exclusiva de teste, <code>cfg!</code>:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// food.rs
+#[allow(clippy::cast_possible_wrap)]
+pub fn spawn_system(mut commands: Commands) {
+    commands
+        .spawn(SpriteBundle {
+            sprite: Sprite {
+                color: FOOD_COLOR,
+                ..default()
+            },
+            ..default()
+        })
+        .insert(Food)
+        .insert(Position {
+            x: if cfg!(test) { 5 } else { (random::&lt;u16&gt;() % GRID_WIDTH) as i16 }, // &lt;--
+            y: if cfg!(test) { 7 } else { (random::&lt;u16&gt;() % GRID_HEIGHT) as i16 }, // &lt;--
+        })
+        .insert(Size::square(0.65));
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Agora sim, nosso teste poderá fazer sentido ao compilar:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// snake.rs
+    #[test]
+    fn snake_grows_when_eating() {
+        // Setup
+        let mut app = App::new();
+
+        // sistemas
+        app.insert_resource(Segments::default())
+            .insert_resource(LastTailPosition::default())
+            .add_event::&lt;GrowthEvent&gt;()
+            .add_systems(Startup, spawn_system)
+            .add_systems(Update, food::spawn_system)
+            .add_systems(
+                Update,
+                snake::movement_system.run_if(on_timer(Duration::from_secs_f32(0.150))),
+            )
+            .add_systems(Update, snake::eating_system.after(snake::movement_system))
+            .add_systems(Update, snake::growth_system.after(snake::eating_system));
+
+        // update de configuração
+        app.update();
+
+        let mut query = app.world.query::&lt;(&amp;Segment, &amp;Position)&gt;();
+        assert_eq!(query.iter(&amp;app.world).count(), 2);
+        let mut query = app.world.query::&lt;(&amp;Food, &amp;Position)&gt;();
+        assert_eq!(query.iter(&amp;app.world).count(), 1);
+
+        // update de execução
+        app.update();
+
+        let mut query = app.world.query::&lt;(&amp;Segment, &amp;Position)&gt;();
+        assert_eq!(query.iter(&amp;app.world).count(), 3);
+    }
+<span class="boring">}</span></code></pre></pre>
+<p>Pronto, agora podemos ir jantar, mas, infelizmente, nossa  cobra ainda não. Para isso, começamos com o <code>snake::eating_system</code>. O objetivo de <code>snake::eating_system</code> é simples, iterar sobre todas as entidades com componente comida, <code>Food</code>, e ver se a posição delas, <code>Position</code>, é igual a <code>Position</code> das entidades com <code>Head</code>. Caso, a firmação anterior seja verdade, removemos, <code>despawn</code>, a entidade <code>Food</code> e lançamos no sistema um evento para crescer a cobra, <code>GrowthEvent</code>, na sua última posição, <code>pub struct LastTailPosition(Option&lt;Position&gt;)</code>. Um detalhe importante, é que para publicar um evento, <code>EventWriter</code>, precisamos registrar esse evento no <code>App</code>, com <code>add_event::&lt;GrowthEvent&gt;()</code>, o mesmo vale para lermos os eventos, <code>EventReader</code>.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Event)]
+pub struct GrowthEvent;
+
+#[derive(Default, Resource)]
+pub struct LastTailPosition(Option&lt;Position&gt;);
+
+pub fn eating_system(
+    mut commands: Commands,
+    mut growth_writer: EventWriter&lt;GrowthEvent&gt;,
+    food_positions: Query&lt;(Entity, &amp;Position), With&lt;Food&gt;&gt;,
+    head_positions: Query&lt;&amp;Position, With&lt;Head&gt;&gt;,
+) {
+    for head_pos in head_positions.iter() {
+        for (ent, food_pos) in food_positions.iter() {
+            if food_pos == head_pos {
+                commands.entity(ent).despawn();
+                growth_writer.send(GrowthEvent);
+            }
+        }
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Na função anterior, recebemos um <code>EventWriter</code> do tipo <code>GrowthEvent</code>, que vai publicar quaisquer eventos necessários, uma query com todas as entidades e posições de comidas, <code>Query&lt;(Entity, &amp;Position), With&lt;Food&gt;&gt;</code> e uma query com a posição das cabeças, no caso, apenas uma, <code>Query&lt;&amp;Position, With&lt;Head&gt;&gt;</code>. Iteramos por tudo e checamos se as posições são iguais para então removermos a entidade associada a comida e publicarmos um evento de crescimento. Próximo passo é lermos o evento com <code>EventReader&lt;GrowthEvent&gt;</code> e adicionarmos um clone da última posição do rabo, como um novo segmento, aos segmentos, <code>Segments</code>:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn growth_system(
+    commands: Commands,
+    last_tail_position: Res&lt;LastTailPosition&gt;,
+    mut segments: ResMut&lt;Segments&gt;,
+    mut growth_reader: EventReader&lt;GrowthEvent&gt;,
+) {
+    if growth_reader.read().next().is_some() {
+        segments.push(spawn_segment_system(commands, last_tail_position.0.clone().unwrap()));
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Nosso teste está quase passando, precisamos adicionar a informação da última posição de segmentos quando nos movimentamos, senão <code>LastTailPosition</code>será sempre <code>None</code> e nossa cobra não crescerá. Para isso, adicionamos o recuso mutável, <code>ResMut</code>, ao sistema <code>movement_system</code> e no final dele, buscamos a última posição dos segmentos:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn movement_system(
+    segments: ResMut&lt;Segments&gt;,
+    mut last_tail_position: ResMut&lt;LastTailPosition&gt;,
+    mut heads: Query&lt;(Entity, &amp;Head)&gt;,
+    mut positions: Query&lt;(Entity, &amp;Segment, &amp;mut Position)&gt;,
+) {
+    let positions_clone: HashMap&lt;Entity, Position&gt; = positions
+        .iter()
+        .map(|(entity, _segment, position)| (entity, position.clone()))
+        .collect();
+    if let Some((id, head)) = heads.iter_mut().next() {
+        (*segments).windows(2).for_each(|entity| {
+            if let Ok((_, _segment, mut position)) = positions.get_mut(entity[1]) {
+                if let Some(new_position) = positions_clone.get(&amp;entity[0]) {
+                    *position = new_position.clone();
+                }
+            };
+        });
+        // ...
+        *last_tail_position = LastTailPosition(Some(positions_clone.get(segments.last().unwrap()).unwrap().clone())); // &lt;--
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Agora sim, nosso teste passa! Sabemos que podemos utilizar <code>unwrap</code>, pois a cobra inicia seu movimento com 2 segmentos e sabemos que ambos os segmentos possuem <code>Position</code>, assim, <code>positions_clone.get</code> , também, nunca será <code>None</code>. Possivelmente precisaremos adicionar alguns <code>.insert_resource(LastTailPosition::default())</code>no setup dos testes.</p>
+<p>Os testes são os seguintes:</p>
+<pre><code class="language-bash">    snake_cannot_start_moving_down
+    snake_head_has_moved_up
+    snake_head_moves_down_and_left
+    snake_head_moves_up_and_right
+    snake_segment_has_followed_head
+
+</code></pre>
+<p>No próximo capítulo vamos aprender um pouco mais sobre colisões.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../part-2/06-cadencia.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../part-2/08-colisoes.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../part-2/06-cadencia.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../part-2/08-colisoes.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

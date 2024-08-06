@@ -1,0 +1,628 @@
+<!DOCTYPE HTML>
+<html lang="pt" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Multiplayer Local - Desenvolvimento de Jogos online com Rust</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../0-capa.html"><strong aria-hidden="true">1.</strong> Capa</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../01-quemsou.html"><strong aria-hidden="true">1.1.</strong> Quem sou eu? (Sobre a autora)</a></li></ol></li><li class="chapter-item expanded "><a href="../part-1/00-capa.html"><strong aria-hidden="true">2.</strong> Conceitos Básicos</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../part-1/01-arq.html"><strong aria-hidden="true">2.1.</strong> Arquitetura de servidores</a></li><li class="chapter-item expanded "><a href="../part-1/02-prd-rec.html"><strong aria-hidden="true">2.2.</strong> Predição e Reconciliação</a></li><li class="chapter-item expanded "><a href="../part-1/03-interpolacao.html"><strong aria-hidden="true">2.3.</strong> Interpolação de Entidades</a></li><li class="chapter-item expanded "><a href="../part-1/04-lag.html"><strong aria-hidden="true">2.4.</strong> Compensacão de Lag</a></li></ol></li><li class="chapter-item expanded "><a href="../part-2/00-intro.html"><strong aria-hidden="true">3.</strong> Multiplayer Local Snake Game</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../part-2/01-bevy.html"><strong aria-hidden="true">3.1.</strong> Sobre a Bevy</a></li><li class="chapter-item expanded "><a href="../part-2/02-ecs.html"><strong aria-hidden="true">3.2.</strong> Entity Component System</a></li><li class="chapter-item expanded "><a href="../part-2/03-cabeca.html"><strong aria-hidden="true">3.3.</strong> A Cabeça da Cobra</a></li><li class="chapter-item expanded "><a href="../part-2/04-grid.html"><strong aria-hidden="true">3.4.</strong> Grade de Movimento</a></li><li class="chapter-item expanded "><a href="../part-2/05-spawnfood.html"><strong aria-hidden="true">3.5.</strong> Gerador de Comidas</a></li><li class="chapter-item expanded "><a href="../part-2/06-cadencia.html"><strong aria-hidden="true">3.6.</strong> Melhorando a Cadência do Movimento</a></li><li class="chapter-item expanded "><a href="../part-2/07-rabo.html"><strong aria-hidden="true">3.7.</strong> Adicionando um Rabo a Cobra</a></li><li class="chapter-item expanded "><a href="../part-2/08-colisoes.html"><strong aria-hidden="true">3.8.</strong> Colisões</a></li><li class="chapter-item expanded "><a href="../part-2/09-migrando-versoes.html"><strong aria-hidden="true">3.9.</strong> Migrando versões da Bevy</a></li><li class="chapter-item expanded "><a href="../part-2/10-multiplayer.html" class="active"><strong aria-hidden="true">3.10.</strong> Multiplayer Local</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Desenvolvimento de Jogos online com Rust</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="multiplayer-local"><a class="header" href="#multiplayer-local">Multiplayer Local</a></h1>
+<p><strong>INICIALMENTE ESCRITO NA VERSÃO 0.9 DA BEVY</strong></p>
+<p>Primeiro passo para entendermos um jogo multiplayer é criarmos as regras para o jogo executar corretamente no modo multiplayer, podemos fazer isso adicionando mais um player de forma local. O suporte ao multiplayer exige uma pequena refatoração, que será por onde começaremos.</p>
+<h2 id="refatorando"><a class="header" href="#refatorando">Refatorando</a></h2>
+<p>Com a atualização do Rust para versão <code>1.66</code>, o linter do Rust sugeriu algumas novas refatorações bem simples, mas muito bem observadas no módulo <code>grid</code>. A primeira é na função <code>translate_position</code> e na função <code>scale_sprite</code> que possuíam um casting desnecessário, podendo-se remover o <code>as f32</code> das chamadas de funções <code>window.width()</code> e <code>window.height()</code>:</p>
+<pre><code class="language-rs">// Grid.rs
+// Antes
+fn scale_sprite(transform: &amp;mut Transform, sprite_size: &amp;Size, window: &amp;Window) {
+    transform.scale = Vec3::new(
+        sprite_size.width / GRID_WIDTH as f32 * window.width() as f32,
+        sprite_size.height / GRID_HEIGHT as f32 * window.height() as f32,
+        1.0,
+    );
+}
+
+fn translate_position(transform: &amp;mut Transform, pos: &amp;Position, window: &amp;Window) {
+    transform.translation = Vec3::new(
+        convert(pos.x as f32, window.width() as f32, GRID_WIDTH as f32),
+        convert(pos.y as f32, window.height() as f32, GRID_HEIGHT as f32),
+        0.0,
+    );
+}
+
+// Depois
+fn scale_sprite(transform: &amp;mut Transform, sprite_size: &amp;Size, window: &amp;Window) {
+    transform.scale = Vec3::new(
+        sprite_size.width / GRID_WIDTH as f32 * window.width(),
+        sprite_size.height / GRID_HEIGHT as f32 * window.height(),
+        1.0,
+    );
+}
+
+fn translate_position(transform: &amp;mut Transform, pos: &amp;Position, window: &amp;Window) {
+    transform.translation = Vec3::new(
+        convert(pos.x as f32, window.width(), GRID_WIDTH as f32),
+        convert(pos.y as f32, window.height(), GRID_HEIGHT as f32),
+        0.0,
+    );
+}
+</code></pre>
+<p>A segunda refatoração é, no mesmo módulo, a simplificação da função <code>convert</code> para utilizar a função <code>mul_add</code> em vez de uma multiplicação seguida por uma adição. A vantagem do uso de <code>mul_add</code> é que reduz os erros por arredondamento que poderiam ser causados pelo uso de <code>f32</code>:</p>
+<pre><code class="language-rs">// grid.rs
+// Antes
+fn convert(pos: f32, bound_window: f32, grid_side_lenght: f32) -&gt; f32 {
+    let tile_size = bound_window / grid_side_lenght;
+    pos / grid_side_lenght * bound_window - (bound_window / 2.) + (tile_size / 2.)
+}
+
+// Depois
+fn convert(pos: f32, bound_window: f32, grid_side_lenght: f32) -&gt; f32 {
+    let tile_size = bound_window / grid_side_lenght;
+    (pos / grid_side_lenght).mul_add(bound_window, -bound_window / 2.) + (tile_size / 2.)
+}
+</code></pre>
+<blockquote>
+<p><strong>Trait <code>MulAdd</code></strong> equivale a representar <code>(self * a) + b</code> e tem como sintaxe <code>fn mul_add&lt;A: Self, B: Self&gt;(self, a: A, b: B) -&gt; Self</code>.</p>
+</blockquote>
+<p>Outra refatoração que fiz foi para melhorar os resultados de testes em modo <code>release</code>  e em Windows, utilizando a biblioteca <code>approx = "0.5.1"</code>. Esta biblioteca garante uma comparação mais correta de epsilons de f32. Assim, podemos mudar todos os testes que contém comparações de f32 para utilizar o <code>assert_relative_eq</code>, que recebe um epsilon de valor de erro na comparação:</p>
+<pre><code class="language-rs">// grid.rs
+mod test {
+    use super::*;
+    use approx::assert_relative_eq;
+
+    fn convert_position_x_for_grid_width() {
+        let x = convert(4., 400., GRID_WIDTH as f32);
+
+        assert_relative_eq!(x, -20., epsilon = 0.00001);
+    }
+
+    #[test]
+    fn convert_position_y_for_grid_height() {
+        let x = convert(5., 400., GRID_HEIGHT as f32);
+
+        assert_relative_eq!(x, 20., epsilon = 0.00001);
+    }
+    // ...
+}
+</code></pre>
+<p>Por último, vamos atualizar os testes com múltiplas chamadas de <code>app.update()</code>. Fazemos isso substituindo todas as linhas por um <code>for</code> com range:</p>
+<pre><code class="language-rs">// Antes
+app.update(); // 3 + 1
+app.update(); // 3 + 2
+app.update(); // 3 + 3
+app.update(); // 3 + 4
+app.update(); // 3 + 5
+app.update(); // 3 + 6
+
+// Depois
+for _ in 0..6 {
+    app.update(); // 3 + _
+}
+</code></pre>
+<h2 id="criando-outro-player"><a class="header" href="#criando-outro-player">Criando Outro Player</a></h2>
+<p>A primeira coisa que precisamos para começar a dar suporte para multiplayer local é adicionarmos o conceito de player, ou seja, um componente chamado <code>Player</code> que possui um <code>id</code> com o id do player, podemos fazer isso no módulo <code>components.rs</code>. Além disso, vale a pena criar uma função constante para retornar o valor de <code>id</code>:</p>
+<pre><code class="language-rs">#[derive(Component, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Player {
+    id: u8,
+}
+
+impl Player {
+    pub const fn id(&amp;self) -&gt; usize {
+        self.id as usize
+    }
+}
+</code></pre>
+<p>Depois disso, podemos aumentar o tamanho do mapa para que duas cobras possam andar juntas sem se colidir constantemente, fazemos isso mudando o valor da janela gerada no <code>WindowPlugin</code> para <code>1000f32</code>:</p>
+<pre><code class="language-rs">.add_plugins(DefaultPlugins.set(WindowPlugin {
+    window: WindowDescriptor {
+        title: "Snake Game".to_string(),
+        width: 1000.0,
+        height: 1000.0,
+        ..default()
+    },
+    // ...
+</code></pre>
+<p>Somente esta mudança não garante mais espaço para duas cobras, assim, em <code>grid.rs</code> aumentamos a quantidade de tiles de <code>10</code> para <code>20</code>, mas apenas em modo release. Definimos compilação em modo <code>debug</code> com a flag de compilação <code>#[cfg(debug_assertions)]</code> e modo <code>release</code> com a flag de compilação <code>#[cfg(not(debug_assertions))]</code>, um <code>not</code> a mais:</p>
+<pre><code class="language-rs">#[cfg(debug_assertions)]
+pub(crate) const GRID_WIDTH: u16 = 10;
+#[cfg(not(debug_assertions))]
+pub(crate) const GRID_WIDTH: u16 = 20;
+#[cfg(debug_assertions)]
+pub(crate) const GRID_HEIGHT: u16 = 10;
+#[cfg(not(debug_assertions))]
+pub(crate) const GRID_HEIGHT: u16 = 20;
+</code></pre>
+<h3 id="testando-com-uma-janela-maior"><a class="header" href="#testando-com-uma-janela-maior">Testando com uma janela maior</a></h3>
+<p>Essa mudança fará com que uma série de testes falhem em modo <code>release</code>, necessário para windows, assim, as correções passam a ser utilizar asserts ou declarações diferentes em modo <code>debug</code> e modo <code>release</code>. Por exemplo:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Grid.rs
+fn convert_position_x_for_grid_width() {
+    let x = convert(4., 400., GRID_WIDTH as f32);
+
+    #[cfg(debug_assertions)] // &lt;-- DEBUG
+    assert_relative_eq!(x, -20., epsilon = 0.00001); // &lt;-- DEBUG
+    #[cfg(not(debug_assertions))] // &lt;-- RELEASE
+    assert_relative_eq!(x, -110., epsilon = 0.00001); // &lt;-- RELEASE
+}
+
+#[test]
+fn translate_position_to_window() {
+    let position = Position { x: 2, y: 8 };
+    let mut default_transform = Transform::default();
+    let expected = Transform {
+        #[cfg(debug_assertions)] // &lt;-- DEBUG
+        translation: Vec3::new(-100., 140., 0.), // &lt;-- DEBUG
+        #[cfg(not(debug_assertions))] // &lt;-- RELEASE
+        translation: Vec3::new(-150., -29.999996, 0.), // &lt;-- RELEASE
+        ..default()
+    };
+
+    let mut descriptor = WindowDescriptor::default();
+    descriptor.height = 400.;
+    descriptor.width = 400.;
+    let window = Window::new(WindowId::new(), &amp;descriptor, 400, 400, 1., None, None);
+    translate_position(&amp;mut default_transform, &amp;position, &amp;window);
+    
+    assert_eq!(default_transform, expected);
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Mais exemplos podem ser encontrados no <a href="https://github.com/naomijub/bevy-snake/pull/14/files">PR#14</a>, inclusive as mudanças para os testes das próximas partes.</p>
+<h2 id="utilizando-player"><a class="header" href="#utilizando-player">Utilizando <code>Player</code></a></h2>
+<p>Primeira mudança que fiz foi algo bem simples, mas muito representativo, adicionar uma outra cor de segmentos de cobra, <code>SNAKE_SEGMENT_COLOR</code> virou:</p>
+<pre><code class="language-rs">const SNAKE_HEAD_COLOR: Color = Color::rgb(0.7, 0.7, 0.7);
+const SNAKE1_SEGMENT_COLOR: Color = Color::rgb(0.8, 0.0, 0.8); // &lt;--
+const SNAKE2_SEGMENT_COLOR: Color = Color::rgb(0., 0.8, 0.8); // &lt;--
+</code></pre>
+<p>Próximo passo é adicionarmos uma referência ao vetor de segmentos da segunda cobra, podemos fazer isso modificando a struct <code>Segments</code> para <code>pub struct Segments([Vec&lt;Entity&gt;; 2]);</code>, que significa que nossa struct <code>Segments</code> possui um array de tamanho 2 do tipo Vetor de <code>Entity</code>, assim o id do player 1 será <code>0</code> e o id do player 2 será <code>1</code>, conforme o sistema de indexação de arrays. Essa pequena mudança quebra todo nosso código para <code>snake.rs</code>, mas vou tentar explicar como ajustar as funções do modo mais lógico possível.</p>
+<h3 id="sistema-de-geração-de-cobras-spawn"><a class="header" href="#sistema-de-geração-de-cobras-spawn">Sistema de Geração de Cobras (Spawn)</a></h3>
+<p>Agora nosso sistema de spawn exige que segments seja um Array com dois vetores de entidades, para isso podemos refatorar o código dentro de <code>spawn_system</code> para ser reutilizável. Fazemos isso criando a função privada <code>spawn_entity_with_segment</code>, que recebe uma referência mutável de <code>Commands</code> e um <code>u8</code> que corresponderá ao id do Player. É importante que o segmento da cabeça da cobra seja ciente de qual seu <code>player_id</code>, para isso adicionamos essa informação nos componentes da primeira entidade, <code>.insert(components::Player { id: player_id })</code>, e que player 1 e player 2 não iniciem na mesma posição, para isso utilizamos um <code>if/else</code> na posição X do componente <code>Position</code>, definindo a posição do player 1 em <code>x = 3</code>, e do player 2 em <code>x = GRID_WIDTH - 3</code>, <code>if player_id == 0 { 3 } else { (GRID_WIDTH - 3) as i16 }</code>:</p>
+<pre><code class="language-rs">fn spawn_entity_with_segment(commands: &amp;mut Commands, player_id: u8) -&gt; Vec&lt;Entity&gt; {
+    vec![
+        commands
+            .spawn(SpriteBundle {
+                sprite: Sprite {
+                    color: SNAKE_HEAD_COLOR,
+                    ..default()
+                },
+                transform: Transform {
+                    scale: Vec3::new(10.0, 10.0, 10.0),
+                    ..default()
+                },
+                ..default()
+            })
+            .insert(components::Player { id: player_id })
+            .insert(Head::default())
+            .insert(Segment)
+            .insert(Position {
+                x: if player_id == 0 {
+                    3
+                } else {
+                    (GRID_WIDTH - 3) as i16
+                },
+                y: 3,
+            })
+            .insert(Size::square(0.8))
+            .id(),
+        spawn_segment_system(
+            commands,
+            Position {
+                x: if player_id == 0 {
+                    3
+                } else {
+                    (GRID_WIDTH - 3) as i16
+                },
+                y: 2,
+            },
+            player_id,
+        ),
+    ]
+}
+</code></pre>
+<p>Com essa mudança podemos atualizar a função <code>spawn_system</code> para chamar a função <code>spawn_entity_with_segment</code> para ambos os players:</p>
+<pre><code class="language-rs">pub fn spawn_system(mut commands: Commands, mut segments: ResMut&lt;Segments&gt;) {
+    *segments = Segments([
+        spawn_entity_with_segment(&amp;mut commands, 0),
+        spawn_entity_with_segment(&amp;mut commands, 1),
+    ]);
+}
+</code></pre>
+<p>Note que <code>spawn_entity_with_segment</code> recebe como argumento <code>commands: &amp;mut Commands</code> e por isso, devemos modificar o tipo de <code>commands</code> em <code>spawn_segment_system</code> para corresponder a mesma referência mutável. É nesta função, <code>spawn_segment_system</code> que vamos definir a cor dos segmentos de player que criamos anteriormente, com <code>if player_id == 0 { SNAKE1_SEGMENT_COLOR } else { SNAKE2_SEGMENT_COLOR }</code>:</p>
+<pre><code class="language-rs">pub fn spawn_segment_system(commands: &amp;mut Commands, position: Position, player_id: u8) -&gt; Entity {
+    commands
+        .spawn(SpriteBundle {
+            sprite: Sprite {
+                color: if player_id == 0 {
+                    SNAKE1_SEGMENT_COLOR
+                } else {
+                    SNAKE2_SEGMENT_COLOR
+                },
+                ..default()
+            },
+            transform: Transform {
+                scale: Vec3::new(10.0, 10.0, 10.0),
+                ..default()
+            },
+            ..default()
+        })
+        .insert(Segment)
+        .insert(position)
+        .insert(Size::square(0.65))
+        .id()
+}
+</code></pre>
+<h3 id="sistema-de-movimento"><a class="header" href="#sistema-de-movimento">Sistema de Movimento</a></h3>
+<p>A base para o sistema de movimento é fazer com que o <code>wasd</code> mova o player 1 e as setas (<code>arrows</code>) movam o player 2. Agora, nosso <code>movement_input_system</code> não pode se restringir a iterar sobre <code>heads</code> apenas com <code>.next()</code>, já que sabemos que há pelo menos dois elementos em <code>heads</code>. Além disso, precisamos de uma forma de determinar de qual player estamos falando, por isso adicionamos o componente <code>Player</code> na <code>Query</code> de <code>heads</code>, <code>mut heads: Query&lt;(&amp;mut Head, &amp;Player)&gt;</code>, e iteramos sobre todos os elementos com um <code>iter_mut().for_each((mut head, player)| { ... })</code>. O resto do código segue a mesma lógica de antes:</p>
+<pre><code class="language-rs">pub fn movement_input_system(
+    keyboard_input: Res&lt;Input&lt;KeyCode&gt;&gt;,
+    mut heads: Query&lt;(&amp;mut Head, &amp;Player)&gt;,
+) {
+    heads.iter_mut().for_each(|(mut head, player)| {
+        let dir: Direction = if player.id() == 0 {
+            if keyboard_input.pressed(KeyCode::A) {
+                Direction::Left
+            } else if keyboard_input.pressed(KeyCode::S) {
+                Direction::Down
+            } else if keyboard_input.pressed(KeyCode::W) {
+                Direction::Up
+            } else if keyboard_input.pressed(KeyCode::D) {
+                Direction::Right
+            } else {
+                head.direction
+            }
+        } else if player.id() == 1 {
+            if keyboard_input.pressed(KeyCode::Left) {
+                Direction::Left
+            } else if keyboard_input.pressed(KeyCode::Down) {
+                Direction::Down
+            } else if keyboard_input.pressed(KeyCode::Up) {
+                Direction::Up
+            } else if keyboard_input.pressed(KeyCode::Right) {
+                Direction::Right
+            } else {
+                head.direction
+            }
+        } else {
+            head.direction
+        };
+        if dir != head.direction.opposite() {
+            head.direction = dir;
+        }
+    });
+}
+</code></pre>
+<p>A mudança no <code>movement_system</code> é essencialmente a mesma, agora precisamos adicionar a informação de <code>Player</code> na <code>Query</code> de <code>heads</code>, <code>heads: Query&lt;(Entity, &amp;Head, &amp;Player)&gt;,</code>, e refatorar a iteração sobre <code>heads</code> para ser um <code>for</code> em vez de um <code>.next()</code>, considerando que agora possuímos o <code>id</code> de <code>Player</code>, que causa colisão com o antigo <code>id</code>, que mudei para <code>entity_id</code>. Note que estamos destruturando o valor de <code>Player</code> em <code>id</code> ao utilizarmos <code>Player { id }</code> no <code>for</code> loop. A única outra grande mudança é que agora para acessarmos <code>segments</code>, precisamos indicar qual o <code>player_id</code> do segment, fazemos isso substituindo as referências a <code>segments</code> por <code>segments[player_id]</code>:</p>
+<pre><code class="language-rs">pub fn movement_system(
+    segments: ResMut&lt;Segments&gt;,
+    mut last_tail_position: ResMut&lt;LastTailPosition&gt;,
+    mut game_end_writer: EventWriter&lt;GameEndEvent&gt;,
+    heads: Query&lt;(Entity, &amp;Head, &amp;Player)&gt;,
+    mut positions: Query&lt;(Entity, &amp;Segment, &amp;mut Position)&gt;,
+    game_end: Query&lt;&amp;GameEndEvent&gt;,
+) {
+    let positions_clone: HashMap&lt;Entity, Position&gt; = positions
+        .iter()
+        .map(|(entity, _segment, position)| (entity, position.clone()))
+        .collect();
+    for (entity_id, head, Player { id }) in heads.iter() {
+        let player_id = (*id) as usize;
+        (*segments[player_id]).windows(2).for_each(|entity| {
+            if let Ok((_, _segment, mut position)) = positions.get_mut(entity[1]) {
+                if let Some(new_position) = positions_clone.get(&amp;entity[0]) {
+                    *position = new_position.clone();
+                }
+            };
+        });
+        if game_end.is_empty() {
+            let _ = positions.get_mut(entity_id).map(|(_, _segment, mut pos)| {
+                match &amp;head.direction {
+                    Direction::Left =&gt; {
+                        pos.x -= 1;
+                    }
+                    Direction::Right =&gt; {
+                        pos.x += 1;
+                    }
+                    Direction::Up =&gt; {
+                        pos.y += 1;
+                    }
+                    Direction::Down =&gt; {
+                        pos.y -= 1;
+                    }
+                };
+                if pos.x &lt; 0
+                    || pos.y &lt; 0
+                    || pos.x as u16 &gt;= GRID_WIDTH
+                    || pos.y as u16 &gt;= GRID_HEIGHT
+                {
+                    game_end_writer.send(GameEndEvent::GameOver);
+                }
+
+                if positions_clone
+                    .iter()
+                    .filter(|(k, _)| k != &amp;&amp;entity_id)
+                    .map(|(_, v)| v)
+                    .any(|segment_position| &amp;*pos == segment_position)
+                {
+                    game_end_writer.send(GameEndEvent::GameOver);
+                }
+            });
+        }
+        *last_tail_position = LastTailPosition(Some(
+            positions_clone
+                .get(segments[player_id].last().unwrap())
+                .unwrap()
+                .clone(),
+        ));
+    }
+}
+</code></pre>
+<h3 id="sistema-de-crescimento"><a class="header" href="#sistema-de-crescimento">Sistema de crescimento</a></h3>
+<p>A única mudança realmente significativa no sistema de crescimento é que o evento <code>GrowthEvent</code> precisa ter informação de qual player deve crescer, fazemos isso adicionando a informação de player ao <code>GrowthEvent</code>:</p>
+<pre><code class="language-rs">pub struct GrowthEvent {
+    pub player_id: u8,
+}
+</code></pre>
+<p>Agora, nosso <code>eating_system</code>, precisa transmitir a informação do <code>id</code> do <code>Player</code> para o <code>GrowthEvent</code>, fazemos isso adicionando <code>Player</code> a query de <code>head_positions</code>, <code>head_positions: Query&lt;(&amp;Position, &amp;Player), With&lt;Head&gt;&gt;,</code> e definindo o <code>id</code> destruturado como <code>player_id</code>  em <code>GrowthEvent</code>:</p>
+<pre><code class="language-rs">pub fn eating_system(
+    mut commands: Commands,
+    mut growth_writer: EventWriter&lt;GrowthEvent&gt;,
+    food_positions: Query&lt;(Entity, &amp;Position), With&lt;Food&gt;&gt;,
+    head_positions: Query&lt;(&amp;Position, &amp;Player), With&lt;Head&gt;&gt;,
+) {
+    for (head_pos, Player { id }) in head_positions.iter() {
+        for (ent, food_pos) in food_positions.iter() {
+            if food_pos == head_pos {
+                commands.entity(ent).despawn();
+                growth_writer.send(GrowthEvent { player_id: *id });
+            }
+        }
+    }
+}
+</code></pre>
+<p>A próxima mudança é fazer com que o sistema de crescimento reconheça as informações relativas a <code>player_id</code>, contidas em <code>GrowthEvent</code>. Como pode haver mais de um evento no <code>EventBuffer</code>, precisamos iterar sobre o <code>growth_reader</code> com um <code>for_each</code>, em vez de um <code>.next()</code>, além disso, para garantir um sistema robusto, fazemos uma checagem se o <code>player_id</code> é menor que o tamanho do array <code>segments</code>, já que vamos acessar o array utilizando indexação sem checagem, <code>segments.[player_id]</code>. As outras mudanças simplesmente refletem as mudanças esperadas em <code>spawn_segment_system</code>:</p>
+<pre><code class="language-rs">pub fn growth_system(
+    mut commands: Commands,
+    last_tail_position: Res&lt;LastTailPosition&gt;,
+    mut segments: ResMut&lt;Segments&gt;,
+    mut growth_reader: EventReader&lt;GrowthEvent&gt;,
+) {
+    growth_reader.iter().for_each(|event| {
+        let player_id = event.player_id as usize;
+        if player_id &lt; segments.len() {
+            segments[player_id].push(spawn_segment_system(
+                &amp;mut commands,
+                last_tail_position.0.clone().unwrap(),
+                event.player_id,
+            ));
+        }
+    });
+}
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../part-2/09-migrando-versoes.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../part-2/09-migrando-versoes.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

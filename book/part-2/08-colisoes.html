@@ -1,0 +1,777 @@
+<!DOCTYPE HTML>
+<html lang="pt" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Colisões - Desenvolvimento de Jogos online com Rust</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../0-capa.html"><strong aria-hidden="true">1.</strong> Capa</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../01-quemsou.html"><strong aria-hidden="true">1.1.</strong> Quem sou eu? (Sobre a autora)</a></li></ol></li><li class="chapter-item expanded "><a href="../part-1/00-capa.html"><strong aria-hidden="true">2.</strong> Conceitos Básicos</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../part-1/01-arq.html"><strong aria-hidden="true">2.1.</strong> Arquitetura de servidores</a></li><li class="chapter-item expanded "><a href="../part-1/02-prd-rec.html"><strong aria-hidden="true">2.2.</strong> Predição e Reconciliação</a></li><li class="chapter-item expanded "><a href="../part-1/03-interpolacao.html"><strong aria-hidden="true">2.3.</strong> Interpolação de Entidades</a></li><li class="chapter-item expanded "><a href="../part-1/04-lag.html"><strong aria-hidden="true">2.4.</strong> Compensacão de Lag</a></li></ol></li><li class="chapter-item expanded "><a href="../part-2/00-intro.html"><strong aria-hidden="true">3.</strong> Multiplayer Local Snake Game</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../part-2/01-bevy.html"><strong aria-hidden="true">3.1.</strong> Sobre a Bevy</a></li><li class="chapter-item expanded "><a href="../part-2/02-ecs.html"><strong aria-hidden="true">3.2.</strong> Entity Component System</a></li><li class="chapter-item expanded "><a href="../part-2/03-cabeca.html"><strong aria-hidden="true">3.3.</strong> A Cabeça da Cobra</a></li><li class="chapter-item expanded "><a href="../part-2/04-grid.html"><strong aria-hidden="true">3.4.</strong> Grade de Movimento</a></li><li class="chapter-item expanded "><a href="../part-2/05-spawnfood.html"><strong aria-hidden="true">3.5.</strong> Gerador de Comidas</a></li><li class="chapter-item expanded "><a href="../part-2/06-cadencia.html"><strong aria-hidden="true">3.6.</strong> Melhorando a Cadência do Movimento</a></li><li class="chapter-item expanded "><a href="../part-2/07-rabo.html"><strong aria-hidden="true">3.7.</strong> Adicionando um Rabo a Cobra</a></li><li class="chapter-item expanded "><a href="../part-2/08-colisoes.html" class="active"><strong aria-hidden="true">3.8.</strong> Colisões</a></li><li class="chapter-item expanded "><a href="../part-2/09-migrando-versoes.html"><strong aria-hidden="true">3.9.</strong> Migrando versões da Bevy</a></li><li class="chapter-item expanded "><a href="../part-2/10-multiplayer.html"><strong aria-hidden="true">3.10.</strong> Multiplayer Local</a></li></ol></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Desenvolvimento de Jogos online com Rust</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="colisões"><a class="header" href="#colisões">Colisões</a></h1>
+<p>Uma parte muito importante de jogos é a definição dos critérios de perda ou derrota. No caso do snake game, há dois critérios:</p>
+<ol>
+<li>A cobra "come" um pedaço dela mesma.</li>
+<li>A cobra sai dos limites, ou paredes, do jogo.</li>
+</ol>
+<p>Testar a cobra comendo um pedaço dela mesma é bastante complicado considerando um cenário na qual as comidas surgem de forma aleátoria, pois a cobra precisa possuir pelo menos 5 segmentos para que ocorra uma colisão da cabeça da cobra com um segmento. Neste caso, um teste de gameplay seria mais fácil e possivelmente mais valioso, porém não é algo que planejei dentro do escopo deste livro. Por outro lado, testar que a cobra sai dos limites do jogo é bastante trivial, basta definir uma direção e garantir que após <code>n</code> updates, a cobra vai colidir com as paredes. Uma vez que a condição de colisão ocorreu, podemos publicar um evento de <em>game end</em>, e pausa o jogo com um status de jogo. Único teste que não vou escrever neste caso é o teste de colisão com a parede de baixo, mas seria igual aos outros, porém com 3 updates extras para fazer retorno e mudar a direção para baixo.</p>
+<p>O primeiro teste consite basicamente em fazer com que a cobra se movimente para cima até ultrapassar a parede superior e ai detectamos um componente do tipo <code>GameEndEvent::GameOver</code>, derivado do evento <code>GameEndEvent</code>. Adicionaremos este teste em um novo módulo chamado <code>game.rs</code>:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[test]
+fn game_end_event_with_game_over() {
+    // Setup
+    let mut app = App::new();
+
+    // Sistemas
+    app.insert_resource(Segments::default())
+        .insert_resource(LastTailPosition::default())
+        .add_event::&lt;GameEndEvent&gt;() // &lt;--
+        .add_startup_system(snake::spawn_system)
+        .add_system(snake::movement_system)
+        .add_system(snake::movement_input_system.before(snake::movement_system))
+        .add_system(game_over_system.after(snake::movement_system)); // &lt;--
+
+    // tecla para cima
+    let mut input = Input::&lt;KeyCode&gt;::default();
+    input.press(KeyCode::W);
+    app.insert_resource(input);
+
+    // executgar sistema algumas vezes
+    app.update(); // x: 3, y: 4
+    app.update(); // x: 3, y: 5
+    app.update(); // x: 3, y: 6
+    app.update(); // x: 3, y: 7
+    app.update(); // x: 3, y: 8
+    app.update(); // x: 3, y: 9
+
+    // Verificar que não há componente de game end
+    let mut query = app.world.query::&lt;&amp;GameEndEvent&gt;();
+    assert_eq!(query.iter(&amp;app.world).count(), 0);
+
+    app.update(); // x: 3, y: 10
+
+    // Verificar que há componente de game end
+    let mut query = app.world.query::&lt;&amp;GameEndEvent&gt;();
+    assert_eq!(query.iter(&amp;app.world).count(), 1);
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Com este teste podemos começar a implementar o primeiro critério de falha, que neste caso seria <code>y</code> da posição da cabeça menor que zero ou maior ou igual a <code>GRID_HEIGHT</code>, ou seja, <code>head.position.y &lt; 0 || head.position.y &gt;= GRID_HEIGHT</code>. Na função <code>snake::movement_system</code>, temos acesso a <code>head.position</code> dentro do block que contém o <code>match head.direction</code>, assim podemos adicionar a condicional de posições depois do match e publicar o evento <code>GameEndEvent::GameOver</code> pelo <code>EventWriter</code> que precisamos adicionar nos argumentos da função:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn movement_system(
+    segments: ResMut&lt;Segments&gt;,
+    mut last_tail_position: ResMut&lt;LastTailPosition&gt;,
+    mut game_end_writer: EventWriter&lt;GameEndEvent&gt;, // &lt;-- Adicionar EventWriter
+    mut heads: Query&lt;(Entity, &amp;Head)&gt;,
+    mut positions: Query&lt;(Entity, &amp;Segment, &amp;mut Position)&gt;,
+) {
+    let positions_clone: HashMap&lt;Entity, Position&gt; = positions
+        .iter()
+        .map(|(entity, _segment, position)| (entity, position.clone()))
+        .collect();
+    if let Some((id, head)) = heads.iter_mut().next() {
+        (*segments).windows(2).for_each(|entity| {
+            if let Ok((_, _segment, mut position)) = positions.get_mut(entity[1]) {
+                if let Some(new_position) = positions_clone.get(&amp;entity[0]) {
+                    *position = new_position.clone();
+                }
+            };
+        });
+        
+        let _ = positions.get_mut(id).map(|(_, _segment, mut pos)| {
+            match &amp;head.direction {
+                Direction::Left =&gt; {
+                    pos.x -= 1;
+                }
+                Direction::Right =&gt; {
+                    pos.x += 1;
+                }
+                Direction::Up =&gt; {
+                    pos.y += 1;
+                }
+                Direction::Down =&gt; {
+                    pos.y -= 1;
+                }
+            };
+            if pos.y &lt; 0
+                || pos.y as u16 &gt;= GRID_HEIGHT // &lt;-- Condicional de limites do grid
+            {
+                game_end_writer.send(GameEndEvent::GameOver); // &lt;-- publicar evento
+            }
+        });
+        
+        *last_tail_position = LastTailPosition(Some(
+            positions_clone
+                .get(segments.last().unwrap())
+                .unwrap()
+                .clone(),
+        ));
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Agora todos os testes que lidam com <code>movement_system</code> falham e é preciso adicionar <code>.add_event::&lt;GameEndEvent&gt;()</code> ao setup de sistemas, além disso, adicione a função <code>main</code>. Outro elemento importante que é adicionar o <code>GameEndEvent</code>, que vamos adicionar no módulo <code>components.rs</code>:</p>
+<pre><pre class="playground"><code class="language-rust">// main.rs
+
+...
+fn main() {
+    App::new()
+        .add_systems(Startup, setup_camera)
+        .insert_resource(snake::Segments::default())
+        .insert_resource(snake::LastTailPosition::default())
+        .add_event::&lt;GameEndEvent&gt;() // &lt;-- Adicionar
+        .add_event::&lt;snake::GrowthEvent&gt;()
+...
+</code></pre></pre>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// components.rs
+
+#[derive(Component, Clone, Debug, Event, PartialEq, Eq)]
+pub enum GameEndEvent {
+    GameOver,
+}
+
+impl Default for GameEndEvent {
+    fn default() -&gt; Self {
+        Self::GameOver
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Perfeito, mas o teste ainda não passa, pois não temos nenhum sistema escutando pelo evento <code>GameEndEvent</code>, podemos adicionar um sistema <code>game_over_system</code> que adicionará o componente <code>GameEndEvent::GameOver</code> que buscamos no teste. Este sistema verificará se existe algum evento do tipo <code>GameEndEvent</code>, se houver cria uma entidade com <code>GameEndEvent::GameOver</code> como componente e da um print no console com <code>"Game Over!"</code>;</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// game.rs
+
+pub fn game_over_system(mut commands: Commands, mut reader: EventReader&lt;GameEndEvent&gt;) {
+    if reader.iter().next().is_some() {
+        commands.spawn().insert(GameEndEvent::GameOver);
+        println!("{}", GameEndEvent::GameOver);
+    }
+}
+...
+<span class="boring">}</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// main.rs
+
+...
+
+<span class="boring">}</span></code></pre></pre>
+<p>Para printar no console um enum podemos implementar a trait Display:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// components.rs
+...
+use std::fmt::{self, Display};
+...
+
+impl Display for GameEndEvent {
+    fn fmt(&amp;self, f: &amp;mut fmt::Formatter&lt;'_&gt;) -&gt; fmt::Result {
+        match self {
+            GameEndEvent::GameOver =&gt; write!(f, "Game Over!"),
+        }
+    }
+}
+...
+<span class="boring">}</span></code></pre></pre>
+<p>Os testes abaixo vão falhar.</p>
+<pre><code class="language-bash">    snake::test::snake_cannot_start_moving_down
+    snake::test::snake_grows_when_eating
+    snake::test::snake_head_has_moved_up
+    snake::test::snake_head_moves_down_and_left
+    snake::test::snake_head_moves_up_and_right
+    snake::test::snake_segment_has_followed_head
+</code></pre>
+<p>Para resolver isso precisamos adicionar o <code>.add_event::&lt;GameEndEvent&gt;()</code> no setup dos apps.</p>
+<p>Agora nosso teste passa, mas quero adicionar um assert extra no nosso teste, que a posição da cobra não mudará após um game over. Fazemos isso adicionando uma verificação que a posição após o <code>GameEndEvent::GameOver</code> não mudará mesmo após updates.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[test]
+fn game_end_event_with_game_over() {
+    // ...
+
+    let mut query = app.world.query::&lt;&amp;GameEndEvent&gt;();
+    assert_eq!(query.iter(&amp;app.world).count(), 1);
+
+    let mut query = app.world.query_filtered::&lt;&amp;Position, With&lt;Head&gt;&gt;();
+    let position_at_gameover = query.iter(&amp;app.world).next().unwrap();
+    let snake_position_after_game_over = position_at_gameover.clone();
+
+    app.update();
+
+    let mut query = app.world.query_filtered::&lt;&amp;Position, With&lt;Head&gt;&gt;();
+    let position_after_gameover = query.iter(&amp;app.world).next().unwrap();
+
+    assert_eq!(snake_position_after_game_over, position_after_gameover.clone());
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Após adicionar essas linhas o teste quebrará.</p>
+<p>Essa mudança é facilmente resolvida adicionando uma query que busca por um <code>GameEndEvent</code>, <code>Query&lt;&amp;GameEndEvent&gt;</code>, e verificando se ela não está vazia em um <code>if</code>:</p>
+<pre><code class="language-rs">pub fn movement_system(
+    segments: ResMut&lt;Segments&gt;,
+    mut last_tail_position: ResMut&lt;LastTailPosition&gt;,
+    mut game_end_writer: EventWriter&lt;GameEndEvent&gt;,
+    heads: Query&lt;(Entity, &amp;Head)&gt;,
+    mut positions: Query&lt;(Entity, &amp;Segment, &amp;mut Position)&gt;,
+    game_end: Query&lt;&amp;GameEndEvent&gt;, // &lt;-- GameEndEvent Query
+) {
+    // ...
+    if let Some((id, head)) = heads.iter().next() {
+        (*segments).windows(2).for_each(|entity| {
+            if let Ok((_, _segment, mut position)) = positions.get_mut(entity[1]) {
+                if let Some(new_position) = positions_clone.get(&amp;entity[0]) {
+                    *position = new_position.clone();
+                }
+            };
+        });
+        if game_end.is_empty() {  // &lt;-- if verificando se houve um evento de fimd e jogo
+            let _ = positions.get_mut(id).map(|(_, _segment, mut pos)| {
+                match &amp;head.direction {
+                    // ...
+                };
+                if pos.y &lt; 0
+                    || pos.y as u16 &gt;= GRID_HEIGHT
+                {
+                    game_end_writer.send(GameEndEvent::GameOver);
+                }
+            });
+        }
+        // ...
+    }
+}
+</code></pre>
+<p>Próximo teste é verificar se o mesmo acontece se movendo para esquerda e para a direita. Começamos pela esquerda:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>    #[test]
+    fn game_end_event_with_game_over_when_moving_left() {
+        // Setup
+        let mut app = App::new();
+
+        // Add systems
+        app.insert_resource(Segments::default())
+            .insert_resource(LastTailPosition::default())
+            .add_event::&lt;GameEndEvent&gt;() // &lt;--
+            .add_systems(Startup, snake::spawn_system)
+            .add_systems(Update, snake::movement_system)
+            .add_systems(
+                Update,
+                snake::movement_input_system.before(snake::movement_system),
+            )
+            .add_systems(Update, game_over_system.after(snake::movement_system)); // &lt;--
+
+        // Add new input resource
+        let mut input = Input::&lt;KeyCode&gt;::default();
+        input.press(KeyCode::A);
+        app.insert_resource(input);
+
+        // Run systems again
+        app.update(); // x: 4, y: 5
+        app.update(); // x: 3, y: 5
+        app.update(); // x: 2, y: 5
+        app.update(); // x: 1, y: 5
+        app.update(); // x: 0, y: 5
+
+        let mut query = app.world.query::&lt;&amp;GameEndEvent&gt;();
+        assert_eq!(query.iter(&amp;app.world).count(), 0);
+
+        app.update(); // x: -1, y: 5
+
+        let mut query = app.world.query::&lt;&amp;GameEndEvent&gt;();
+        assert_eq!(query.iter(&amp;app.world).count(), 1);
+    }
+
+<span class="boring">}</span></code></pre></pre>
+<p>Com isso adicionamos a verificação se <code>head.position</code> não é menor que zero:</p>
+<pre><code class="language-rs">pub fn movement_system(
+    // ...
+) {
+    // ...
+    if let Some((id, head)) = heads.iter().next() {
+        // ...
+        if game_end.is_empty() {  // &lt;-- if verificando se houve um evento de fimd e jogo
+            let _ = positions.get_mut(id).map(|(_, _segment, mut pos)| {
+                match &amp;head.direction {
+                    // ...
+                };
+                if pos.x &lt; 0 // &lt;-- Nova Verificação
+                    || pos.y &lt; 0
+                    || pos.y as u16 &gt;= GRID_HEIGHT
+                {
+                    game_end_writer.send(GameEndEvent::GameOver);
+                }
+            });
+        }
+        // ...
+    }
+}
+</code></pre>
+<p>Depois, repetimos o teste se movendo para direita e com uma verificação se <code>head.position.x</code> maior ou igual a <code>GRID_WIDTH</code>:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[test]
+fn game_end_event_with_game_over_when_moving_right() {
+    // Setup
+    let mut app = App::new();
+
+    // Add systems
+    app.insert_resource(Segments::default())
+        .insert_resource(LastTailPosition::default())
+        .add_event::&lt;GameEndEvent&gt;() // &lt;--
+        .add_systems(Startup, snake::spawn_system)
+        .add_systems(Update, snake::movement_system)
+        .add_systems(
+            Update,
+            snake::movement_input_system.before(snake::movement_system),
+        )
+        .add_systems(Update, game_over_system.after(snake::movement_system)); // &lt;--
+
+    // Add new input resource
+    let mut input = Input::&lt;KeyCode&gt;::default();
+    input.press(KeyCode::D);
+    app.insert_resource(input);
+
+    // Run systems again
+    app.update(); // x: 5, y: 5
+    app.update(); // x: 6, y: 5
+    app.update(); // x: 7, y: 5
+    app.update(); // x: 8, y: 5
+    app.update(); // x: 9, y: 5
+    app.update(); // x: 10, y: 5
+
+
+
+    let mut query = app.world.query::&lt;&amp;GameEndEvent&gt;();
+    assert_eq!(query.iter(&amp;app.world).count(), 1);
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Agora adicionamos a condição para o teste passar.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn movement_system(
+    // ...
+) {
+    // ...
+    if let Some((id, head)) = heads.iter().next() {
+        // ...
+        if game_end.is_empty() {  
+            let _ = positions.get_mut(id).map(|(_, _segment, mut pos)| {
+                match &amp;head.direction {
+                    // ...
+                };
+                if pos.x &lt; 0
+                    || pos.y &lt; 0
+                    || pos.x as u16 &gt;= GRID_WIDTH // &lt;-- Nova verificação
+                    || pos.y as u16 &gt;= GRID_HEIGHT
+                {
+                    game_end_writer.send(GameEndEvent::GameOver);
+                }
+            });
+        }
+        // ...
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="colidindo-com-o-rabo"><a class="header" href="#colidindo-com-o-rabo">Colidindo com o rabo</a></h2>
+<p>Como mencionei antes, escrever um teste para este cenário é um pouco mais trabalhoso que eu gostaria e acaba sendo mais fácil fazer com alguma ferramenta de testes automatizados, mas caso você queira um desafio, para escrever este teste você pode executar o sistema de spawn de segmentos (<code>spawn_segment_system</code>) com posições, <code>Position</code>, especificas e ao realizar um update a posição de <code>Head</code> vai ser igual a posição de um elemento do rabo. Agora vamos ao código, é uma mudança muito simples em movement system, basta adicionarmos mais uma cláusula <code>if</code> que checa se a posição de <code>Head</code> é a mesma que qualquer posição de <code>Segment</code>, infelizmente não temos uma estrutura de dados que possui todas a <code>Positions</code> com <code>Segments</code> identificadas, mas possuimos <code>positions_clone</code> que é um <code>HashMap&lt;Entity, Position&gt;</code>.</p>
+<p>Para descobrirmos o valor de position que não contém <code>Head</code> precisamos filtrar por todas <code>Positions</code>, cuja <code>Entity</code> correspondente não é igual ao <code>id</code> de <code>Head</code>, algo como <code>positions_clone.iter().filter(|(k, _)| k != &amp;&amp;id)</code>. Com isso, teremos um iterável que possui todos os pares <code>Entity, Position</code> que não correspondem ao conjunto <code>Entity, Position, Head</code> e podemos continuar iterando somente com <code>Positions</code> adicionando <code>.map(|(_, v)| v)</code>, para depois verificamos se existe qualquer <code>Position</code> que equivale ao par <code>Head, Position</code>, utilizando o valor da variável <code>pos</code>, <code>.any(|segment_position| &amp;*pos == segment_position)</code>.  Adicionamos esta lógica logo após o outro if de game over e publicamos outro <code>GameEndEvent::GameOver</code>:</p>
+<pre><code class="language-rs">pub fn movement_system(
+    segments: ResMut&lt;Segments&gt;,
+    mut last_tail_position: ResMut&lt;LastTailPosition&gt;,
+    mut game_end_writer: EventWriter&lt;GameEndEvent&gt;,
+    heads: Query&lt;(Entity, &amp;Head)&gt;,
+    mut positions: Query&lt;(Entity, &amp;Segment, &amp;mut Position)&gt;,
+    game_end: Query&lt;&amp;GameEndEvent&gt;,
+) {
+    let positions_clone: HashMap&lt;Entity, Position&gt; = positions
+        .iter()
+        .map(|(entity, _segment, position)| (entity, position.clone()))
+        .collect();
+    if let Some((id, head)) = heads.iter().next() {
+        // ...
+        if game_end.is_empty() {
+            let _ = positions.get_mut(id).map(|(_, _segment, mut pos)| {
+                match &amp;head.direction {
+                    // ...
+                };
+                if pos.x &lt; 0
+                    || pos.y &lt; 0
+                    || pos.x as u16 &gt;= GRID_WIDTH
+                    || pos.y as u16 &gt;= GRID_HEIGHT
+                {
+                    game_end_writer.send(GameEndEvent::GameOver);
+                }
+
+                if positions_clone.iter()
+                    .filter(|(k, _)| k != &amp;&amp;id)
+                    .map(|(_, v)| v)
+                    .any(|segment_position| &amp;*pos == segment_position)
+                {
+                    game_end_writer.send(GameEndEvent::GameOver);
+                }
+            });
+        }
+        // ...
+    }
+}
+</code></pre>
+<p>Agora é hora de um teste manual e voilá, "a cobra morde o rabo!". Proxima colisão que devemos impedir é a de comidas surgindo em posições já ocupadas.</p>
+<h2 id="colisões-de-surgimento-de-comdias"><a class="header" href="#colisões-de-surgimento-de-comdias">Colisões de surgimento de comdias</a></h2>
+<p>Particularmente não sou fã dessa, pois na minha concepção uma comida deveria poder surgir embaixo da cobra, desde que não seja na cabeça, mas vale a explicação pelo exemplo. Assim, o teste que vamos escrever é bastante simples, pois vamos apenas checar se a quantidade de entidades com os componentes <code>Food</code> e <code>Position</code> é <code>1</code>, apesar de termos dois updates. Podemos fazer isso por conta  da condição de <code>spawn</code> associada a testes em <code>food::spawn_system</code>, quando utilizados <code>if cfg!(test)</code> com valores pré-fixados.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[test]
+fn food_only_spawns_once() {
+    // Setup
+    let mut app = App::new();
+
+    // Add systems
+    app.add_system(spawn_system);
+
+
+    // Run systems
+    app.update();
+
+    let mut query = app.world.query::&lt;(&amp;Food, &amp;Position)&gt;();
+    assert_eq!(query.iter(&amp;app.world).count(), 1);
+
+    // Run systems
+    app.update();
+
+    let mut query = app.world.query::&lt;(&amp;Food, &amp;Position)&gt;();
+    assert_eq!(query.iter(&amp;app.world).count(), 1)
+}
+<span class="boring">}</span></code></pre></pre>
+<p>A solução para este teste é bastante simples, precisamos obter uma posição que não coincide com outra posição, fazemos isso com um iterador infinito, que procura pela primeira posição que não coincide com outra. Esse iterator pode ser feita com um <code>Range</code> do tipo <code>(0..)</code> (de <code>0</code> a infinito), depois criamos instâncias aleatórias de <code>Position</code> e procuramos por uma <code>Position</code> que não está contida em um <code>HashSet</code> de <code>Position</code>.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>(0..)
+    .map(|_| Position {
+        x: if cfg!(test) {
+            3
+        } else {
+            (random::&lt;u16&gt;() % GRID_WIDTH) as i16
+        },
+        y: if cfg!(test) {
+            5
+        } else {
+            (random::&lt;u16&gt;() % GRID_HEIGHT) as i16
+        },
+    })
+    .find(|position| !positions_set.contains(position))
+<span class="boring">}</span></code></pre></pre>
+<p><code>positions_set</code> é o <code>HashSet&lt;Position&gt;</code> que falamos antes, podemos criar ele através de <code>let positions_set: HashSet&lt;&amp;Position&gt; = positions.iter().collect();</code>, porém <code>Position</code> não implementa a trait <code>Hash</code>, que é facilmente resolvível adicionando a macro <code>Hash</code> ao <code>derive</code> de <code>Position</code>:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Component, Clone, Debug, PartialEq, Eq, Hash)]
+pub struct Position {
+    pub x: i16,
+    pub y: i16,
+}
+
+<span class="boring">}</span></code></pre></pre>
+<p>Agora, precisamos adicionar uma comida ao jogo apenas se o retorno de find é existente, <code>Option::Some</code>:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn spawn_system(mut commands: Commands, positions: Query&lt;&amp;Position&gt;) {
+    let positions_set: HashSet&lt;&amp;Position&gt; = positions.iter().collect();
+
+    if let Some(position) = (0..)
+        .map(|_| Position {
+            x: if cfg!(test) {
+                3
+            } else {
+                (random::&lt;u16&gt;() % GRID_WIDTH) as i16
+            },
+            y: if cfg!(test) {
+                5
+            } else {
+                (random::&lt;u16&gt;() % GRID_HEIGHT) as i16
+            },
+        })
+        .find(|position| !positions_set.contains(position))
+    {
+        commands
+            .spawn_bundle(SpriteBundle {
+                sprite: Sprite {
+                    color: FOOD_COLOR,
+                    ..default()
+                },
+                ..default()
+            })
+            .insert(Food)
+            .insert(position)
+            .insert(Size::square(0.65));
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Para resolvermos esse problema, encapsulamos nosso iterador infinito em um <code>if let</code> e em caso de <code>Option::Some</code>, adicionamos uma nova comida. Porém, do jeito que escrevemos o iterador infinito vai quebrar os testes já que nunca vai encontrar uma <code>Position</code> válida em testes. Assim, podemos fazer uma aproximação para o tamanho do grid, <code>(0..(GRID_WIDTH * GRID_HEIGHT))</code>:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn spawn_system(mut commands: Commands, positions: Query&lt;&amp;Position&gt;) {
+    let positions_set: HashSet&lt;&amp;Position&gt; = positions.iter().collect();
+
+    if let Some(position) = (0..(GRID_WIDTH * GRID_HEIGHT))
+        .map(|_| Position {
+            x: if cfg!(test) {
+                3
+            } else {
+                (random::&lt;u16&gt;() % GRID_WIDTH) as i16
+            },
+            y: if cfg!(test) {
+                5
+            } else {
+                (random::&lt;u16&gt;() % GRID_HEIGHT) as i16
+            },
+        })
+        .find(|position| !positions_set.contains(position))
+    {
+        commands
+            .spawn_bundle(SpriteBundle {
+                sprite: Sprite {
+                    color: FOOD_COLOR,
+                    ..default()
+                },
+                ..default()
+            })
+            .insert(Food)
+            .insert(position)
+            .insert(Size::square(0.65));
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Agora sim, testes passando e comidas surgem de forma eficiente.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../part-2/07-rabo.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../part-2/09-migrando-versoes.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../part-2/07-rabo.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../part-2/09-migrando-versoes.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

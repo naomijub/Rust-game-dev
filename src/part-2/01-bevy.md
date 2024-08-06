@@ -9,7 +9,7 @@ Bevy engine é uma das game engines mais promissoras do mercado e um grande esfo
 * Rápida, paralela e em Rust <3.
 * Compilação rápida
 
-A atual versão da Bevy é [![Crates.io](https://img.shields.io/crates/v/bevy.svg)](https://crates.io/crates/bevy) e este livro foi desenvolvido com a versão `0.7`, mas contém guias de migração para as versões `0.8` e `0.9`. A compatibilidade com Rust esta garantida para a versão `1.66`.
+A atual versão da Bevy é [![Crates.io](https://img.shields.io/crates/v/bevy.svg)](https://crates.io/crates/bevy) e este livro atualmente foi atualizado para a versão `0.12`. A compatibilidade com Rust esta garantida para a versão `1.73`.
 
 ## Iniciando o projeto
 
@@ -29,12 +29,20 @@ fn main() {
 /target
 ```
 
-Agora adicionamos versão atual da bevy (`bevy = "0.7"`) a seção `[dependencies]` do Cargo.toml. Adicionamos também a crate de aleatoriedade `rand`:
+Agora adicionamos versão atual da bevy (`bevy = "0.12"`) a seção `[dependencies]` do Cargo.toml. Adicionamos também a crate de aleatoriedade `rand`:
 
 ```toml
 [dependencies]
-bevy = "0.7"
-rand = "0.7"
+bevy = "0.12"
+rand = "0.8.5"
+```
+
+ou simplesmente
+
+```bash
+cargo add bevy@0.12
+cargo add rand@0.8.5
+
 ```
 
 Com essas mudanças no `Cargo.toml` podemos começar a usar o `prelude` da bevy e criar nosso primeiro app com:
@@ -57,26 +65,26 @@ fn main() {
 }
 ```
 
-Agora se executarmos `cargo run` veremos uma janela com fundo cinza. Por padrão, os plugins da Bevy não incluem camera, pois o uso de camera é muito variado em jogos, assim, precisamos criar nosso próprio sistema de cameras. Usaremos uma camera ortográfica 2D com o commando `OrthographicCameraBundle::new_2d()` em uma função que fará a configuração do sistema de cameras inicial alterando a variável do tipo `mut Commands`. `Commands` é um tipo muito comum ao escrever sistemas com a Bevy e é usado para enfileirar comandos com o objetivo de modificar o mundo (que chamaremos de `world`) e os recursos (que chamaremos de `resources`). Assim, na função a seguir, `setup_camera`, receberemos como argumento `mut commands: Commands` e utilizaremos ele para instanciar (chamado de `spawn`) uma nova entidade bundle com os componentes de uma câmera 2D ortográfica:
+Agora se executarmos `cargo run` veremos uma janela com fundo cinza. Por padrão, os plugins da Bevy não incluem camera, pois o uso de camera é muito variado em jogos, assim, precisamos criar nosso próprio sistema de cameras. Usaremos uma camera 2D com o commando `CameraBundle2D::default()` em uma função que fará a configuração do sistema de cameras inicial alterando a variável do tipo `mut Commands`. `Commands` é um tipo muito comum ao escrever sistemas com a Bevy e é usado para enfileirar comandos com o objetivo de modificar o mundo (que chamaremos de `world`) e os recursos (que chamaremos de `resources`). Assim, na função a seguir, `setup_camera`, receberemos como argumento `mut commands: Commands` e utilizaremos ele para instanciar (chamado de `spawn`) uma nova entidade bundle com os componentes de uma câmera 2D:
 
 ```rust
 fn setup_camera(mut commands: Commands) {
-    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+    commands.spawn(Camera2dBundle::default());
+
 }
 ```
 
-E agora basta adicionar esse função ao nosso `App` através de um `add_startup_system`:
+E agora basta adicionar esse função ao nosso `App` através de um `add_systems` que é o método responsável por adicionar esse tipo de recurso no nosso `App`:
 
-```rust
-fn main() {
+```rust fn main() {
     App::new()
-        .add_startup_system(setup_camera)
         .add_plugins(DefaultPlugins)
+        .add_systems(Startup, setup_camera)
         .run();
 }
 
 fn setup_camera(mut commands: Commands) {
-    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+    commands.spawn(Camera2dBundle::default());
 }
 ```
 
@@ -114,9 +122,10 @@ E adicionamos essa função como um `startup_system` no nosso plugin:
 ```rust
 impl Plugin for HelloPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(hello_plugin);
+        app.add_systems(Startup, hello_plugin);
     }
 }
+
 ```
 
 Por último, basta adicionarmos nosso plugin ao `App` principal e executar `cargo run`:
@@ -125,7 +134,7 @@ Por último, basta adicionarmos nosso plugin ao `App` principal e executar `carg
 fn main() {
     App::new()
         .add_startup_system(setup_camera)
-        .add_plugin(HelloPlugin)
+        .add_plugins(HelloPlugin)
         .add_plugins(DefaultPlugins)
         .run();
 }
